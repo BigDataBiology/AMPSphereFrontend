@@ -649,7 +649,7 @@
                                     <el-row type="flex" justify="center">
                                         <div id="environment" style="width: 400px;height:300px;"></div>
                                     </el-row>
-                                </el-tab-pane>
+                              </el-tab-pane>
                             </el-tabs>
                         </el-col>
                     </el-row>
@@ -724,8 +724,8 @@
                     this.AMP_Country = [];
                     this.AMP_Environment = [];
                     this.isNull = true;
-                    this.drawCountryChart();
-                    this.drawEnvironmentChart();
+                    //this.drawCountryChart();
+                    //this.drawEnvironmentChart();
                 }
             },
 
@@ -745,8 +745,9 @@
                         self.AMP_Environment = response.data['AMP_Environment'];
                         self.AMP_Graphs = response.data['AMP_Graphs'];
                         self.isNull = false;
-                        self.drawCountryChart();
-                        self.drawEnvironmentChart();
+                        //self.drawCountryChart();
+                        //self.drawEnvironmentChart();
+
                     } else if (response.status === 204) {
                         self.AMP_Family = [];
                         self.AMP_Feature = [];
@@ -755,8 +756,8 @@
                         self.AMP_Country = [];
                         self.AMP_Environment = [];
                         self.isNull = true;
-                        self.drawCountryChart();
-                        self.drawEnvironmentChart();
+                        //self.drawCountryChart();
+                        //self.drawEnvironmentChart();
                     }
                     self.type = 'primary';
                     self.searchLoading = false;
