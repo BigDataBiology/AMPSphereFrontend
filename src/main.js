@@ -8,7 +8,6 @@ import locale from 'element-plus/lib/locale/lang/en'
 import router from './router'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
-import imageZoom from 'vue-image-zoomer'
 import { Download, More } from '@element-plus/icons'
 import JsonViewer from "vue3-json-viewer"
 import BootstrapIcon from '@dvuckovic/vue3-bootstrap-icons'
@@ -25,10 +24,7 @@ router.beforeEach((to, from, next) => {
 })
 
 const app = createApp(
-    {
-        render: () => h(App),
-        imageZoom
-    }
+    {render: () => h(App),}
 )
 
 
@@ -43,9 +39,6 @@ app.use(Quasar, quasarUserOptions)
 app.use(ElementPLus, {locale})
 app.use(VueAxios, axios)
 app.use(JsonViewer)
-//app.use(VueSidebarMenu)
-const ImageZoom = require('vue-image-zoomer').default
-app.component('image-zoom', ImageZoom)
 app.component(More.name, More)
 app.component(Download.name, Download)
 app.component('BootstrapIcon', BootstrapIcon);
