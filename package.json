@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "../frontend/node_modules/.bin/vue-cli-service serve --host 0.0.0.0 ",
-    "build": "../frontend/node_modules/.bin/vue-cli-service build",
-    "lint": "../frontend/node_modules/.bin/vue-cli-service lint",
-    "report": "../frontend/node_modules/.bin/vue-cli-service build --report"
+    "serve": "node_modules/.bin/vue-cli-service serve --host 0.0.0.0 ",
+    "build": "node_modules/.bin/vue-cli-service build",
+    "lint": "node_modules/.bin/vue-cli-service lint",
+    "report": "node_modules/.bin/vue-cli-service build --report"
   },
   "dependencies": {
     "@dvuckovic/vue3-bootstrap-icons": "^1.0.4",
