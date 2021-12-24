@@ -30,10 +30,12 @@ const app = createApp(
 
 app.use(router)
 app.use(VueGtag, {
-    config: {
+    property: {
         id: "G-WXMZ531P7V",
     },
-}, router)
+})
+
+
 app.use(Quasar, {plugins: {Notify}, config: {notify: { /* look at QuasarConfOptions from the API card */ }}})
 app.use(Quasar, quasarUserOptions)
 app.use(ElementPLus, {locale})

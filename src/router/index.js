@@ -10,6 +10,7 @@ import About from '../views/About'
 import Contact from '../views/Contact'
 import SequenceSearch from "../views/SequenceSearch";
 import TextSearch from "../views/TextSearch";
+import { trackRouter } from "vue-gtag-next";
 
 
 const routes = [
@@ -111,5 +112,7 @@ const router = createRouter({
     history: createWebHistory(),
     routes: routes,
 })
+
+trackRouter(router)
 
 export default router
