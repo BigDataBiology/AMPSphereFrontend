@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from "../views/Home"
 import BrowseData from "../views/Browse_data"
-import API from '../views/API'
 import Downloads from '../views/Downloads'
 // import Help from '../views/Help.vue'
 import AMP_card from '../views/AMP_Card'
@@ -65,14 +64,6 @@ const routes = [
         meta:{
             title: 'AMPSphere: Family'
         },
-    },
-    {
-        path: '/api',
-        name: 'API',
-        component: API,
-        meta:{
-            title: 'AMPSphere: API'
-        }
     },
     {
         path: '/downloads',

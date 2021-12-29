@@ -74,7 +74,7 @@
 
             <div class="text-bold">Downloads &amp; API</div>
             <p>Advanced users can <a href="/downloads">download all our data</a>
-            or query it using <a href="/api">an API</a>.</p>
+            or query it using <a href="https://ampsphere-api.big-data-biology.org/">an API</a>.</p>
 
             <div class="text-bold">Acknowledgements</div>
             <p>This project is conducted in collaboration with the <a href="https://www.embl.org/groups/bork/">Bork Group at EMBL</a> and the <a href="http://compgenomics.org/">Huerta-Cepas group at CPGB</a>.</p>
