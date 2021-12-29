@@ -171,7 +171,7 @@
                           </el-link>
                         </div>
                         <div style="align-content: center; text-align: center;">
-                          <el-image :src="amp.helicalwheel"></el-image>
+                          <el-image :src="amp.helicalwheel" fit="scale-down"></el-image>
                         </div>
                       </div>
                     </div>
@@ -398,7 +398,7 @@ export default {
           .then(function (response) {
             console.log(response.data)
             self.amp = response.data
-            self.amp.helicalwheel = 'http://18.140.248.253:443/v1/amps/' + self.amp.accession +  '/helicalwheel'
+            self.amp.helicalwheel = 'https://ampsphere-api.big-data-biology.org/v1/amps/' + self.amp.accession +  '/helicalwheel'
             self.amp.metadata.info.totalRow = response.data.metadata.info.totalItem
             self.getFamilyFeatures()
           })
