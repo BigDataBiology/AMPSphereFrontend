@@ -116,7 +116,7 @@
                         </template>
                       </el-table-column>
                       <el-table-column prop="sample" label="Sample/Genome" sortable width="150%"/>
-                      <el-table-column prop="habitat" label="Habitat" sortable width="150%"/>
+                      <el-table-column prop="general_envo_name" label="Habitat" sortable width="150%"/>
                       <el-table-column prop="microbial_source" label="microbial source" sortable width="150%"/>
                     </el-table>
                     <div class="block">
