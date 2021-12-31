@@ -40,6 +40,7 @@
                             input-debounce="0" use-input fill-input hide-selected
                             behavior="menu" align="center" clearable />
                 </div>
+
               </div>
               <div class="row">
                 <div class="col-12 col-md-2 justify-center text-bold q-pa-sm">Peptide length: </div>
@@ -69,14 +70,13 @@
                 </div>
               </div>
             </q-card-section>
+<!--            <q-inner-loading :showing="filterLoading" label="Please wait..." label-class="text-teal" label-style="font-size: 1.1em" />-->
           </q-card>
         </q-expansion-item>
         <div class="row justify-center q-py-md">
           <div class="col-12">
-            <el-table :data="amps" stripe style="width: 100%"
-                      v-loading="isloading"
-                      element-loading-text="Loading..."
-                      element-loading-spinner="el-icon-loading">
+<!--            <q-table :rows="amps" row-key="accession" :loading="tableLoading"></q-table>-->
+            <el-table :data="amps" stripe style="width: 100%">
               <el-table-column label="Accession" width="200">
                 <template #default="props">
                   <el-button @click="AMPDetail(props.row.accession)" type="text">{{ props.row.accession }}</el-button>
@@ -107,10 +107,11 @@
               </el-table-column>
             </el-table>
           </div>
+<!--          <q-inner-loading :showing="tableLoading" label="Please wait..." label-class="text-teal" label-style="font-size: 1.1em" />-->
         </div>
         <div class="row justify-center q-py-md">
           <div class="col-12">
-            <el-pagination @size-change="setAMPsPageSize" @current-change="setAMPsPage" :page-sizes="[20, 50, 100, 200]"
+            <el-pagination @size-change="setAMPsPageSize" @current-change="setAMPsPageWithLoading" :page-sizes="[20, 50, 100, 200]"
                            :page-size="20" layout="sizes, pager, jumper" :total="info.totalRow">
             </el-pagination>
           </div>
@@ -131,6 +132,7 @@
 
 <script>
 import {useQuasar} from 'quasar'
+import {ref} from 'vue'
 
 
 export default {
@@ -142,54 +144,20 @@ export default {
       habitat: [],
       sample: [],
       microbial_source: [],
-      pep_length: {
-        min: 8,
-        max: 98
-      },
-      molecular_weight: {
-        min: 813,
-        max: 12286
-      },
-      isoelectric_point: {
-        min: 4,
-        max: 12
-      },
-      charge_at_pH_7: {
-        min: -57,
-        max: 44
-      }
+      pep_length: {min: 8, max: 98},
+      molecular_weight: {min: 813, max: 12286},
+      isoelectric_point: {min: 4, max: 12},
+      charge_at_pH_7: {min: -57, max: 44}
     }
     return {
       amps: [],
       axiosRefCount: 0,
-      loading: false,
-      info: {
-        currentPage: 1,
-        pageSize: 20,
-        totalRow: 0,
-        totalPage: 1,
-      },
-      options: {
-        family: null,
-        habitat: null,
-        sample: null,
-        microbial_source: null,
-        pep_length: {
-          min: 8,
-          max: 99
-        },
-        molecular_weight: {
-          min: 813,
-          max: 12286
-        },
-        isoelectric_point: {
-          min: 4,
-          max: 12
-        },
-        charge_at_pH_7: {
-          min: -57,
-          max: 44
-        }
+      info: {currentPage: 1, pageSize: 20, totalRow: 0, totalPage: 1,},
+      options: {family: null, habitat: null, sample: null, microbial_source: null,
+        pep_length: {min: 8, max: 99},
+        molecular_weight: {min: 813, max: 12286},
+        isoelectric_point: {min: 4, max: 12},
+        charge_at_pH_7: {min: -57, max: 44}
       },
       avalOptionsFull: options_full,
       availableOptions: options_full,
@@ -197,53 +165,87 @@ export default {
   },
   setup(){
     const $q = useQuasar()
+    let timer
     $q.notify({
       message: '<strong>Note</strong>: The filters may need tens of seconds to load. Please be patient.',
-      html: true,
-      color: 'primary',
-      position: 'top',
-      timeout: 10000,
-      icon: 'announcement',
-      actions: [
-        { label: 'Got it', color: 'yellow', handler: () => { /* ... */ } }
-      ]
+      html: true, color: 'primary', position: 'top', timeout: 10000, icon: 'announcement',
+      actions: [{ label: 'Got it', color: 'yellow', handler: () => { /* ... */ } }]
     })
+    // const filterLoading = ref(false)
+    // const showFilters = ref(false)
+    // const tableLoading = ref(false)
+    // const showTable = ref(false)
+    return {
+      // filterLoading,
+      // showFilters,
+      // tableLoading,
+      // showTable,
+      setAMPsPageWithLoading (page) {
+        $q.loading.show()
+        console.log('loading...')
+        this.setAMPsPage(page)
+        timer = setTimeout(() => {
+          $q.loading.hide()
+          timer = void 0
+        }, 800)
+      }
+      // showFilterLoading () {
+      //   filterLoading.value = true
+      //   showFilters.value = false
+      // },
+      // showTableLoading () {
+      //   tableLoading.value = true
+      //   showTable.value = false
+      // },
+      // closeFilterLoading () {
+      //   filterLoading.value = false
+      //   showFilters.value = true
+      // },
+      // closeTableLoading () {
+      //   tableLoading.value = false
+      //   showTable.value = true
+      // }
+    }
   },
   created() {
-    let self = this
-    // https://stackoverflow.com/questions/50768678/axios-ajax-show-loading-when-making-ajax-request
-    this.axios.interceptors.request.use((config) => {
-      self.loading = true
-      // trigger 'loading=true' event here
-      return config;
-    }, (error) => {
-      self.loading = false
-      // trigger 'loading=false' event here
-      return Promise.reject(error);
-    });
-    this.axios.interceptors.response.use((response) => {
-      self.loading = false
-      // trigger 'loading=false' event here
-      return response;
-    }, (error) => {
-      self.loading = false
-      // trigger 'loading=false' event here
-      return Promise.reject(error);
-    });
+    // let self = this
+    // // https://stackoverflow.com/questions/50768678/axios-ajax-show-loading-when-making-ajax-request
+    // this.axios.interceptors.request.use((config) => {
+    //   self.loading = true
+    //   // trigger 'loading=true' event here
+    //   return config;
+    // }, (error) => {
+    //   self.loading = false
+    //   // trigger 'loading=false' event here
+    //   return Promise.reject(error);
+    // });
+    // this.axios.interceptors.response.use((response) => {
+    //   self.loading = false
+    //   // trigger 'loading=false' event here
+    //   return response;
+    // }, (error) => {
+    //   self.loading = false
+    //   // trigger 'loading=false' event here
+    //   return Promise.reject(error);
+    // });
   },
   mounted() {
     this.setAMPsPageSize(20)
     this.getAvailableOptions()
   },
   computed: {
-    isloading() {
-      return this.loading
-    }
+    // isTableLoading() {
+    //   return this.tableLoading
+    // },
+    // isFilterLoading() {
+    //   return this.isFilterLoading
+    // }
   },
   methods: {
     setAMPsPage(page) {
       // this.$message('setting to ' + page + 'th page')
       // Important: page index starting from zero.
+      // this.showTableLoading()
       this.info.currentPage = page - 1
       console.log(this.info.currentPage)
       let config = {
@@ -275,9 +277,10 @@ export default {
     },
     setAMPsPageSize(size) {
       this.info.pageSize = size
-      this.setAMPsPage(1)
+      this.setAMPsPageWithLoading(1)
     },
     getAvailableOptions() {
+      // this.showLoading()
       let self = this
       this.axios.get('/available_filters')
           .then(function (response) {
@@ -288,6 +291,7 @@ export default {
           .catch(function (error) {
             console.log(error);
           })
+      // this.closeLoading()
     },
     filterFamily(val, update, abort){
       update(() => {
@@ -315,39 +319,39 @@ export default {
     },
     onFamilyChange(option) {
       this.options.family = option;
-      this.setAMPsPage(1)
+      this.setAMPsPageWithLoading(1)
     },
     onHabitatChange(option) {
       this.options.habitat = option;
-      this.setAMPsPage(1)
+      this.setAMPsPageWithLoading(1)
     },
     onSampleChange(option) {
       this.options.sample = option;
-      this.setAMPsPage(1)
+      this.setAMPsPageWithLoading(1)
     },
     onMicrobialSourceChange(option) {
       this.options.microbial_source = option;
-      this.setAMPsPage(1)
+      this.setAMPsPageWithLoading(1)
     },
     onPepLengthChange(value) {
       // this.options.pep_length = {min: 0, max: 100}
       console.log('peplength changed.')
-      this.setAMPsPage(1)
+      this.setAMPsPageWithLoading(1)
     },
     onMWChange(value) {
       // this.options.pep_length = {min: 0, max: 100}
       console.log('MW changed.')
-      this.setAMPsPage(1)
+      this.setAMPsPageWithLoading(1)
     },
     onpIChange(value) {
       // this.options.pep_length = {min: 0, max: 100}
       console.log('pI changed.')
-      this.setAMPsPage(1)
+      this.setAMPsPageWithLoading(1)
     },
     onChargechange(value) {
       // this.options.pep_length = {min: 0, max: 100}
       console.log('Charge changed.')
-      this.setAMPsPage(1)
+      this.setAMPsPageWithLoading(1)
     },
     clearFilters() {
       this.options = {
