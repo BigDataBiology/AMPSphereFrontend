@@ -12,11 +12,11 @@
               </a>
             </div>
             <div class="col-xs-8 col-sm-8 col-md-6 offset-sm-1 offset-md-5">
-              <q-input  clearable disable clear-icon="close" filled color="primary" label="Search" v-model="searchTerm"
-                        type="search" hint="Temporarily disabled."
+              <q-input  clearable clear-icon="close" filled color="primary" label="Entity accession" v-model="searchTerm"
+                        type="search" hint="e.g., AMP10.000_000, SPHERE-III.001_396"
                         style="max-width: 600px" @keydown.enter.prevent="textSearch()">
                 <template v-slot:append>
-                  <q-btn @click="textSearch()" label="Search" icon-right="search"></q-btn>
+                  <q-btn @click="textSearch()" label="Go" icon-right="search"></q-btn>
                 </template>
               </q-input>
             </div>
@@ -110,6 +110,8 @@
 </style>
 
 <script>
+import {useQuasar} from 'quasar'
+
 export default {
   name: 'AMPSphere',
   data() {
@@ -120,6 +122,24 @@ export default {
       loading: false,
       url: require('./assets/ampsphere_logo.svg'),
     };
+  },
+  setup(){
+    const $q = useQuasar()
+    return {
+      showInputAccNotif(){
+        $q.notify({
+          message: 'Please input a correct entity accession.',
+          html: false,
+          color: 'primary',
+          position: 'top',
+          timeout: 2000,
+          icon: 'announcement',
+          actions: [
+            { label: 'Got it', color: 'yellow', handler: () => { /* ... */ } }
+          ]
+        })
+      }
+    }
   },
   created() {
     // let self = this
@@ -158,8 +178,10 @@ export default {
       } else if (this.searchTerm.startsWith('SPHERE')) {
         window.open('/family?accession=' + this.searchTerm, '_self')
       } else {
-        window.open(encodeURI('/text_search?query=' + this.searchTerm), '_self')}
+        this.showInputAccNotif()
+        // window.open(encodeURI('/text_search?query=' + this.searchTerm), '_self')
       }
+    }
   }
 }
 </script>
