@@ -11,7 +11,7 @@ import VueAxios from 'vue-axios'
 import { Download, More } from '@element-plus/icons'
 import JsonViewer from "vue3-json-viewer"
 import BootstrapIcon from '@dvuckovic/vue3-bootstrap-icons'
-import { Quasar, Notify } from 'quasar'
+import { Quasar, Notify, Loading } from 'quasar'
 import quasarUserOptions from './quasar-user-options'
 import VueGtag from "vue-gtag-next"
 
@@ -36,7 +36,19 @@ app.use(VueGtag, {
 })
 
 
-app.use(Quasar, {plugins: {Notify}, config: {notify: { /* look at QuasarConfOptions from the API card */ }}})
+app.use(
+    Quasar,
+    {
+        plugins: {
+            Notify,
+            Loading
+        },
+        config: {
+            notify: {},
+            loading: {}
+            }
+    }
+)
 app.use(Quasar, quasarUserOptions)
 app.use(ElementPLus, {locale})
 app.use(VueAxios, axios)
