@@ -35,7 +35,7 @@
 <!--                            behavior="menu" align="center" clearable />-->
 <!--                </div>-->
                 <div class="col-12 col-md-5 justify-center q-pa-xs">
-                  <q-select filled v-model="options.microbial_source" label="Microbial source" @update:model-value="onMicrobialSourceChange"
+                  <q-select filled v-model="options.microbial_source" label="Microbial source (GTDB taxonomy)" @update:model-value="onMicrobialSourceChange"
                             :options="availableOptions.microbial_source" @filter="filterMicrobialSource"
                             input-debounce="0" use-input fill-input hide-selected
                             behavior="menu" align="center" clearable />
