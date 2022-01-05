@@ -16,25 +16,25 @@
                 <div class="col-12 col-md-2 text-bold justify-center">
                   Filter by metadata
                 </div>
-                <div class="col-12 col-md-2 justify-center q-pa-xs">
-                  <q-select filled v-model="options.family" label="Family" @update:model-value="onFamilyChange"
-                            :options="availableOptions.family" @filter="filterFamily"
-                            input-debounce="0" use-input fill-input hide-selected
-                            behavior="menu" align="center" clearable />
-                </div>
-                <div class="col-12 col-md-2 justify-center q-pa-xs">
+<!--                <div class="col-12 col-md-2 justify-center q-pa-xs">-->
+<!--&lt;!&ndash;                  <q-select filled v-model="options.family" label="Family" @update:model-value="onFamilyChange"&ndash;&gt;-->
+<!--&lt;!&ndash;                            :options="availableOptions.family" @filter="filterFamily"&ndash;&gt;-->
+<!--&lt;!&ndash;                            input-debounce="0" use-input fill-input hide-selected&ndash;&gt;-->
+<!--&lt;!&ndash;                            behavior="menu" align="center" clearable />&ndash;&gt;-->
+<!--                </div>-->
+                <div class="col-12 col-md-5 justify-center q-pa-xs">
                   <q-select filled v-model="options.habitat" label="Habitat" @update:model-value="onHabitatChange"
                             :options="availableOptions.habitat" @filter="filterHabitat"
                             input-debounce="0" use-input fill-input hide-selected
                             behavior="menu" align="center" clearable />
                 </div>
-                <div class="col-12 col-md-3 justify-center q-pa-xs">
-                  <q-select filled v-model="options.sample" label="Sample/Progenomes2 genome" @update:model-value="onSampleChange"
-                            :options="availableOptions.sample" @filter="filterSample"
-                            input-debounce="0" use-input fill-input hide-selected
-                            behavior="menu" align="center" clearable />
-                </div>
-                <div class="col-12 col-md-3 justify-center q-pa-xs">
+<!--                <div class="col-12 col-md-3 justify-center q-pa-xs">-->
+<!--                  <q-select filled v-model="options.sample" label="Sample/Progenomes2 genome" @update:model-value="onSampleChange"-->
+<!--                            :options="availableOptions.sample" @filter="filterSample"-->
+<!--                            input-debounce="0" use-input fill-input hide-selected-->
+<!--                            behavior="menu" align="center" clearable />-->
+<!--                </div>-->
+                <div class="col-12 col-md-5 justify-center q-pa-xs">
                   <q-select filled v-model="options.microbial_source" label="Microbial source" @update:model-value="onMicrobialSourceChange"
                             :options="availableOptions.microbial_source" @filter="filterMicrobialSource"
                             input-debounce="0" use-input fill-input hide-selected
@@ -140,9 +140,9 @@ export default {
 
   data() {
     const options_full = {
-      family: [],
+      // family: [],
       habitat: [],
-      sample: [],
+      // sample: [],
       microbial_source: [],
       pep_length: {min: 8, max: 98},
       molecular_weight: {min: 813, max: 12286},
@@ -166,11 +166,11 @@ export default {
   setup(){
     const $q = useQuasar()
     let timer
-    $q.notify({
-      message: '<strong>Note</strong>: The filters may need tens of seconds to load. Please be patient.',
-      html: true, color: 'primary', position: 'top', timeout: 10000, icon: 'announcement',
-      actions: [{ label: 'Got it', color: 'yellow', handler: () => { /* ... */ } }]
-    })
+    // $q.notify({
+    //   message: '<strong>Note</strong>: The filters may need tens of seconds to load. Please be patient.',
+    //   html: true, color: 'primary', position: 'top', timeout: 10000, icon: 'announcement',
+    //   actions: [{ label: 'Got it', color: 'yellow', handler: () => { /* ... */ } }]
+    // })
     // const filterLoading = ref(false)
     // const showFilters = ref(false)
     // const tableLoading = ref(false)
@@ -293,18 +293,18 @@ export default {
           })
       // this.closeLoading()
     },
-    filterFamily(val, update, abort){
-      update(() => {
-        val = val.toLowerCase()
-        this.availableOptions.family = this.avalOptionsFull.family.filter(v => v.toLowerCase().indexOf(val) > -1)
-      })
-    },
-    filterSample(val, update, abort){
-      update(() => {
-        val = val.toLowerCase()
-        this.availableOptions.sample = this.avalOptionsFull.sample.filter(v => v.toLowerCase().indexOf(val) > -1)
-      })
-    },
+    // filterFamily(val, update, abort){
+    //   update(() => {
+    //     val = val.toLowerCase()
+    //     this.availableOptions.family = this.avalOptionsFull.family.filter(v => v.toLowerCase().indexOf(val) > -1)
+    //   })
+    // },
+    // filterSample(val, update, abort){
+    //   update(() => {
+    //     val = val.toLowerCase()
+    //     this.availableOptions.sample = this.avalOptionsFull.sample.filter(v => v.toLowerCase().indexOf(val) > -1)
+    //   })
+    // },
     filterHabitat(val, update, abort){
       update(() => {
         val = val.toLowerCase()
@@ -317,18 +317,18 @@ export default {
         this.availableOptions.microbial_source = this.avalOptionsFull.microbial_source.filter(v => v.toLowerCase().indexOf(val) > -1)
       })
     },
-    onFamilyChange(option) {
-      this.options.family = option;
-      this.setAMPsPageWithLoading(1)
-    },
+    // onFamilyChange(option) {
+    //   this.options.family = option;
+    //   this.setAMPsPageWithLoading(1)
+    // },
     onHabitatChange(option) {
       this.options.habitat = option;
       this.setAMPsPageWithLoading(1)
     },
-    onSampleChange(option) {
-      this.options.sample = option;
-      this.setAMPsPageWithLoading(1)
-    },
+    // onSampleChange(option) {
+    //   this.options.sample = option;
+    //   this.setAMPsPageWithLoading(1)
+    // },
     onMicrobialSourceChange(option) {
       this.options.microbial_source = option;
       this.setAMPsPageWithLoading(1)
