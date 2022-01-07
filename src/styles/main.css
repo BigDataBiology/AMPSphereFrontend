@@ -35,6 +35,14 @@
     text-align: left;
     margin-top: 16px;
 }
+.filter-subsection-title {
+    font-size: 0.9rem;
+    font-weight: bold;
+    line-height: 1rem;
+    letter-spacing: 0.0125em;
+    text-align: left;
+    margin-top: 16px;
+}
 /*.text-subtitle1 {*/
 /*    font-size: 1rem;*/
 /*    font-weight: 400;*/

@@ -3,96 +3,89 @@
     <div class="row justify-center">
       <div class="col-xs-0 col-xl-2 bg-white"></div>
       <div class="col-12 col-xl-8 justify-center q-pa-auto">
-        <q-expansion-item
-            class="shadow-1 overflow-hidden"
-            style="border-radius: 30px"
-            label="Filters"
-            header-class="bg-secondary text-white"
-            expand-icon-class="text-white"
-        >
-          <q-card>
-            <q-card-section>
-              <div class="row justify-center q-py-md">
-                <div class="col-12 col-md-2 text-bold justify-center">
-                  Filter by metadata
-                </div>
-                <div class="col-12 col-md-2 justify-center q-pa-xs">
-                  <q-select filled v-model="options.family" label="Family" @update:model-value="onFamilyChange"
-                            :options="availableOptions.family" @filter="filterFamily"
-                            input-debounce="0" use-input fill-input hide-selected
-                            behavior="menu" align="center" clearable />
-                </div>
-                <div class="col-12 col-md-2 justify-center q-pa-xs">
-                  <q-select filled v-model="options.habitat" label="Habitat" @update:model-value="onHabitatChange"
-                            :options="availableOptions.habitat" @filter="filterHabitat"
-                            input-debounce="0" use-input fill-input hide-selected
-                            behavior="menu" align="center" clearable />
-                </div>
-                <div class="col-12 col-md-3 justify-center q-pa-xs">
-                  <q-select filled v-model="options.sample" label="Sample/Progenomes2 genome" @update:model-value="onSampleChange"
-                            :options="availableOptions.sample" @filter="filterSample"
-                            input-debounce="0" use-input fill-input hide-selected
-                            behavior="menu" align="center" clearable />
-                </div>
-                <div class="col-12 col-md-3 justify-center q-pa-xs">
-                  <q-select filled v-model="options.microbial_source" label="Microbial source" @update:model-value="onMicrobialSourceChange"
-                            :options="availableOptions.microbial_source" @filter="filterMicrobialSource"
-                            input-debounce="0" use-input fill-input hide-selected
-                            behavior="menu" align="center" clearable />
-                </div>
+        <div class="row">
+          <div class="col-12 col-md-3 q-pa-sm">
+            <div style="position: fixed; display: block; top: 180px; height: 500px">
+              <div class="row q-px-xs q-py-xs filter-subsection-title">Filter by metadata</div>
+              <div class="row q-px-md q-py-xs">
+                <q-select filled v-model="options.habitat" label="Habitat" @update:model-value="onHabitatChange"
+                          :options="availableOptions.habitat" @filter="filterHabitat"
+                          input-debounce="0" use-input fill-input hide-selected style="width: 250px"
+                          behavior="menu" align="center" clearable/>
+              </div>
+              <br/>
+              <div class="row q-px-md">
+                <q-select filled v-model="options.microbial_source" label="Microbial source"
+                          @update:model-value="onMicrobialSourceChange"
+                          :options="availableOptions.microbial_source" @filter="filterMicrobialSource"
+                          style="width: 250px"
+                          input-debounce="0" use-input fill-input hide-selected hint="GTDB taxonomy name"
+                          behavior="menu" align="center" clearable/>
+              </div>
+              <div class="row q-px-xs q-py-xs filter-subsection-title">Peptide length:</div>
+              <div class="row q-px-md">
+                <!--                    <q-input v-model.number="options.pep_length.min" type="number" label="Min" filled style="max-width: 100px" /> &nbsp; &nbsp;-->
+                <!--                    <q-input v-model.number="options.pep_length.max" type="number" label="Max" filled style="max-width: 100px" />-->
+                <q-range v-model="options.pep_length" @change="onPepLengthChange"
+                         :min="availableOptions.pep_length.min" style="width: 240px"
+                         :max="availableOptions.pep_length.max" label color="secondary"/>
+              </div>
+              <div class="row q-px-xs q-py-xs filter-subsection-title">Molecular weight:</div>
+              <div class="row q-px-md">
+                <!--                    <q-input v-model.number="options.molecular_weight.min" type="number" label="Min" filled style="max-width: 100px" /> &nbsp; &nbsp;-->
+                <!--                    <q-input v-model.number="options.molecular_weight.max" type="number" label="Max" filled style="max-width: 100px" />-->
+                <q-range v-model="options.molecular_weight" @change="onMWChange"
+                         :min="availableOptions.molecular_weight.min" style="width: 240px"
+                         :max="availableOptions.molecular_weight.max" label color="secondary"/>
 
               </div>
-              <div class="row">
-                <div class="col-12 col-md-2 justify-center text-bold q-pa-sm">Peptide length: </div>
-                <div class="col-12 col-md-10 justify-center q-pa-sm">
-                  <q-range v-model="options.pep_length" @change="onPepLengthChange"
-                           :min="availableOptions.pep_length.min"
-                           :max="availableOptions.pep_length.max" label color="secondary"/>
-                </div>
-                <div class="col-12 col-md-2 justify-center text-bold q-pa-sm">Molecular weight: </div>
-                <div class="col-12 col-md-10 justify-center q-pa-sm">
-                  <q-range v-model="options.molecular_weight" @change="onMWChange"
-                           :min="availableOptions.molecular_weight.min"
-                           :max="availableOptions.molecular_weight.max" label color="secondary"/>
-
-                </div>
-                <div class="col-12 col-md-2 justify-center text-bold q-pa-sm">Isoelectric point: </div>
-                <div class="col-12 col-md-10 justify-center q-pa-sm">
-                  <q-range v-model="options.isoelectric_point" @change="onpIChange"
-                           :min="availableOptions.isoelectric_point.min"
-                           :max="availableOptions.isoelectric_point.max" label color="secondary"/>
-                </div>
-                <div class="col-12 col-md-2 justify-center text-bold q-pa-sm">Charge at pH 7.0</div>
-                <div class="col-12 col-md-10 justify-center q-pa-sm">
-                  <q-range v-model="options.charge_at_pH_7" @change="onChargechange"
-                           :min="availableOptions.charge_at_pH_7.min" label
-                           :max="availableOptions.charge_at_pH_7.max" color="secondary"/>
-                </div>
+              <div class="row q-px-xs q-py-xs filter-subsection-title">Isoelectric point:</div>
+              <div class="row q-px-md">
+                <!--                    <q-input v-model.number="options.isoelectric_point.min" type="number" label="Min" filled style="max-width: 100px" /> &nbsp; &nbsp;-->
+                <!--                    <q-input v-model.number="options.isoelectric_point.max" type="number" label="Max" filled style="max-width: 100px" />-->
+                <q-range v-model="options.isoelectric_point" @change="onpIChange"
+                         :min="availableOptions.isoelectric_point.min" style="width: 240px"
+                         :max="availableOptions.isoelectric_point.max" label color="secondary"/>
               </div>
-            </q-card-section>
-<!--            <q-inner-loading :showing="filterLoading" label="Please wait..." label-class="text-teal" label-style="font-size: 1.1em" />-->
-          </q-card>
-        </q-expansion-item>
-        <div class="row justify-center q-py-md">
-          <div class="col-12">
-<!--            <q-table :rows="amps" row-key="accession" :loading="tableLoading"></q-table>-->
-            <el-table :data="amps" stripe style="width: 100%">
-              <el-table-column label="Accession" width="200">
+              <div class="row q-px-xs q-py-xs filter-subsection-title">Charge at pH 7.0:</div>
+              <div class="row q-px-md">
+                <!--                    <q-input v-model.number="options.charge_at_pH_7.min" type="number" label="Min" filled style="max-width: 100px" /> &nbsp; &nbsp;-->
+                <!--                    <q-input v-model.number="options.charge_at_pH_7.max" type="number" label="Max" filled style="max-width: 100px" />-->
+                <q-range v-model="options.charge_at_pH_7" @change="onChargechange"
+                         :min="availableOptions.charge_at_pH_7.min" label style="width: 240px"
+                         :max="availableOptions.charge_at_pH_7.max" color="secondary"/>
+              </div>
+              <div class="row q-px-xs q-py-xs filter-subsection-title">Advanced filters</div>
+<!--              TODO　Add in database checking-->
+              <div class="row q-px-md q-py-xs">
+                <q-input v-model.number="options.family" type="text" label="Family" filled/>
+                <br/>
+              </div>
+              <div class="row q-px-md q-py-xs">
+                <q-input v-model.number="options.sample" type="text" label="Sample/Genome" filled/>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-9 q-py-sm q-px-lg">
+            <!--            <q-page padding>-->
+            <el-table :data="amps" stripe style="width: 100%" v-loading="loading">
+              <el-table-column label="Accession" width="150%">
                 <template #default="props">
                   <el-button @click="AMPDetail(props.row.accession)" type="text">{{ props.row.accession }}</el-button>
                 </template>
               </el-table-column>
-              <el-table-column label="Family" width="200">
+              <el-table-column label="Family" width="150%">
                 <template #default="props">
                   <el-button @click="familyDetail(props.row.family)" type="text">{{ props.row.family }}</el-button>
                 </template>
               </el-table-column>
-              <el-table-column label="Peptide sequence" width="500%">
+              <el-table-column label="Peptide sequence" width="300%">
                 <template #default="props">
                   <pre><code><small>{{ props.row.sequence }}</small></code></pre>
                 </template>
               </el-table-column>
-              <el-table-column label="# smORF genes" width="150%">
+              <el-table-column label="# smORF genes" width="120%">
                 <template #default="props">
                   <!--                <el-tooltip class="item" effect="dark" content="Associated number of small ORF genes." placement="right">-->
                   <span>{{ props.row.metadata.info.totalItem }}</span>
@@ -101,17 +94,12 @@
               </el-table-column>
               <el-table-column label="Quality badge" width="150%">
                 <template #default="props">
-<!--                  <q-badge :color="getBadgeColor(props.row.quality.badge)" :label="getBadgeLabel(props.row.quality.badge)" text-color="black"/>-->
+                  <!--                  <q-badge :color="getBadgeColor(props.row.quality.badge)" :label="getBadgeLabel(props.row.quality.badge)" text-color="black"/>-->
                   <q-img :src="makeBadgeURL(props.row.quality.badge)" height="70%" fit="scale-down"></q-img>
                 </template>
               </el-table-column>
             </el-table>
-          </div>
-<!--          <q-inner-loading :showing="tableLoading" label="Please wait..." label-class="text-teal" label-style="font-size: 1.1em" />-->
-        </div>
-        <div class="row justify-center q-py-md">
-          <div class="col-12">
-            <el-pagination @size-change="setAMPsPageSize" @current-change="setAMPsPageWithLoading" :page-sizes="[20, 50, 100, 200]"
+            <el-pagination @size-change="setAMPsPageSize" @current-change="setAMPsPage" :page-sizes="[20, 50, 100, 200]"
                            :page-size="20" layout="sizes, pager, jumper" :total="info.totalRow">
             </el-pagination>
           </div>
@@ -132,7 +120,6 @@
 
 <script>
 import {useQuasar} from 'quasar'
-import {ref} from 'vue'
 
 
 export default {
@@ -140,9 +127,9 @@ export default {
 
   data() {
     const options_full = {
-      family: [],
+      // family: [],
       habitat: [],
-      sample: [],
+      // sample: [],
       microbial_source: [],
       pep_length: {min: 8, max: 98},
       molecular_weight: {min: 813, max: 12286},
@@ -150,10 +137,14 @@ export default {
       charge_at_pH_7: {min: -57, max: 44}
     }
     return {
+      drawerOpen: true,
+      miniState: true,
+      loading: false,
       amps: [],
       axiosRefCount: 0,
       info: {currentPage: 1, pageSize: 20, totalRow: 0, totalPage: 1,},
-      options: {family: null, habitat: null, sample: null, microbial_source: null,
+      options: {
+        family: null, habitat: null, sample: null, microbial_source: null,
         pep_length: {min: 8, max: 99},
         molecular_weight: {min: 813, max: 12286},
         isoelectric_point: {min: 4, max: 12},
@@ -163,89 +154,40 @@ export default {
       availableOptions: options_full,
     }
   },
-  setup(){
+  setup() {
     const $q = useQuasar()
     let timer
-    $q.notify({
-      message: '<strong>Note</strong>: The filters may need tens of seconds to load. Please be patient.',
-      html: true, color: 'primary', position: 'top', timeout: 10000, icon: 'announcement',
-      actions: [{ label: 'Got it', color: 'yellow', handler: () => { /* ... */ } }]
-    })
-    // const filterLoading = ref(false)
-    // const showFilters = ref(false)
-    // const tableLoading = ref(false)
-    // const showTable = ref(false)
-    return {
-      // filterLoading,
-      // showFilters,
-      // tableLoading,
-      // showTable,
-      setAMPsPageWithLoading (page) {
-        $q.loading.show()
-        console.log('loading...')
-        this.setAMPsPage(page)
-        timer = setTimeout(() => {
-          $q.loading.hide()
-          timer = void 0
-        }, 800)
-      }
-      // showFilterLoading () {
-      //   filterLoading.value = true
-      //   showFilters.value = false
-      // },
-      // showTableLoading () {
-      //   tableLoading.value = true
-      //   showTable.value = false
-      // },
-      // closeFilterLoading () {
-      //   filterLoading.value = false
-      //   showFilters.value = true
-      // },
-      // closeTableLoading () {
-      //   tableLoading.value = false
-      //   showTable.value = true
-      // }
-    }
+    return {}
   },
   created() {
-    // let self = this
-    // // https://stackoverflow.com/questions/50768678/axios-ajax-show-loading-when-making-ajax-request
-    // this.axios.interceptors.request.use((config) => {
-    //   self.loading = true
-    //   // trigger 'loading=true' event here
-    //   return config;
-    // }, (error) => {
-    //   self.loading = false
-    //   // trigger 'loading=false' event here
-    //   return Promise.reject(error);
-    // });
-    // this.axios.interceptors.response.use((response) => {
-    //   self.loading = false
-    //   // trigger 'loading=false' event here
-    //   return response;
-    // }, (error) => {
-    //   self.loading = false
-    //   // trigger 'loading=false' event here
-    //   return Promise.reject(error);
-    // });
+    let self = this
+    // https://stackoverflow.com/questions/50768678/axios-ajax-show-loading-when-making-ajax-request
+    this.axios.interceptors.request.use((config) => {
+      self.loading = true
+      // trigger 'loading=true' event here
+      return config;
+    }, (error) => {
+      self.loading = false
+      // trigger 'loading=false' event here
+      return Promise.reject(error);
+    });
+    this.axios.interceptors.response.use((response) => {
+      self.loading = false
+      // trigger 'loading=false' event here
+      return response;
+    }, (error) => {
+      self.loading = false
+      // trigger 'loading=false' event here
+      return Promise.reject(error);
+    });
   },
   mounted() {
     this.setAMPsPageSize(20)
     this.getAvailableOptions()
   },
-  computed: {
-    // isTableLoading() {
-    //   return this.tableLoading
-    // },
-    // isFilterLoading() {
-    //   return this.isFilterLoading
-    // }
-  },
+  computed: {},
   methods: {
     setAMPsPage(page) {
-      // this.$message('setting to ' + page + 'th page')
-      // Important: page index starting from zero.
-      // this.showTableLoading()
       this.info.currentPage = page - 1
       console.log(this.info.currentPage)
       let config = {
@@ -277,12 +219,12 @@ export default {
     },
     setAMPsPageSize(size) {
       this.info.pageSize = size
-      this.setAMPsPageWithLoading(1)
+      this.setAMPsPage(1)
     },
     getAvailableOptions() {
       // this.showLoading()
       let self = this
-      this.axios.get('/available_filters')
+      this.axios.get('/all_available_options')
           .then(function (response) {
             console.log(response.data)
             self.avalOptionsFull = Object.assign({}, response.data)
@@ -293,65 +235,65 @@ export default {
           })
       // this.closeLoading()
     },
-    filterFamily(val, update, abort){
-      update(() => {
-        val = val.toLowerCase()
-        this.availableOptions.family = this.avalOptionsFull.family.filter(v => v.toLowerCase().indexOf(val) > -1)
-      })
-    },
-    filterSample(val, update, abort){
-      update(() => {
-        val = val.toLowerCase()
-        this.availableOptions.sample = this.avalOptionsFull.sample.filter(v => v.toLowerCase().indexOf(val) > -1)
-      })
-    },
-    filterHabitat(val, update, abort){
+    // filterFamily(val, update, abort){
+    //   update(() => {
+    //     val = val.toLowerCase()
+    //     this.availableOptions.family = this.avalOptionsFull.family.filter(v => v.toLowerCase().indexOf(val) > -1)
+    //   })
+    // },
+    // filterSample(val, update, abort){
+    //   update(() => {
+    //     val = val.toLowerCase()
+    //     this.availableOptions.sample = this.avalOptionsFull.sample.filter(v => v.toLowerCase().indexOf(val) > -1)
+    //   })
+    // },
+    filterHabitat(val, update, abort) {
       update(() => {
         val = val.toLowerCase()
         this.availableOptions.habitat = this.avalOptionsFull.habitat.filter(v => v.toLowerCase().indexOf(val) > -1)
       })
     },
-    filterMicrobialSource(val, update, abort){
+    filterMicrobialSource(val, update, abort) {
       update(() => {
         val = val.toLowerCase()
         this.availableOptions.microbial_source = this.avalOptionsFull.microbial_source.filter(v => v.toLowerCase().indexOf(val) > -1)
       })
     },
-    onFamilyChange(option) {
-      this.options.family = option;
-      this.setAMPsPageWithLoading(1)
-    },
+    // onFamilyChange(option) {
+    //   this.options.family = option;
+    //   this.setAMPsPage(1)
+    // },
     onHabitatChange(option) {
       this.options.habitat = option;
-      this.setAMPsPageWithLoading(1)
+      this.setAMPsPage(1)
     },
-    onSampleChange(option) {
-      this.options.sample = option;
-      this.setAMPsPageWithLoading(1)
-    },
+    // onSampleChange(option) {
+    //   this.options.sample = option;
+    //   this.setAMPsPage(1)
+    // },
     onMicrobialSourceChange(option) {
       this.options.microbial_source = option;
-      this.setAMPsPageWithLoading(1)
+      this.setAMPsPage(1)
     },
     onPepLengthChange(value) {
       // this.options.pep_length = {min: 0, max: 100}
       console.log('peplength changed.')
-      this.setAMPsPageWithLoading(1)
+      this.setAMPsPage(1)
     },
     onMWChange(value) {
       // this.options.pep_length = {min: 0, max: 100}
       console.log('MW changed.')
-      this.setAMPsPageWithLoading(1)
+      this.setAMPsPage(1)
     },
     onpIChange(value) {
       // this.options.pep_length = {min: 0, max: 100}
       console.log('pI changed.')
-      this.setAMPsPageWithLoading(1)
+      this.setAMPsPage(1)
     },
     onChargechange(value) {
       // this.options.pep_length = {min: 0, max: 100}
       console.log('Charge changed.')
-      this.setAMPsPageWithLoading(1)
+      this.setAMPsPage(1)
     },
     clearFilters() {
       this.options = {
@@ -371,7 +313,7 @@ export default {
       }
       return amps
     },
-    getBadgeColor(quality_level){
+    getBadgeColor(quality_level) {
       const color_mapping = {
         gold: 'green',
         silver: 'yellow',
@@ -379,7 +321,7 @@ export default {
       }
       return color_mapping[quality_level]
     },
-    getBadgeLabel(quality_level){
+    getBadgeLabel(quality_level) {
       const quality_level_mapping = {
         gold: 'High',
         silver: 'Medium',
@@ -421,4 +363,3 @@ export default {
   }
 }
 </script>
-
