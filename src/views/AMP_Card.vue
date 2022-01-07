@@ -10,37 +10,23 @@
             <div class="row">
               <div class="col-6">
                 <div class="row">
-                  <span class="text-bold">Quality
-<!--                    <a href="/about">?</a>-->
-<!--                    <q-tooltip :offset="[10, 10]">-->
-<!--                      Understand how we did the quality control:-->
-<!--                      1. Search against <a href="https://www.ebi.ac.uk/research/bateman/software/antifam-tool-identify-spurious-proteins">Antifam</a>, which consists of a database of profile-HMMs created from translations of commonly occurring non-coding RNAs;-->
-<!--                      2. Identification of protein-coding regions with <a href="https://github.com/ViennaRNA/RNAcode">RNAcode</a> in alignments produced with nucleotide sequences from families of at least eight members. RNAcode assesses evolutionary signatures typical for protein genes;-->
-<!--                      3. Mapping of exact matches in metaproteomic sets from <a href="https://www.ebi.ac.uk/pride/">PRIDE database</a>;-->
-<!--                      4. Mapping genes to their coordinates in the contigs, marking those at 5' terminal as suspicious.-->
-<!--                    </q-tooltip>-->
-                    :
-                  </span>
-                  <q-img v-if="amp.quality.Antifam !== 'yellow'" class="col" :src="makeQualityBadge('Antifam', amp.quality.Antifam)" height="2rem" fit="scale-down">
-                    <q-tooltip :offset="[10, 10]">
-                      Search against <a href="https://www.ebi.ac.uk/research/bateman/software/antifam-tool-identify-spurious-proteins">Antifam</a>, a database of profile-HMMs created from translations of commonly occurring non-coding RNAs
-                    </q-tooltip>
-                  </q-img>
-                  <q-img v-if="amp.quality.coordinates !== 'yellow'" class="col" :src="makeQualityBadge('coordinates', amp.quality.coordinates)" height="2rem" fit="scale-down">
-                    <q-tooltip :offset="[10, 10]">
-                      Mapping genes to their coordinates in the contigs, marking those at 5' terminal as suspicious
-                    </q-tooltip>
-                  </q-img>
-                  <q-img v-if="amp.quality.metaproteomes !== 'yellow'" class="col" :src="makeQualityBadge('metaproteomes', amp.quality.metaproteomes)" height="2rem" fit="scale-down">
-                    <q-tooltip :offset="[10, 10]">
-                      Mapping of exact matches in metaproteomic sets from <a href="https://www.ebi.ac.uk/pride/">PRIDE database</a>
-                    </q-tooltip>
-                  </q-img>
-                  <q-img v-if="amp.quality.RNAcode !== 'yellow'" class="col" :src="makeQualityBadge('RNAcode', amp.quality.RNAcode)" height="2rem" fit="scale-down">
-                    <q-tooltip :offset="[10, 10]">
-                      Identification of protein-coding regions with <a href="https://github.com/ViennaRNA/RNAcode">RNAcode</a> in alignments produced with nucleotide sequences from families of at least eight members. RNAcode assesses evolutionary signatures typical for protein genes
-                    </q-tooltip>
-                  </q-img>
+                  <div class="col-2">
+                      <span class="text-bold">Quality:</span>
+                  </div>
+                  <div class="col-10" style="display: inline-flex;">
+                    <img :src="makeQualityBadge('Antifam', amp.quality.Antifam)" fit="scale-down"
+                         alt="Quality badge cannot be shown. Please check your internet connection."
+                         title="Search against Antifam, a database of profile-HMMs created from translations of commonly occurring non-coding RNAs"/> &nbsp; &nbsp;
+                    <img :src="makeQualityBadge('coordinates', amp.quality.coordinates)" fit="scale-down"
+                         alt="Quality badge cannot be shown. Please check your internet connection."
+                         title="Mapping genes to their coordinates in the contigs, marking those at 5' terminal as suspicious"/> &nbsp; &nbsp;
+                    <img :src="makeQualityBadge('metaproteomes', amp.quality.metaproteomes)" fit="scale-down"
+                         alt="Quality badge cannot be shown. Please check your internet connection."
+                         title="Mapping of exact matches in metaproteomic sets from PRIDE database"/> &nbsp; &nbsp;
+                    <img :src="makeQualityBadge('RNAcode', amp.quality.RNAcode)" fit="scale-down"
+                         alt="Quality badge cannot be shown. Please check your internet connection."
+                         title="Identification of protein-coding regions with RNAcode in alignments produced with nucleotide sequences from families of at least eight members. RNAcode assesses evolutionary signatures typical for protein genes"/>&nbsp; &nbsp;
+                  </div>
                 </div>
               </div>
             </div>
@@ -230,26 +216,6 @@
   <!--                        <div>-->
   <!--                          <span class="caption-bold">Surface accessibility.</span> Profile of solvent accessibility of residues of {{ accession }}.-->
   <!--                        </div>-->
-  <!--                    <br/>-->
-  <!--                  </el-row>-->
-  <!--                  <el-divider></el-divider>-->
-  <!--                  <el-row>-->
-  <!--                    <br>-->
-  <!--                    <div styles="alignment: center; text-align: center">-->
-  <!--                      <v-chart :option="echartOption"></v-chart>-->
-  <!--                    </div>-->
-  <!--                    <div>-->
-  <!--                      <span class="caption-bold">EZenergy.</span> Profile of {{ accession }} residues free energy of transfer from water to membrane lipid.-->
-  <!--                    </div>-->
-  <!--                    <div>-->
-  <!--                      <span class="caption-bold">Flexibility.</span> Profile of flexibility of {{ accession }}. The normalized flexibility parameters (B-values) from <el-link href="https://onlinelibrary.wiley.com/doi/10.1002/prot.340190207" type="primary">Vihinen (1994)</el-link> was the scale adopted in the profile calculation.-->
-  <!--                    </div>-->
-  <!--                    <div>-->
-  <!--                      <span class="caption-bold">Hydrophobicity Parker.</span> Profile of hydrophobicity of residues of {{ accession }} using the relative scale of Parker.-->
-  <!--                    </div>-->
-  <!--                    <div>-->
-  <!--                      <span class="caption-bold">Surface accessibility.</span> Profile of solvent accessibility of residues of {{ accession }}.-->
-  <!--                    </div>-->
   <!--                    <br/>-->
   <!--                  </el-row>-->
                   </div>
