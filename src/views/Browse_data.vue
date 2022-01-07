@@ -76,7 +76,7 @@
         <div class="row justify-center q-py-md">
           <div class="col-12">
 <!--            <q-table :rows="amps" row-key="accession" :loading="tableLoading"></q-table>-->
-            <el-table :data="amps" stripe style="width: 100%">
+            <el-table :data="amps" stripe style="width: 100%" v-loading="loading">
               <el-table-column label="Accession" width="200">
                 <template #default="props">
                   <el-button @click="AMPDetail(props.row.accession)" type="text">{{ props.row.accession }}</el-button>
@@ -111,7 +111,7 @@
         </div>
         <div class="row justify-center q-py-md">
           <div class="col-12">
-            <el-pagination @size-change="setAMPsPageSize" @current-change="setAMPsPageWithLoading" :page-sizes="[20, 50, 100, 200]"
+            <el-pagination @size-change="setAMPsPageSize" @current-change="setAMPsPage" :page-sizes="[20, 50, 100, 200]"
                            :page-size="20" layout="sizes, pager, jumper" :total="info.totalRow">
             </el-pagination>
           </div>
@@ -150,6 +150,7 @@ export default {
       charge_at_pH_7: {min: -57, max: 44}
     }
     return {
+      loading: false,
       amps: [],
       axiosRefCount: 0,
       info: {currentPage: 1, pageSize: 20, totalRow: 0, totalPage: 1,},
@@ -166,86 +167,37 @@ export default {
   setup(){
     const $q = useQuasar()
     let timer
-    // $q.notify({
-    //   message: '<strong>Note</strong>: The filters may need tens of seconds to load. Please be patient.',
-    //   html: true, color: 'primary', position: 'top', timeout: 10000, icon: 'announcement',
-    //   actions: [{ label: 'Got it', color: 'yellow', handler: () => { /* ... */ } }]
-    // })
-    // const filterLoading = ref(false)
-    // const showFilters = ref(false)
-    // const tableLoading = ref(false)
-    // const showTable = ref(false)
-    return {
-      // filterLoading,
-      // showFilters,
-      // tableLoading,
-      // showTable,
-      setAMPsPageWithLoading (page) {
-        $q.loading.show()
-        console.log('loading...')
-        this.setAMPsPage(page)
-        timer = setTimeout(() => {
-          $q.loading.hide()
-          timer = void 0
-        }, 800)
-      }
-      // showFilterLoading () {
-      //   filterLoading.value = true
-      //   showFilters.value = false
-      // },
-      // showTableLoading () {
-      //   tableLoading.value = true
-      //   showTable.value = false
-      // },
-      // closeFilterLoading () {
-      //   filterLoading.value = false
-      //   showFilters.value = true
-      // },
-      // closeTableLoading () {
-      //   tableLoading.value = false
-      //   showTable.value = true
-      // }
-    }
+    return {}
   },
   created() {
-    // let self = this
-    // // https://stackoverflow.com/questions/50768678/axios-ajax-show-loading-when-making-ajax-request
-    // this.axios.interceptors.request.use((config) => {
-    //   self.loading = true
-    //   // trigger 'loading=true' event here
-    //   return config;
-    // }, (error) => {
-    //   self.loading = false
-    //   // trigger 'loading=false' event here
-    //   return Promise.reject(error);
-    // });
-    // this.axios.interceptors.response.use((response) => {
-    //   self.loading = false
-    //   // trigger 'loading=false' event here
-    //   return response;
-    // }, (error) => {
-    //   self.loading = false
-    //   // trigger 'loading=false' event here
-    //   return Promise.reject(error);
-    // });
+    let self = this
+    // https://stackoverflow.com/questions/50768678/axios-ajax-show-loading-when-making-ajax-request
+    this.axios.interceptors.request.use((config) => {
+      self.loading = true
+      // trigger 'loading=true' event here
+      return config;
+    }, (error) => {
+      self.loading = false
+      // trigger 'loading=false' event here
+      return Promise.reject(error);
+    });
+    this.axios.interceptors.response.use((response) => {
+      self.loading = false
+      // trigger 'loading=false' event here
+      return response;
+    }, (error) => {
+      self.loading = false
+      // trigger 'loading=false' event here
+      return Promise.reject(error);
+    });
   },
   mounted() {
     this.setAMPsPageSize(20)
     this.getAvailableOptions()
   },
-  computed: {
-    // isTableLoading() {
-    //   return this.tableLoading
-    // },
-    // isFilterLoading() {
-    //   return this.isFilterLoading
-    // }
-  },
+  computed: {},
   methods: {
     setAMPsPage(page) {
-      // this.$message('setting to ' + page + 'th page')
-      // Important: page index starting from zero.
-      // this.showTableLoading()
       this.info.currentPage = page - 1
       console.log(this.info.currentPage)
       let config = {
@@ -277,7 +229,7 @@ export default {
     },
     setAMPsPageSize(size) {
       this.info.pageSize = size
-      this.setAMPsPageWithLoading(1)
+      this.setAMPsPage(1)
     },
     getAvailableOptions() {
       // this.showLoading()
@@ -319,39 +271,39 @@ export default {
     },
     // onFamilyChange(option) {
     //   this.options.family = option;
-    //   this.setAMPsPageWithLoading(1)
+    //   this.setAMPsPage(1)
     // },
     onHabitatChange(option) {
       this.options.habitat = option;
-      this.setAMPsPageWithLoading(1)
+      this.setAMPsPage(1)
     },
     // onSampleChange(option) {
     //   this.options.sample = option;
-    //   this.setAMPsPageWithLoading(1)
+    //   this.setAMPsPage(1)
     // },
     onMicrobialSourceChange(option) {
       this.options.microbial_source = option;
-      this.setAMPsPageWithLoading(1)
+      this.setAMPsPage(1)
     },
     onPepLengthChange(value) {
       // this.options.pep_length = {min: 0, max: 100}
       console.log('peplength changed.')
-      this.setAMPsPageWithLoading(1)
+      this.setAMPsPage(1)
     },
     onMWChange(value) {
       // this.options.pep_length = {min: 0, max: 100}
       console.log('MW changed.')
-      this.setAMPsPageWithLoading(1)
+      this.setAMPsPage(1)
     },
     onpIChange(value) {
       // this.options.pep_length = {min: 0, max: 100}
       console.log('pI changed.')
-      this.setAMPsPageWithLoading(1)
+      this.setAMPsPage(1)
     },
     onChargechange(value) {
       // this.options.pep_length = {min: 0, max: 100}
       console.log('Charge changed.')
-      this.setAMPsPageWithLoading(1)
+      this.setAMPsPage(1)
     },
     clearFilters() {
       this.options = {
