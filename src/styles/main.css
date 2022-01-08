@@ -43,6 +43,9 @@
     text-align: left;
     margin-top: 16px;
 }
+.download-btn {
+    float:right;
+}
 /*.text-subtitle1 {*/
 /*    font-size: 1rem;*/
 /*    font-weight: 400;*/
