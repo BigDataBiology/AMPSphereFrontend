@@ -7,7 +7,7 @@
           <div class="col-12 col-lg-2 offset-lg-10">
             <el-button @click="downloadSearchResults" type="primary">
               <BootstrapIcon icon="cloud-download" variant="light" size="1x" />
-              Download results as csv
+              Download as CSV
             </el-button>
           </div>
         </div>
