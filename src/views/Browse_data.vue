@@ -6,20 +6,19 @@
         <div class="row">
           <div class="col-12 col-md-3 q-pa-sm">
             <div>
+              <div class="row q-px-xs q-py-xs filter-subsection-title">Filter by quality</div>
+              <div class="row q-px-md q-py-xs">
+                <q-select filled v-model="options.quality" label="Quality" @update:model-value="onQualityChange"
+                          :options="['High', 'Medium', 'Low']"
+                          style="width: 250px" behavior="menu" align="center" clearable/>
+              </div>
               <div class="row q-px-xs q-py-xs filter-subsection-title">Filter by metadata</div>
-<!--              <div class="row q-px-md q-py-xs">-->
-<!--                <q-btn-toggle-->
-<!--                    v-model="model" spread no-caps toggle-color="primary" color="white" style="width: 250px"-->
-<!--                    text-color="black" :options="[{label: 'Option 1', value: 'one', attr: { 'aria-label': 'Button label' }}, {label: 'Option 2', value: 'two'}]"-->
-<!--                />-->
-<!--              </div>-->
               <div class="row q-px-md q-py-xs">
                 <q-select filled v-model="options.habitat" label="Habitat" @update:model-value="onHabitatChange"
                           :options="availableOptions.habitat" @filter="filterHabitat"
                           input-debounce="0" use-input fill-input hide-selected style="width: 250px"
                           behavior="menu" align="center" clearable/>
               </div>
-              <br/>
               <div class="row q-px-md">
                 <q-select filled v-model="options.microbial_source" label="Microbial source"
                           @update:model-value="onMicrobialSourceChange"
@@ -76,14 +75,13 @@
                     <q-input v-model.number="options.family" type="text" label="Family" filled style="width: 250px"
                              :error="(!familyInDB && options.family !== '')" lazy-rules
                              @change="onFamilyChange" clearable @clear="onFamilyClear"
-                             error-message="The input does not follow any family" />
-                    <br/>
+                             error-message="The input does not match any family" />
                   </div>
                   <div class="row q-px-md q-py-xs">
                     <q-input v-model.number="options.sample" type="text" label="Sample/Genome" filled style="width: 250px"
                              :error="(!sampleInDB && options.sample !== '')" lazy-rules
                              @change="onSampleChange" clearable @clear="onSampleClear"
-                             error-message="The input does not follow any sample/genome" />
+                             error-message="The input does not match any sample/genome" />
                   </div>
                 </div>
               </q-slide-transition>
@@ -131,8 +129,8 @@
                 </template>
               </el-table-column>
             </el-table>
-            <el-pagination @size-change="setAMPsPageSize" @current-change="setAMPsPage" :page-sizes="[5, 20, 50, 100, 200]"
-                           :page-size="5" layout="sizes, pager, jumper" :total="info.totalRow">
+            <el-pagination @size-change="setAMPsPageSize" @current-change="setAMPsPage" :page-sizes="[20, 50, 100, 200]"
+                           :page-size="20" layout="sizes, pager, jumper" :total="info.totalRow">
             </el-pagination>
           </div>
         </div>
@@ -159,9 +157,8 @@ export default {
 
   data() {
     const options_full = {
-      // family: [],
+      quality: [],
       habitat: [],
-      // sample: [],
       microbial_source: [],
       pep_length: {min: 8, max: 98},
       molecular_weight: {min: 813, max: 12286},
@@ -177,7 +174,7 @@ export default {
       axiosRefCount: 0,
       info: {currentPage: 1, pageSize: 20, totalRow: 0, totalPage: 1,},
       options: {
-        family: null, habitat: null, sample: null, microbial_source: null,
+        quality: null, family: null, habitat: null, sample: null, microbial_source: null,
         pep_length: {min: 8, max: 99},
         molecular_weight: {min: 813, max: 12286},
         isoelectric_point: {min: 4, max: 12},
@@ -216,7 +213,7 @@ export default {
     });
   },
   mounted() {
-    this.setAMPsPageSize(10)
+    this.setAMPsPageSize(20)
     this.getAvailableOptions()
     // this.grayOutOptions()
   },
@@ -224,6 +221,7 @@ export default {
   methods: {
     getParams(){
       return {
+          quality: this.transQualityOptions(this.options.quality),
           family: this.options.family,
           habitat: this.options.habitat,
           host: this.options.host,
@@ -283,20 +281,7 @@ export default {
           .catch(function (error) {
             console.log(error);
           })
-
     },
-    // filterFamily(val, update, abort){
-    //   update(() => {
-    //     val = val.toLowerCase()
-    //     this.availableOptions.family = this.staticOptions.family.filter(v => v.toLowerCase().indexOf(val) > -1)
-    //   })
-    // },
-    // filterSample(val, update, abort){
-    //   update(() => {
-    //     val = val.toLowerCase()
-    //     this.availableOptions.sample = this.staticOptions.sample.filter(v => v.toLowerCase().indexOf(val) > -1)
-    //   })
-    // },
     filterHabitat(val, update, abort) {
       update(() => {
         val = val.toLowerCase()
@@ -308,6 +293,10 @@ export default {
         val = val.toLowerCase()
         this.availableOptions.microbial_source = this.staticOptions.microbial_source.filter(v => v.toLowerCase().indexOf(val) > -1)
       })
+    },
+    onQualityChange(option){
+      this.options.quality = option
+      this.setAMPsPage(1)
     },
     onFamilyChange(option) {
       this.inDBChecking(this.options.family, 'family')
@@ -378,6 +367,14 @@ export default {
         Object.assign(amps[i], {quality_tag: {msg: 'Not available', level: 'warning'}})
       }
       return amps
+    },
+    transQualityOptions(quality_level){
+      const quality_level_mapping = {
+        'High': 'gold',
+        'Medium': 'silver',
+        'Low': 'bronze'
+      }
+      return quality_level_mapping[quality_level]
     },
     getBadgeColor(quality_level) {
       const color_mapping = {
