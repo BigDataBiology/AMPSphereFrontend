@@ -44,7 +44,6 @@
                          :min="staticOptions.molecular_weight.min" :max="staticOptions.molecular_weight.max"
                          :inner-min="filteredAvailableOptions.molecular_weight.min" style="width: 240px"
                          :inner-max="filteredAvailableOptions.molecular_weight.max" label color="secondary"/>
-
               </div>
               <div class="row q-px-xs q-py-xs filter-subsection-title">Isoelectric point:</div>
               <div class="row q-px-md">
@@ -98,7 +97,6 @@
               </el-button>
               </div>
             </div>
-            <!--            <q-page padding>-->
             <el-table :data="amps" stripe style="width: 100%" v-loading="loading">
               <el-table-column label="Accession" width="150%">
                 <template #default="props">
@@ -157,6 +155,7 @@ export default {
 
   data() {
     const options_full = {
+
       quality: [],
       habitat: [],
       microbial_source: [],
@@ -298,6 +297,7 @@ export default {
       this.options.quality = option
       this.setAMPsPage(1)
     },
+
     onFamilyChange(option) {
       this.inDBChecking(this.options.family, 'family')
       this.setAMPsPage(1)
@@ -321,6 +321,10 @@ export default {
       this.setAMPsPage(1)
       // this.grayOutOptions()
     },
+    // onSampleChange(option) {
+    //   this.options.sample = option;
+    //   this.setAMPsPage(1)
+    // },
     onMicrobialSourceChange(option) {
       this.options.microbial_source = option;
       this.setAMPsPage(1)
