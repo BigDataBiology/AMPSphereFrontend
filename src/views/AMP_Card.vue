@@ -13,7 +13,7 @@
                   <div class="col-2">
                       <span class="text-bold">Quality:</span>
                   </div>
-                  <div class="col-10" style="display: inline-flex;">
+                  <div class="col-10" style="display: inline-flex; height: 100%; width: 100%">
                     <img :src="makeQualityBadge('Antifam', amp.quality.Antifam)" fit="scale-down"
                          alt="Quality badge cannot be shown. Please check your internet connection."
                          title="Search against Antifam, a database of profile-HMMs created from translations of commonly occurring non-coding RNAs"/> &nbsp; &nbsp;
