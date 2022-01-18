@@ -388,7 +388,7 @@ export default {
     getBadgeLabel(quality_level){
       const quality_level_mapping = {
         green: 'Pass',
-        yellow: 'Medium',
+        yellow: 'Not_tested',
         red: 'Fail'
       }
       return quality_level_mapping[quality_level]
