@@ -15,7 +15,7 @@
           </div>
         </div>
         <div class="row justify-center">
-          <div class="col-12 col-lg-4 text-left">
+          <div class="col-12 col-lg-4 text-center">
             <p class="text-h6"><strong>Authors</strong></p>
             <a href="mailto:celio@big-data-biology.org">Célio Dias Santos Júnior</a><br/>
             <a href="mailto:hui@big-data-biology.org">Hui Chong</a><br/>
