@@ -14,16 +14,19 @@
                       <span class="text-bold">Quality:</span>
                   </div>
                   <div class="col-10" style="display: inline-flex; height: 100%; width: 100%">
-                    <img :src="makeQualityBadge('Antifam', amp.quality.Antifam)" fit="scale-down"
+                    <img :src="makeQualityBadge('Antifam', amp.Antifam)" fit="scale-down"
                          alt="Quality badge cannot be shown. Please check your internet connection."
                          title="Search against Antifam, a database of profile-HMMs created from translations of commonly occurring non-coding RNAs"/> &nbsp; &nbsp;
-                    <img :src="makeQualityBadge('coordinates', amp.quality.coordinates)" fit="scale-down"
+                    <img :src="makeQualityBadge('coordinates', amp.coordinates)" fit="scale-down"
                          alt="Quality badge cannot be shown. Please check your internet connection."
                          title="Mapping genes to their coordinates in the contigs, marking those at 5' terminal as suspicious"/> &nbsp; &nbsp;
-                    <img :src="makeQualityBadge('metaproteomes', amp.quality.metaproteomes)" fit="scale-down"
+                    <img :src="makeQualityBadge('metaproteomes', amp.metaproteomes)" fit="scale-down"
                          alt="Quality badge cannot be shown. Please check your internet connection."
                          title="Mapping of exact matches in metaproteomic sets from PRIDE database"/> &nbsp; &nbsp;
-                    <img :src="makeQualityBadge('RNAcode', amp.quality.RNAcode)" fit="scale-down"
+                    <img :src="makeQualityBadge('metatranscriptomes', amp.metatranscriptomes)" fit="scale-down"
+                         alt="Quality badge cannot be shown. Please check your internet connection."
+                         title="No info."/> &nbsp; &nbsp;
+                    <img :src="makeQualityBadge('RNAcode', amp.RNAcode)" fit="scale-down"
                          alt="Quality badge cannot be shown. Please check your internet connection."
                          title="Identification of protein-coding regions with RNAcode in alignments produced with nucleotide sequences from families of at least eight members. RNAcode assesses evolutionary signatures typical for protein genes"/>&nbsp; &nbsp;
                   </div>
@@ -95,7 +98,7 @@
                     <div class="subsection-title">Relationships</div>
 <!--                    TODO add download button here -->
                     <el-table :data="currentMetadata" stripe :default-sort="{prop: 'GMSC', order: 'ascending'}" width="100%">
-                      <el-table-column prop="GMSC" label="Gene" sortable width="260%"/>
+                      <el-table-column prop="GMSC_accession" label="Gene" sortable width="260%"/>
                       <el-table-column label="Gene sequense" sortable width="400%">
                         <template #default="props">
                           <pre><code><small>{{ props.row.gene_sequence }}</small></code></pre>
@@ -103,7 +106,7 @@
                       </el-table-column>
                       <el-table-column prop="sample" label="Sample/Genome" sortable width="150%"/>
                       <el-table-column prop="general_envo_name" label="Habitat" sortable width="150%"/>
-                      <el-table-column prop="microbial_source" label="microbial source" sortable width="150%"/>
+                      <el-table-column prop="microbial_source_s" label="microbial source" sortable width="150%"/>
                     </el-table>
                     <div class="block">
                       <el-pagination
@@ -381,17 +384,14 @@ export default {
           })
     },
     makeQualityBadge(name, value){
-      const URL = 'https://img.shields.io/static/v1?style=flat&label=' + name + '&color=' + value + '&message=' + this.getBadgeLabel(value) + '&style=flat'
+      const colors_mapping = {
+        Passed: "green",
+        "Not tested": 'yellow',
+        Failed: "red",
+      }
+      const URL = 'https://img.shields.io/static/v1?style=flat&label=' + name + '&color=' + colors_mapping[value] + '&message=' + value + '&style=flat'
       // console.log(URL)
       return URL
-    },
-    getBadgeLabel(quality_level){
-      const quality_level_mapping = {
-        green: 'Pass',
-        yellow: 'Not_tested',
-        red: 'Fail'
-      }
-      return quality_level_mapping[quality_level]
     },
     getFamilyFeatures() {
       let self = this

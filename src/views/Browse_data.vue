@@ -123,7 +123,7 @@
               <el-table-column label="Quality badge" width="150%">
                 <template #default="props">
                   <!--                  <q-badge :color="getBadgeColor(props.row.quality.badge)" :label="getBadgeLabel(props.row.quality.badge)" text-color="black"/>-->
-                  <q-img :src="makeBadgeURL(props.row.quality.badge)" height="70%" fit="scale-down"></q-img>
+                  <q-img :src="makeBadgeURL(props.row.RNAcode)" height="70%" fit="scale-down"></q-img>
                 </template>
               </el-table-column>
             </el-table>
@@ -374,38 +374,38 @@ export default {
     },
     transQualityOptions(quality_level){
       const quality_level_mapping = {
-        'High': 'gold',
-        'Medium': 'silver',
-        'Low': 'bronze'
+        'Passed': 'gold',
+        'Not tested': 'silver',
+        'Failed': 'bronze'
       }
       return quality_level_mapping[quality_level]
     },
     getBadgeColor(quality_level) {
       const color_mapping = {
-        gold: 'green',
-        silver: 'yellow',
-        bronze: 'red'
+        Passed: 'green',
+        'Not tested': 'yellow',
+        Failed: 'red'
       }
       return color_mapping[quality_level]
     },
     getBadgeLabel(quality_level) {
       const quality_level_mapping = {
-        gold: 'High',
-        silver: 'Medium',
-        bronze: 'Low'
+        Passed: 'High',
+        'Not tested': 'Medium',
+        Failed: 'Low'
       }
       return quality_level_mapping[quality_level]
     },
     makeBadgeURL(quality) {
       const quality_level_mapping = {
-        gold: 'high',
-        silver: 'medium',
-        bronze: 'low'
+        Passed: 'high',
+        "Not tested": 'medium',
+        Failed: 'low'
       }
       const color_mapping = {
-        gold: 'FFD700',
-        silver: 'C0C0C0',
-        bronze: 'CD7F32'
+        Passed: 'FFD700',
+        "Not tested": 'C0C0C0',
+        Failed: 'CD7F32'
       }
       // const URL = 'https://badgen.net/badge/quality/' + quality_level_mapping[quality]  + '/' +
       const URL = 'https://img.shields.io/static/v1?style=flat&label=quality&color=' + color_mapping[quality] + '&message=' + quality_level_mapping[quality] + '&style=flat'
