@@ -8,20 +8,42 @@
             <div>
               <div class="row q-px-xs q-py-xs filter-subsection-title">Filter by quality</div>
               <div class="row q-px-md q-py-xs">
-                <q-select filled v-model="options.quality" label="Quality" @update:model-value="onQualityChange"
-                          :options="['High', 'Medium', 'Low']"
+                <q-select filled v-model="options.exp_evidence" label="Evidence" @update:model-value="onExpEvidenceChange"
+                          :options="['Yes', 'No']" hint="Any experimental evidence" @clear="onExpEvidenceClear"
                           style="width: 250px" behavior="menu" align="center" clearable/>
               </div>
+              <div class="row q-px-xs q-py-xs filter-toggle-label">
+                 <q-toggle v-model="qualitySpecFiltersVisible" label="Specific tests" left-label />
+              </div>
+              <q-slide-transition>
+                <div v-show="qualitySpecFiltersVisible">
+                  <div class="row q-px-md q-py-xs">
+                    <q-select filled v-model="options.antifam" label="Antifam" @update:model-value="onAntifamChange"
+                          :options="['Yes', 'No']" @clear="onAntifamClear"
+                          style="width: 250px" behavior="menu" align="center" clearable/>
+                  </div>
+                  <div class="row q-px-md q-py-xs">
+                    <q-select filled v-model="options.RNAcode" label="RNAcode" @update:model-value="onRNAcodeChange"
+                          :options="['Yes', 'No']" @clear="onRNAcodeClear"
+                          style="width: 250px" behavior="menu" align="center" clearable/>
+                  </div>
+                  <div class="row q-px-md q-py-xs">
+                    <q-select filled v-model="options.coordinates" label="coordinates" @update:model-value="onCoordinatesChange"
+                          :options="['Yes', 'No']" @clear="onCoordinatesClear"
+                          style="width: 250px" behavior="menu" align="center" clearable/>
+                  </div>
+                </div>
+              </q-slide-transition>
               <div class="row q-px-xs q-py-xs filter-subsection-title">Filter by metadata</div>
               <div class="row q-px-md q-py-xs">
                 <q-select filled v-model="options.habitat" label="Habitat" @update:model-value="onHabitatChange"
-                          :options="availableOptions.habitat" @filter="filterHabitat"
+                          :options="availableOptions.habitat" @filter="filterHabitat" @clear="onHabitatChange"
                           input-debounce="0" use-input fill-input hide-selected style="width: 250px"
                           behavior="menu" align="center" clearable/>
               </div>
               <div class="row q-px-md">
                 <q-select filled v-model="options.microbial_source" label="Microbial source"
-                          @update:model-value="onMicrobialSourceChange"
+                          @update:model-value="onMicrobialSourceChange" @clear="onMicrobialSourceChange"
                           :options="availableOptions.microbial_source" @filter="filterMicrobialSource"
                           style="width: 250px"
                           input-debounce="0" use-input fill-input hide-selected hint="GTDB taxonomy name"
@@ -66,10 +88,8 @@
               <div class="row q-px-xs q-py-xs filter-subsection-title">
                  <q-toggle v-model="advancedFiltersVisible" label="Advanced filters" left-label class="q-mb-md" />
               </div>
-
               <q-slide-transition>
                 <div v-show="advancedFiltersVisible">
-                  <!--  TODO　Add in database checking-->
                   <div class="row q-px-md q-py-xs">
                     <q-input v-model.number="options.family" type="text" label="Family" filled style="width: 250px"
                              :error="(!familyInDB && options.family !== '')" lazy-rules
@@ -120,10 +140,12 @@
                   <!--                </el-tooltip>-->
                 </template>
               </el-table-column>
-              <el-table-column label="Quality badge" width="150%">
+              <el-table-column label="Quality" width="150%">
                 <template #default="props">
-                  <!--                  <q-badge :color="getBadgeColor(props.row.quality.badge)" :label="getBadgeLabel(props.row.quality.badge)" text-color="black"/>-->
-                  <q-img :src="makeBadgeURL(props.row.RNAcode)" height="70%" fit="scale-down"></q-img>
+                  <q-img :src="makeBadgeURL('Evidence', hasEvidence(props.row))" height="70%" fit="scale-down"></q-img>
+                  <q-img :src="makeBadgeURL('RNAcode', props.row.RNAcode)" height="70%" fit="scale-down"></q-img>
+                  <q-img :src="makeBadgeURL('Antifam', props.row.Antifam)" height="70%" fit="scale-down"></q-img>
+                  <q-img :src="makeBadgeURL('coordinates', props.row.coordinates)" height="70%" fit="scale-down"></q-img>
                 </template>
               </el-table-column>
             </el-table>
@@ -166,6 +188,7 @@ export default {
     }
     return {
       advancedFiltersVisible: false,
+      qualitySpecFiltersVisible: false,
       familyInDB: true,
       sampleInDB: true,
       loading: false,
@@ -173,7 +196,8 @@ export default {
       axiosRefCount: 0,
       info: {currentPage: 1, pageSize: 20, totalRow: 0, totalPage: 1,},
       options: {
-        quality: null, family: null, habitat: null, sample: null, microbial_source: null,
+        exp_evidence: null, antifam: null, RNAcode: null, coordinates: null,
+        family: null, habitat: null, sample: null, microbial_source: null,
         pep_length: {min: 8, max: 99},
         molecular_weight: {min: 813, max: 12286},
         isoelectric_point: {min: 4, max: 12},
@@ -220,7 +244,10 @@ export default {
   methods: {
     getParams(){
       return {
-          quality: this.transQualityOptions(this.options.quality),
+          exp_evidence: this.options.exp_evidence,
+          antifam: this.options.antifam, 
+          RNAcode: this.options.RNAcode, 
+          coordinates: this.options.coordinates,  // four filters to be added.
           family: this.options.family,
           habitat: this.options.habitat,
           host: this.options.host,
@@ -293,11 +320,46 @@ export default {
         this.availableOptions.microbial_source = this.staticOptions.microbial_source.filter(v => v.toLowerCase().indexOf(val) > -1)
       })
     },
-    onQualityChange(option){
-      this.options.quality = option
+    onExpEvidenceChange(option){
+      this.options.exp_evidence = option
+      console.log('exp_evidence filter applied', option)
       this.setAMPsPage(1)
     },
-
+    onAntifamChange(option){
+      this.options.antifam = option
+      console.log('antifam filter applied', option)
+      this.setAMPsPage(1)
+    },
+    onRNAcodeChange(option){
+      this.options.RNAcode = option
+      console.log('RNAcode filter applied', option)
+      this.setAMPsPage(1)
+    },
+    onCoordinatesChange(option){
+      this.options.coordinates = option
+      console.log('coordinates filter applied', option)
+      this.setAMPsPage(1)
+    },
+    onExpEvidenceClear(option){
+      this.options.exp_evidence = null
+      console.log('exp_evidence filter applied', option)
+      this.setAMPsPage(1)
+    },
+    onAntifamClear(option){
+      this.options.antifam = null
+      console.log('antifam filter applied', option)
+      this.setAMPsPage(1)
+    },
+    onRNAcodeClear(option){
+      this.options.RNAcode = null
+      console.log('RNAcode filter applied', option)
+      this.setAMPsPage(1)
+    },
+    onCoordinatesClear(option){
+      this.options.coordinates = null
+      console.log('coordinates filter applied', option)
+      this.setAMPsPage(1)
+    },
     onFamilyChange(option) {
       this.inDBChecking(this.options.family, 'family')
       this.setAMPsPage(1)
@@ -396,19 +458,21 @@ export default {
       }
       return quality_level_mapping[quality_level]
     },
-    makeBadgeURL(quality) {
-      const quality_level_mapping = {
-        Passed: 'high',
-        "Not tested": 'medium',
-        Failed: 'low'
+    hasEvidence(AMP){
+      if (AMP.metaproteomes === 'Passed' || AMP.metatranscriptomes === 'Passed'){
+        return "Passed"
+      } else {
+        return "Failed"
       }
+    },
+    makeBadgeURL(name, test_result) {
       const color_mapping = {
-        Passed: 'FFD700',
-        "Not tested": 'C0C0C0',
-        Failed: 'CD7F32'
+        Passed: 'green',
+        "Not tested": 'yellow',
+        Failed: 'red'
       }
       // const URL = 'https://badgen.net/badge/quality/' + quality_level_mapping[quality]  + '/' +
-      const URL = 'https://img.shields.io/static/v1?style=flat&label=quality&color=' + color_mapping[quality] + '&message=' + quality_level_mapping[quality] + '&style=flat'
+      const URL = 'https://img.shields.io/static/v1?style=flat&label=' + name + '&color=' + color_mapping[test_result] + '&message=' + test_result + '&style=flat'
       // console.log(URL)
       return URL
     },

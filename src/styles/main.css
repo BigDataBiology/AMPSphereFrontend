@@ -43,6 +43,14 @@
     text-align: left;
     margin-top: 16px;
 }
+.filter-toggle-label {
+    font-size: 0.8rem;
+    font-weight: bold;
+    line-height: 1rem;
+    letter-spacing: 0.0125em;
+    text-align: left;
+    margin-top: 10px;
+}
 .download-btn {
     float:right;
 }
