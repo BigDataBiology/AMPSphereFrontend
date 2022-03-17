@@ -4,7 +4,7 @@
       <div class="col-xs-0 col-lg-2"></div>
       <div class="col-12 col-lg-8 justify-center q-pr-md q-ma-auto">
         <div class="row">
-          <div class="col-12 col-md-6 q-pr-md">
+          <div class="col-12 col-md-6 q-pl-md">
             <h4>Overview</h4>
             <p>
               Antimicrobial peptides (AMPs) are small peptides (operationally
@@ -99,10 +99,11 @@
                 CPGB</a>.</p>
 
             <p>We would like to acknowledge in particular: T.S.B. Schmidt; A.N.
-              Fullam; P. Bork; X. Zhao and J. Huerta-Cepas.</p></div>
+              Fullam; P. Bork; X. Zhao and J. Huerta-Cepas.</p>
+          </div>
         </div>
       </div>
-      <div class="col-xs-0 col-lg-2 bg-white"></div>
+      <div class="col-xs-0 col-lg-2"></div>
     </div>
   </div>
 </template>
