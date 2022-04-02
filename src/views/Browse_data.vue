@@ -9,7 +9,7 @@
               <div class="row q-px-xs q-py-xs filter-subsection-title">Filter by quality</div>
               <div class="row q-px-md q-py-xs">
                 <q-select filled v-model="options.exp_evidence" label="Evidence" @update:model-value="onExpEvidenceChange"
-                          :options="['Yes', 'No']" hint="Any experimental evidence" @clear="onExpEvidenceClear"
+                          :options="['Yes', 'No']" hint="transcription/translation" @clear="onExpEvidenceClear"
                           style="width: 250px" behavior="menu" align="center" clearable/>
               </div>
               <div class="row q-px-xs q-py-xs filter-toggle-label">
@@ -28,7 +28,7 @@
                           style="width: 250px" behavior="menu" align="center" clearable/>
                   </div>
                   <div class="row q-px-md q-py-xs">
-                    <q-select filled v-model="options.coordinates" label="coordinates" @update:model-value="onCoordinatesChange"
+                    <q-select filled v-model="options.coordinates" label="terminal placement" @update:model-value="onCoordinatesChange"
                           :options="['Yes', 'No']" @clear="onCoordinatesClear"
                           style="width: 250px" behavior="menu" align="center" clearable/>
                   </div>
@@ -142,10 +142,10 @@
               </el-table-column>
               <el-table-column label="Quality" width="150%">
                 <template #default="props">
-                  <q-img :src="makeBadgeURL('Evidence', hasEvidence(props.row))" height="70%" fit="scale-down"></q-img>
+                  <q-img :src="makeBadgeURL('transcription/translation', hasEvidence(props.row))" height="70%" fit="scale-down"></q-img>
                   <q-img :src="makeBadgeURL('RNAcode', props.row.RNAcode)" height="70%" fit="scale-down"></q-img>
                   <q-img :src="makeBadgeURL('Antifam', props.row.Antifam)" height="70%" fit="scale-down"></q-img>
-                  <q-img :src="makeBadgeURL('coordinates', props.row.coordinates)" height="70%" fit="scale-down"></q-img>
+                  <q-img :src="makeBadgeURL('terminal placement', props.row.coordinates)" height="70%" fit="scale-down"></q-img>
                 </template>
               </el-table-column>
             </el-table>

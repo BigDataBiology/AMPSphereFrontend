@@ -75,7 +75,7 @@
                         </p>
                         <p>
                         To verify the set of metatranscriptomes used,
-                        follow this <a href="">link</a> (link to be added) to the metadata.
+                        follow this <a href="https://github.com/BigDataBiology/AMPSphereBackend/blob/include_gtdb_and_new_QC_result/data/qc/metaT_metadata.csv">link</a> to the metadata.
                         </p>
 
                         <div class="text-bold">Presence in metaproteomes</div>
@@ -84,9 +84,8 @@
                         Following a similar rationale, the detection of peptides previously obtained in 
                         metaproteomes data available in <a href="https://www.ebi.ac.uk/pride/">PRIDE</a>. The set of
                         metaproteomes was curated in a set of 109 publicly available metaproteomes from 
-                        37 environments. To access the metadata related to this set, follow
-                        <a href="">this</a>
-                        (link to be added).
+                        37 environments. To access the metadata related to this set, follow this 
+                        <a href="https://github.com/BigDataBiology/AMPSphereBackend/blob/include_gtdb_and_new_QC_result/data/qc/metaP_PRIDE_list.csv">link</a>.
                         </p>
                         <p>
                         Using python3, we verified the exact string matching of peptides from 
