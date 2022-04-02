@@ -4,14 +4,14 @@
       <div class="col-xs-0 col-xl-2 bg-white"></div>
       <div class="col-12 col-xl-8 justify-center q-px-md q-ma-auto">
         <div class="row justify-center">
-          <div class="col-12 text-center">
-            <p>AMPsphere is discussed in <a href="https://groups.google.com/g/ampsphere-users">a forum</a> where users can suggest improvements, issues, ongoing projects, etc: <a href="https://groups.google.com/g/ampsphere-users">https://groups.google.com/g/ampsphere-users</a>.</p>
-            <p>This is a project hosted by the <a href="https://big-data-biology.org/">Big Data Biology Research Group</a>.</p>
+          <div class="text-h5 col-12 text-bold text-center q-py-md">
+            Contact us if you have issues or suggestions:
           </div>
         </div>
         <div class="row justify-center">
-          <div class="text-h5 col-12 text-bold text-center q-py-md">
-            Contact us if you have issues or suggestions:
+          <div class="col-12 text-center">
+            <p>AMPsphere is discussed in <a href="https://groups.google.com/g/ampsphere-users">a forum</a> where users can suggest improvements, issues, ongoing projects, etc: <a href="https://groups.google.com/g/ampsphere-users">https://groups.google.com/g/ampsphere-users</a>.</p>
+            <p>This is a project hosted by the <a href="https://big-data-biology.org/">Big Data Biology Research Group</a>.</p>
           </div>
         </div>
         <div class="row justify-center">
