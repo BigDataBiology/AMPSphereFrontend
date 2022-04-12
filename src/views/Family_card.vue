@@ -47,7 +47,7 @@
                       </div>
                       <div v-else>
                         <div style="height:400px; line-height: 400px" class="text-center q-px-md">
-                          Empty, all associated smORF genes were from Progenomes2 genomes (no geographical information).
+                          Empty, all associated smORF genes were from isolate genomes (no geographical information).
                         </div>
                       </div>
                     </div>
@@ -64,7 +64,7 @@
                         <Plotly :data="EnvPlotData()" :layout="EnvPlotLayout()" :toImageButtonOptions="{format: 'svg', scale: 1}"/>
                       </div>
                       <div v-else style="height:500px; display: -webkit-flex; display: flex; align-items: center; " class="text-center q-px-md">
-                        <p>Empty, all associated smORF genes were from Progenomes2 genomes (no habitat information).</p>
+                        <p>Empty, all associated smORF genes were from isolate genomes (no habitat information).</p>
                       </div>
                     </div>
                     <div class="col-12 col-md-6 q-px-md">
