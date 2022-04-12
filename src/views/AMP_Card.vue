@@ -515,7 +515,7 @@ export default {
         xaxis: {
           type: 'log', autorange: true,
           title: {
-            text: '# smORF genes (in exponential)',
+            text: '# smORF genes (log scale)',
             font: {
               size: 18,
             }
@@ -543,7 +543,7 @@ export default {
         xaxis: {
           type: 'log', autorange: true,
           title: {
-            text: '# smORF genes (in exponential)',
+            text: '# smORF genes (log scale)',
             font: {
               size: 18,
             }
