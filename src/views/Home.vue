@@ -5,45 +5,9 @@
       <div class="col-12 col-md-7 col-xl-5 justify-center q-pr-md q-ma-auto">
         <div class="row">
           <div class="col-12 text-center subsection-title-center q-mb-md">Overall statistics and distribution</div>
-          <div class="col-md-4 col-xs-12">
-            <el-table :data="distributionData.genes_amps" style="width: 120%" :show-header="false">
-              <el-table-column prop="number" label="Number">
-                <template #default="props">
-                  {{ props.row.number }}
-<!--                  <a href="/browse_data" style="font-size: medium"> {{ props.row.number }}</a>-->
-                </template>
-              </el-table-column>
-              <el-table-column prop="type" label="Type"></el-table-column>
-            </el-table>
-          </div>
-          <div class="col-md-4 col-xs-12">
-            <!--              <h4>Derived from</h4>-->
-            <el-table :data="distributionData.families_habitats" style="width: 120%" :show-header="false">
-              <el-table-column prop="number" label="Number">
-                <template #default="props">
-                  {{ props.row.number }}
-<!--                  <a href="/browse_data" style="font-size: medium"> {{ props.row.number }}</a>-->
-                </template>
-              </el-table-column>
-              <el-table-column prop="type" label="Type"></el-table-column>
-            </el-table>
-          </div>
-          <div class="col-md-4 col-xs-12">
-            <el-table :data="distributionData.genomes_metagenomes" style="width: 120%" :show-header="false">
-              <el-table-column prop="number" label="Number">
-                <template #default="props">
-                  {{ props.row.number }}
-<!--                  <a href="/browse_data" style="font-size: medium"> {{ props.row.number }}</a>-->
-                </template>
-              </el-table-column>
-              <el-table-column prop="type" label="Type"></el-table-column>
-            </el-table>
-          </div>
-        </div>
-        <div class="row">
           <div class="col-12 q-pa-md">
             <q-carousel animated v-model="slideIndex" control-color="primary" control-text-color="black"
-                        arrows autoplay height="30rem">
+                        arrows height="30rem">
               <q-carousel-slide :name="1" class="column ">
                 <q-img :src="distributionGraphs[0].image" fit="scale-down"></q-img>
               </q-carousel-slide>
@@ -63,15 +27,49 @@
           <!--                </el-carousel-item>-->
           <!--              </el-carousel>-->
         </div>
+        <div class="row">
+          <div class="col-md-4 col-xs-12">
+            <el-table :data="distributionData.genes_amps" style="width: 120%" :show-header="false">
+              <el-table-column prop="number" label="Number">
+                <template #default="props">
+                  {{ props.row.number }}
+                  {{ props.row.type }}
+<!--                  <a href="/browse_data" style="font-size: medium"> {{ props.row.number }}</a>-->
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+          <div class="col-md-4 col-xs-12">
+            <!--              <h4>Derived from</h4>-->
+            <el-table :data="distributionData.families_habitats" style="width: 120%" :show-header="false">
+              <el-table-column prop="number" label="Number">
+                <template #default="props">
+                  {{ props.row.number }}
+                  {{ props.row.type }}
+<!--                  <a href="/browse_data" style="font-size: medium"> {{ props.row.number }}</a>-->
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+          <div class="col-md-4 col-xs-12">
+            <el-table :data="distributionData.genomes_metagenomes" style="width: 120%" :show-header="false">
+              <el-table-column prop="number" label="Number">
+                <template #default="props">
+                  {{ props.row.number }}
+                  {{ props.row.type }}
+<!--                  <a href="/browse_data" style="font-size: medium"> {{ props.row.number }}</a>-->
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+        </div>
       </div>
       <div class="col-12 col-md-5 col-xl-3 justify-center q-pl-md q-ma-auto">
         <div class="row">
           <div class="col-12 text-center subsection-title-center q-mb-md">Search by sequence</div>
           <div class="col-12">
             <div class="main-text">
-              Paste (&leq; 10) peptide sequences here (FASTA format). <br/>
-              <span class="text-bold">Note</span>: For large queries and offline use, please download
-              <a href="https://ampsphere.big-data-biology.org/downloads"> our prebuilt indices</a>.
+              Paste (&leq; 10) peptide sequences here (FASTA format).
             </div>
           </div>
           <div class="col-12">
@@ -99,7 +97,10 @@
 <!--              <el-radio v-model="searchMethod" label="HMMER">Families</el-radio>-->
               <q-btn @click="sequenceSearch" label="Submit" class="bg-primary text-white" />
             </div>
-
+            <div class="main-text">
+              <span class="text-bold">Note</span>: For large queries and offline use, please download
+              <a href="https://ampsphere.big-data-biology.org/downloads"> our prebuilt indices</a>.
+            </div>
           </div>
         </div>
       </div>
