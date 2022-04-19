@@ -1,0 +1,112 @@
+<template>
+  <div class="HelicalWheel">
+    <div class="row" >
+        <!-- <p id="viewof-slider"></p> -->
+        <p id="helicalwheel"></p>
+        <!-- <p id="svgSave"></p> -->
+    </div>
+  </div>
+</template>
+
+<style>   
+.jumbotron {
+          padding-top: 10px;
+          padding-bottom: 10px;
+          text-align: center;
+}
+#labelleft, #labelright {
+      dominant-baseline: hanging;
+      font-size: 10px;
+}
+
+#labelleft {
+  text-anchor: end;
+}
+
+#labelright {
+  text-anchor: start;
+}
+
+rect.overlay {
+  stroke: black;
+}
+
+rect.selection {
+  stroke: none;
+  fill: lightblue;
+  fill-opacity: 0.4;
+}
+
+
+
+.social-media-sharers {
+  -ms-flex-positive: 0;
+  flex-grow: 0;
+  -ms-flex-preferred-size: 24px;
+  flex-basis: 24px
+}
+
+.social-media-sharer, .social-media-sharer__icon {
+  display: inline-block
+}
+
+.social-media-sharer {
+  background-color: #212121;
+  border-radius: 3px;
+  color: #fff;
+  margin: 0 8px;
+  height: 24px;
+  padding: 2px 0;
+  text-decoration: none;
+  transition: 25ms ease-out;
+  width: 24px
+}
+
+.content-header--image .social-media-sharer {
+  background-color: transparent;
+  border: 1px solid #fff;
+  padding: 1px 0
+}
+
+.content-header:not(.content-header--image) .social-media-sharer:hover,
+.content-header:not(.content-header--image) .social-media-sharer:active {
+  background-color: #0288d1
+}
+
+.social-media-sharer__icon svg {
+  width: 16px;
+  height: 16px;
+  margin-right: 7px;
+  vertical-align: top
+}
+
+.social-media-sharer__icon_wrapper--small svg {
+  margin: 0;
+  vertical-align: middle
+}
+
+.social-media-sharer__icon--solid {
+  fill: #fff;
+  stroke: none
+}
+</style>
+
+<script>
+import drawHelicalWheel from "../components/helical-wheel-vis";
+
+
+
+export default {
+  name: 'HelicalWheel',
+  components: {
+  },
+  data(){
+    return {
+      amp_seq: 'KKVKSIFKKALAMMGENEVKAWGIGIK'
+    }
+  },
+  mounted(){
+    drawHelicalWheel(this.amp_seq)
+  }
+}
+</script>
