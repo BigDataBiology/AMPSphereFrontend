@@ -29,11 +29,19 @@ const routes = [
         }
     },
     {
-        path: "/test",
+        path: "/test_helicalwheel",
         name: "HelicalWheel",
         component: HelicalWheel,
         meta:{
             title: 'AMPSphere: HelicalWheel'
+        }
+    },
+    {
+        path: "/test_seqlogo",
+        name: "SeqLogo",
+        component: SeqLogo,
+        meta:{
+            title: 'AMPSphere: SeqLogo'
         }
     },
     {
