@@ -459,10 +459,16 @@ export default {
         lat: data.lat,
         lon: data.lon,
         marker: {
-          size: data.size,
-          sizeref: 10,
-          // FIXME
-          // color: this.MapColors(data.colors, this.ColorPalette('quanlitative')),
+          // size: data.size,
+          // sizeref: 10,
+          // // color: this.MapColors(data.colors, this.ColorPalette('quanlitative')),
+        size: 10,
+        sizeref: 10,
+        color: data.size,
+        colorscale: 'Greens',
+        colorbar: {
+            title: '# smORF genes',
+        },
           line: {
             color: 'black',
             size: 2
@@ -625,12 +631,12 @@ export default {
       )
     },
     makeFamilyFeatureTraces(data) {
-      console.log(data)
+      // console.log(data)
       return [
         {
           type: 'violin',
           y: data,
-          points: 'all',
+          points: 'none',
           box: {
             visible: true
           },
@@ -646,7 +652,7 @@ export default {
           },
           name: ''
           // x0: ''
-        }
+        },
       ]
     },
     familyFeatureGraphLayout(value) {
@@ -656,28 +662,34 @@ export default {
         margin: {l: 50, r: 20, b: 20, t: 20},
         annotations: [{
           x: 0,
-          xanchor: 'left',
+          xanchor: 'right',
           y: value,
           yanchor: 'bottom',
-          text: this.accession,
+          text: this.amp.accession,
           showarrow: true,
+          arrowcolor: 'red',
+          arrowhead: 2,
           font: {
-            size: 16,
+            size: 14,
             color: 'red'
           },
-          align: 'center',
-          arrowhead: 1,
-          arrowcolor: 'red',
-          ax: 20,
-          ay: -20,
+          align: 'left',
+          ax: -40,
+          ay: 0,
         }],
         // shapes: [
         //   {
-        //     type: 'scatter',
-        //     x0: [0],
-        //     y0: [value],
-        //     marker: {
-        //       color: 'red',
+        //     type: 'line',
+        //     xref: 'paper',
+        //     yref: 'y',
+        //     x0: 0,
+        //     y0: value,
+        //     x1: 1,
+        //     y1: value,
+        //     line: {
+        //         color: 'red',
+        //         width: 2,
+        //         dash:'dot'
         //     }
         //   }
         // ]
