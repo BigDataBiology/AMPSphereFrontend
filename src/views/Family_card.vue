@@ -100,10 +100,12 @@
                             <!--                </el-tooltip>-->
                           </template>
                         </el-table-column>
-                        <el-table-column label="Tag" width="150%">
+                        <el-table-column label="Quality" width="150%">
                           <template #default="props">
-                            <!--                  <q-badge :color="getBadgeColor(props.row.quality.badge)" :label="getBadgeLabel(props.row.quality.badge)" text-color="black"/>-->
-                            <q-img :src="makeBadgeURL(props.row.RNAcode)" height="70%" fit="scale-down"></q-img>
+                            <q-img :src="makeBadgeURL('transcription/translation', hasEvidence(props.row))" height="70%" fit="scale-down"></q-img>
+                            <q-img :src="makeBadgeURL('RNAcode', props.row.RNAcode)" height="70%" fit="scale-down"></q-img>
+                            <q-img :src="makeBadgeURL('Antifam', props.row.Antifam)" height="70%" fit="scale-down"></q-img>
+                            <q-img :src="makeBadgeURL('terminal placement', props.row.coordinates)" height="70%" fit="scale-down"></q-img>
                           </template>
                         </el-table-column>
                       </el-table>
@@ -439,7 +441,7 @@ export default {
       this.axios.get('/amps/', config)
           .then(function (response) {
             console.log(response.data)
-            self.associatedAMPs.currentData = self.initQualityTag(response.data.data)
+            self.associatedAMPs.currentData = response.data.data
             self.associatedAMPs.info.totalPage = response.data.info.totalPage
             self.associatedAMPs.info.totalRow = response.data.info.totalItem
           })
@@ -459,9 +461,13 @@ export default {
       return [{
         type: 'scattergeo', lat: data.lat, lon: data.lon,
         marker: {
-          size: data.size, sizeref: 10,
-          // TODO
-          // color: this.MapColors(data.colors, this.ColorPalette('quanlitative')),
+          size: 10,
+          sizeref: 10,
+          color: data.size,
+          colorscale: 'Greens',
+          colorbar: {
+              title: '# smORF genes',
+          },
           line: {color: 'black', size: 2}
         },
       }]
@@ -753,19 +759,14 @@ export default {
       //   line: {width: 1}
       // };
     },
-    makeBadgeURL(quality) {
-      const quality_level_mapping = {
-        Passed: 'high',
-        "Not tested": 'medium',
-        Failed: 'low'
-      }
+    makeBadgeURL(name, test_result) {
       const color_mapping = {
-        Passed: 'FFD700',
-        "Not tested": 'C0C0C0',
-        Failed: 'CD7F32'
+        Passed: 'green',
+        "Not tested": 'yellow',
+        Failed: 'red'
       }
       // const URL = 'https://badgen.net/badge/quality/' + quality_level_mapping[quality]  + '/' +
-      const URL = 'https://img.shields.io/static/v1?style=flat&label=quality&color=' + color_mapping[quality] + '&message=' + quality_level_mapping[quality] + '&style=flat'
+      const URL = 'https://img.shields.io/static/v1?style=flat&label=' + name + '&color=' + color_mapping[test_result] + '&message=' + test_result + '&style=flat'
       // console.log(URL)
       return URL
     },
@@ -843,12 +844,6 @@ export default {
     UnpackCol(rows, key) {
       return rows.map(function(row) { return row[key]; });
     },
-    initQualityTag(amps){
-      for (let i=0; i < amps.length; i++) {
-        Object.assign(amps[i], {quality_tag: {msg: 'Not available', level: 'warning'}})
-      }
-      return amps
-    },
     downloadCurrPage(){
       print()
     },
@@ -869,15 +864,9 @@ export default {
         } else if (key === "sequences") {
           name = 'Sequences'
           desc = 'Sequences - fasta file containing the peptide sequences belonging to this family'
-        } else if (key === "hmm_logo") {
-          name = 'HMM-logo'
-          desc = 'HMM-logo - graphical representation of the Hidden Markov Model describing the peptides of this family'
         } else if (key === "hmm_profile") {
           name = 'HMM-profile'
           desc = 'HMM-profile - Statistical Hidden Markov Model describing the peptides of this family, used to sequence searching'
-        } else if (key === "sequence_logo") {
-          name = 'Sequence-logo'
-          desc = 'Sequence-logo - graphical representation of the peptides alignment, the bit-wise information per position is shown'
         } else if (key === "tree_figure") {
           name = 'Tree-figure'
           desc = 'Tree-figure - ASCII graphical representation of the phylogenetic tree of peptides composing this family. Branches were drawn proportionally to the substitution distance and the node support is given as bootstrap of 1000 pseudoreplicates'
@@ -894,6 +883,13 @@ export default {
     download(url){
       console.log(url)
       window.open(encodeURI(url), '_blank')
+    },
+    hasEvidence(AMP){
+      if (AMP.metaproteomes === 'Passed' || AMP.metatranscriptomes === 'Passed'){
+        return "Passed"
+      } else {
+        return "Failed"
+      }
     },
     descStyle(){
       return 'download-desc'
