@@ -10,7 +10,6 @@ import Quality_tests from '@/views/Quality_tests'
 import Contact from '../views/Contact'
 import SequenceSearch from "../views/SequenceSearch";
 import TextSearch from "../views/TextSearch";
-import SeqLogo from "../views/SeqLogo"
 import { trackRouter } from "vue-gtag-next";
 
 
@@ -25,14 +24,6 @@ const routes = [
         component: Home,
         meta:{
             title: 'AMPSphere: Home'
-        }
-    },
-    {
-        path: "/test_seqlogo",
-        name: "SeqLogo",
-        component: SeqLogo,
-        meta:{
-            title: 'AMPSphere: SeqLogo'
         }
     },
     {

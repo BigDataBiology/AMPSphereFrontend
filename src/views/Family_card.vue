@@ -22,25 +22,25 @@
                     <div class="col-12 col-md-3 q-pt-md q-px-md justify-center">
                       <div>
                         <span class="subsubsection-title">
-                        Number of AMPs:
-                                                <!--                      </span>-->
-                                                <!--                    <span>-->
-                        <el-link href="#amps" type="primary">
-                          <span class="subsubsection-title">{{ num_amps }}</span>
-                        </el-link>
-                      </span>
+                          Number of AMPs: <a href="#amps">{{ num_amps }}</a>
+                        </span>
                       </div>
-                      <div v-if="consensusSequence !== ''" class="subsubsection-title">
+                      <div v-if="consensusSequence !== ''" class="subsubsection-title  q-mb-lg">
                         Consensus sequence <q-btn @click="CopyPeptideSequence()" icon="content_copy" size="sm"></q-btn>
                       </div>
                       <div v-if="consensusSequence !== ''">
                         <pre><code id="aa-sequence">{{ consensusSequence }}</code></pre>
                       </div>
-                      <div class="subsubsection-title">Secondary Structure</div>
+                    </div>
+                    <div class="col-12 col-md-8 offset-md-1 q-pt-md q-px-md justify-left" id="seq-logo">
+                      <SeqLogo v-model:alignment="alignment"></SeqLogo>
+                    </div>
+                    <div class="col-12 col-md-3 q-px-md justify-center">
+                      <div class="subsubsection-title q-mb-lg">Secondary Structure</div>
                       <Plotly :data="SecStructureBarData()" :layout="secondaryStructureLayout()"
                               :toImageButtonOptions="{format: 'svg', scale: 1}"/>
                     </div>
-                    <div class="col-12 col-md-8 offset-md-1 q-pt-md q-px-md justify-center" id="global distribution">
+                    <div class="col-12 col-md-8 offset-md-1 q-px-md justify-center" id="global distribution">
                       <div class="subsubsection-title text-center">Geographical Distribution</div>
                       <div v-if="distribution.geo.lat.length > 0">
                         <Plotly :data="GeoPlotData()" :layout="GeoPlotLayout()" :toImageButtonOptions="{format: 'svg', scale: 1}"/>
@@ -163,24 +163,6 @@
                           <Plotly :data="featuresGraphData.Charge_at_pH_7" :layout="featuresBoxplotLayout()" />
                         </div>
                       </div>
-
-
-                      <!--                    <el-table :data="Object.values(feature_statistics).slice(1)" v-loading="loading">-->
-                      <!--                      <el-table-column type="index" :index="indexByStatsName" width="100%"></el-table-column>-->
-                      <!--                      <el-table-column prop="Aromaticity" label="Aromaticity" width="100%"></el-table-column>-->
-                      <!--                      <el-table-column prop="Charge_at_pH_7" label="Charge at pH 7" width="150%"></el-table-column>-->
-                      <!--                      <el-table-column prop="GRAVY" label="GRAVY" width="100%"></el-table-column>-->
-                      <!--                      <el-table-column prop="Instability_index" label="Instability index" width="150%"></el-table-column>-->
-                      <!--                      <el-table-column prop="Isoelectric_point" label="Isoelectric point" width="150%"></el-table-column>-->
-                      <!--                      <el-table-column prop="MW" label="Molecular Weight" width="150%"></el-table-column>-->
-                      <!--                      <el-table-column label="Molar extinction" width="150%">-->
-                      <!--                        <template #default="props">-->
-                      <!--                          {{ props.row.Molar_extinction.cysteines_reduced }}-->
-                      <!--                          {{ props.row.Molar_extinction.cystines_residues }}-->
-                      <!--                        </template>-->
-                      <!--                      </el-table-column>-->
-                      <!--                    </el-table>-->
-                      <!--                    Maybe replace this with a boxplot...-->
                     </div>
                   </div>
                 </q-tab-panel>
@@ -260,12 +242,14 @@ import Plotly from "../components/Plotly"
 import * as clipboard from "clipboard-polyfill/text";
 import { std, mean } from 'mathjs'
 import {Notify} from "quasar";
+import SeqLogo from '@/components/SeqLogo'
 
 
 export default {
   name: 'Family_card',
   components: {
-    Plotly
+    Plotly,
+    SeqLogo
   },
   data() {
     let features_base = {
@@ -285,6 +269,7 @@ export default {
       SeqLogoDialogVisible: false,
       accession: this.$route.query.accession,
       consensusSequence: '',
+      alignment: ['', ''],
       num_amps: 0,
       features: {'': features_base},
       secondaryStructureGraphData: [],
@@ -345,9 +330,11 @@ export default {
       return Promise.reject(error);
     });
     this.getFamily()
+    this.getAlignment()
     this.setAMPsPageSize(5)
   },
   mounted() {
+    
   },
   computed: {
     currentMetadata () {
@@ -378,6 +365,19 @@ export default {
           .catch(function (error) {
             console.log(error);
           })
+    },
+    getAlignment(){
+      const url = '/families/' + this.accession + '/downloads/' + this.accession + '.aln'
+      console.log(url)
+      let self = this
+      self.axios.get(url, {})
+      .then(function(response){
+        self.alignment = response.data.split('\n')
+        console.log(self.alignment)
+      })
+      .catch(function(error){
+        console.log(error)
+      })
     },
     SecStructureBarData(){
       let probabilities = {
@@ -461,14 +461,19 @@ export default {
       return [{
         type: 'scattergeo', lat: data.lat, lon: data.lon,
         marker: {
+          symbol: 'circle',
           size: 10,
           sizeref: 10,
           color: data.size,
           colorscale: 'Greens',
+          reversescale: true,
           colorbar: {
               title: '# smORF genes',
           },
-          line: {color: 'black', size: 2}
+          line: {
+            color: 'rgb(0, 0, 0)',
+            width: 1
+          }
         },
       }]
     },
