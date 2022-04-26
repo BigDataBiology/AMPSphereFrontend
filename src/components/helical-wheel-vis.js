@@ -413,7 +413,7 @@ function drawHelicalWheel(amp_seq){
                     value: "maeditor",
                   },
                   { label: "HeliQuest", value: "heliquest" },
-                  { label: "Custom", value: "custom" },
+                  // { label: "Custom", value: "custom" },
                 ],
                 description:
                   "See <a href=http://www.bioinformatics.nl/~berndb/aacolour.html>http://www.bioinformatics.nl/~berndb/aacolour.html</a> for more details.",
@@ -434,8 +434,8 @@ function drawHelicalWheel(amp_seq){
               return radio({
                 title: "Residue Labels Inside/Outside Circles",
                 options: [
-                  { label: "Residue Labels Outside Circles", value: "nums_inside" },
                   { label: "Residue Labels Inside Circles", value: "nums_outside" },
+                  { label: "Residue Labels Outside Circles", value: "nums_inside" },
                 ],
                 value: startOption,
               });
@@ -451,7 +451,7 @@ function drawHelicalWheel(amp_seq){
             inputs: ["params", "allvars"],
             value: function (params, allvars) {
               if (params.get("a") === null) {
-                return "nums_inside";
+                return "nums_outside";
               }
               return allvars["d"][0]["labelOption"];
             },

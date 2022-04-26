@@ -4,33 +4,30 @@
       <div class="col-xs-0 col-xl-2 bg-white"></div>
       <div class="col-12 col-xl-8 justify-center q-pr-md q-ma-auto">
         <div class="row">
-          <div class="col-12 q-px-md">
-            <div class="text-h4 q-my-md">Antimicrobial peptide: {{ amp.accession }}</div>
-            <!--                    TODO test: move this description down to the overview tab-->
-            <div class="row">
-              <div class="col-6">
-                <div class="row">
-                  <div class="col-2">
-                      <span class="text-bold">Quality:</span>
-                  </div>
-                  <div class="col-10" style="display: inline-flex; height: 100%; width: 100%">
-                    <img :src="makeQualityBadge('Antifam', amp.Antifam)" fit="scale-down"
-                         alt="Quality badge cannot be shown. Please check your internet connection."
-                         title="Search against Antifam, a database of profile-HMMs created from translations of commonly occurring non-coding RNAs"/> &nbsp; &nbsp;
-                    <img :src="makeQualityBadge('coordinates', amp.coordinates)" fit="scale-down"
-                         alt="Quality badge cannot be shown. Please check your internet connection."
-                         title="Mapping genes to their coordinates in the contigs, marking those at 5' terminal as suspicious"/> &nbsp; &nbsp;
-                    <img :src="makeQualityBadge('metaproteomes', amp.metaproteomes)" fit="scale-down"
-                         alt="Quality badge cannot be shown. Please check your internet connection."
-                         title="Mapping of exact matches in metaproteomic sets from PRIDE database"/> &nbsp; &nbsp;
-                    <img :src="makeQualityBadge('metatranscriptomes', amp.metatranscriptomes)" fit="scale-down"
-                         alt="Quality badge cannot be shown. Please check your internet connection."
-                         title="No info."/> &nbsp; &nbsp;
-                    <img :src="makeQualityBadge('RNAcode', amp.RNAcode)" fit="scale-down"
-                         alt="Quality badge cannot be shown. Please check your internet connection."
-                         title="Identification of protein-coding regions with RNAcode in alignments produced with nucleotide sequences from families of at least eight members. RNAcode assesses evolutionary signatures typical for protein genes"/>&nbsp; &nbsp;
-                  </div>
-                </div>
+          <div class="col-12">
+            <div class="row q-pa-md">
+              <div class="col-12 text-h4">
+                Antimicrobial peptide: {{ amp.accession }}
+              </div>
+              <div class="col-2">
+                  <span class="text-bold">Quality:</span>
+              </div>
+              <div class="col-10" style="display: inline-flex; height: 100%; width: 100%">
+                <img :src="makeQualityBadge('Antifam', amp.Antifam)" fit="scale-down"
+                      alt="Quality badge cannot be shown. Please check your internet connection."
+                      title="Search against Antifam, a database of profile-HMMs created from translations of commonly occurring non-coding RNAs"/> &nbsp; &nbsp;
+                <img :src="makeQualityBadge('coordinates', amp.coordinates)" fit="scale-down"
+                      alt="Quality badge cannot be shown. Please check your internet connection."
+                      title="Mapping genes to their coordinates in the contigs, marking those at 5' terminal as suspicious"/> &nbsp; &nbsp;
+                <img :src="makeQualityBadge('metaproteomes', amp.metaproteomes)" fit="scale-down"
+                      alt="Quality badge cannot be shown. Please check your internet connection."
+                      title="Mapping of exact matches in metaproteomic sets from PRIDE database"/> &nbsp; &nbsp;
+                <img :src="makeQualityBadge('metatranscriptomes', amp.metatranscriptomes)" fit="scale-down"
+                      alt="Quality badge cannot be shown. Please check your internet connection."
+                      title="No info."/> &nbsp; &nbsp;
+                <img :src="makeQualityBadge('RNAcode', amp.RNAcode)" fit="scale-down"
+                      alt="Quality badge cannot be shown. Please check your internet connection."
+                      title="Identification of protein-coding regions with RNAcode in alignments produced with nucleotide sequences from families of at least eight members. RNAcode assesses evolutionary signatures typical for protein genes"/>&nbsp; &nbsp;
               </div>
             </div>
             <div class="text-body1">
@@ -42,6 +39,7 @@
             </div>
           </div>
         </div>
+        
         <div class="row bg-white">
           <div class="col-12 q-pa-md">
             <q-tabs v-model="tabName" dense align="left" class="text-teal text-white">
@@ -72,6 +70,7 @@
                     </div>
                   </div>
                 </div>
+                <q-separator></q-separator>
                 <div class="row">
                   <div class="col-12 q-px-md q-pt-md">
                     <div class="subsection-title">Distribution</div>
@@ -93,6 +92,7 @@
                     </div>
                   </div>
                 </div>
+                <q-separator></q-separator>
                 <div class="row">
                   <div class="col-12 q-px-md q-pt-md">
                     <div class="subsection-title">Relationships</div>
@@ -125,102 +125,60 @@
               <q-tab-panel name="features">
                 <div class="row">
                   <div class="col-12 q-pa-md">
+                    <!-- <div class="subsection-title">
+                      Biochemical properties
+                    </div> -->
                     <div class="row">
-                      <div class="col-12 col-md-4 justify-center">
-                        <div class="subsection-title q-py-md">Biochemical properties</div>
-                        <ul>
-                          <li>
-                            <div class="info-item-value">
-                              The feature value of {{ amp.accession }} was pointed out in the distribution among its entire AMP family.
-                            </div>
-                          </li>
-                          <li>
-                            <div class="info-item-value">
-                              The features below were calculated by using the
-                              <el-link href="https://biopython.org/docs/1.79/api/Bio.SeqUtils.ProtParam.html" type="primary">
-                                Bio.SeqUtils.ProtParam.ProteinAnalysis
-                              </el-link>
-                              module from
-                              <el-link href="https://doi.org/10.1093/bioinformatics/btp163" type="primary">
-                                BioPython
-                              </el-link> (version 1.79).
-                            </div>
-                          </li>
-                          <li>
-                            <div class="info-item-value">
-                              Amino acids helical wheel with the H-moment indicated, calculated by using <el-link href="https://modlamp.org/modlamp.html?highlight=helical%20wheel#modlamp.plot.helical_wheel">helical_wheel</el-link> from <el-link href="https://modlamp.org/">modlAMP</el-link>
-                            </div>
-                          </li>
-                        </ul>
+                      <div class="col-12">
+                        <HelicalWheel :amp_seq="amp.sequence"></HelicalWheel>
                       </div>
-                      <div class="col-12 col-md-4 offset-md-2 justify-center">
-                        <div style="text-align: center" id="helical-wheel">
-                          <el-link :href="amp.helicalwheel" type="primary">
-                            <span class="medium">Helical wheel</span>
-                          </el-link>
-                        </div>
-                        <div style="align-content: center; text-align: center;">
-                          <el-image :src="amp.helicalwheel" fit="scale-down"></el-image>
-                        </div>
-                      </div>
+                    </div>
+
+                    <q-separator></q-separator>
+                    <div class="subsection-title">
+                      Feature positioning within family
                     </div>
                     <div class="row">
                       <div class="col-12 col-md-4">
-                        <div class="subsection-title-center">Molecular weight<q-tooltip max-width="30rem">{{ featuresHelpMessages.MW }}</q-tooltip></div>
+                        <div class="subsubsection-title-center">Molecular weight<q-tooltip max-width="30rem">{{ featuresHelpMessages.MW }}</q-tooltip></div>
                         <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.molecular_weight)"
                                 :layout="familyFeatureGraphLayout(amp.molecular_weight)"/>
                       </div>
                       <div class="col-12 col-md-4">
-                        <div class="subsection-title-center">Aromaticity<q-tooltip max-width="30rem">{{ featuresHelpMessages.Aromaticity }}</q-tooltip></div>
+                        <div class="subsubsection-title-center">Aromaticity<q-tooltip max-width="30rem">{{ featuresHelpMessages.Aromaticity }}</q-tooltip></div>
                         <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.aromaticity)"
                                 :layout="familyFeatureGraphLayout(amp.aromaticity)" />
                       </div>
                       <div  class="col-12 col-md-4">
-                        <div class="subsection-title-center">GRAVY<q-tooltip max-width="30rem">{{ featuresHelpMessages.GRAVY }}</q-tooltip></div>
+                        <div class="subsubsection-title-center">GRAVY<q-tooltip max-width="30rem">{{ featuresHelpMessages.GRAVY }}</q-tooltip></div>
                         <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.gravy)"
                                 :layout="familyFeatureGraphLayout(amp.gravy)" />
                       </div>
                     </div>
                     <div class="row">
                       <div class="col-12 col-md-4">
-                        <div class="subsection-title-center">Instability index<q-tooltip max-width="30rem">{{ featuresHelpMessages.Instability_index }}</q-tooltip></div>
+                        <div class="subsubsection-title-center">Instability index<q-tooltip max-width="30rem">{{ featuresHelpMessages.Instability_index }}</q-tooltip></div>
                         <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.instability_index)"
                                 :layout="familyFeatureGraphLayout(amp.instability_index)" />
                       </div>
                       <div class="col-12 col-md-4">
-                        <div class="subsection-title-center">Isoelectric point<q-tooltip max-width="30rem">{{ featuresHelpMessages.pI }}</q-tooltip></div>
+                        <div class="subsubsection-title-center">Isoelectric point<q-tooltip max-width="30rem">{{ featuresHelpMessages.pI }}</q-tooltip></div>
                         <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.isoelectric_point)"
                                 :layout="familyFeatureGraphLayout(amp.isoelectric_point)" />
                       </div>
                       <div class="col-12 col-md-4">
-                        <div class="subsection-title-center">Charge at pH 7.0<q-tooltip max-width="30rem">{{ featuresHelpMessages.Charge_at_pH_7 }}</q-tooltip></div>
+                        <div class="subsubsection-title-center">Charge at pH 7.0<q-tooltip max-width="30rem">{{ featuresHelpMessages.Charge_at_pH_7 }}</q-tooltip></div>
                         <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.charge_at_pH_7)"
                                 :layout="familyFeatureGraphLayout(amp.charge_at_pH_7)" />
                       </div>
+                      <div class="info-item-value">
+                        The features were calculated by using the
+                        <a href="https://biopython.org/docs/1.79/api/Bio.SeqUtils.ProtParam.html">
+                          Bio.SeqUtils.ProtParam.ProteinAnalysis</a> module from<a href="https://doi.org/10.1093/bioinformatics/btp163">
+                          BioPython
+                        </a> (version 1.79).
+                      </div>
                     </div>
-  <!--                  TODO update this later, remove this for a while-->
-  <!--                  <el-divider></el-divider>-->
-  <!--                  <el-row>-->
-  <!--                    <br>-->
-  <!--                      <div styles="alignment: center; text-align: center">-->
-  <!--                          <Plotly :data="featureGraphData()"-->
-  <!--                                  :layout="featureGraphLayout()"-->
-  <!--                                  :toImageButtonOptions="{format: 'svg', scale: 1}"/>-->
-  <!--                      </div>-->
-  <!--                        <div>-->
-  <!--                          <span class="caption-bold">EZenergy.</span> Profile of {{ accession }} residues free energy of transfer from water to membrane lipid.-->
-  <!--                        </div>-->
-  <!--                        <div>-->
-  <!--                          <span class="caption-bold">Flexibility.</span> Profile of flexibility of {{ accession }}. The normalized flexibility parameters (B-values) from <el-link href="https://onlinelibrary.wiley.com/doi/10.1002/prot.340190207" type="primary">Vihinen (1994)</el-link> was the scale adopted in the profile calculation.-->
-  <!--                        </div>-->
-  <!--                        <div>-->
-  <!--                          <span class="caption-bold">Hydrophobicity Parker.</span> Profile of hydrophobicity of residues of {{ accession }} using the relative scale of Parker.-->
-  <!--                        </div>-->
-  <!--                        <div>-->
-  <!--                          <span class="caption-bold">Surface accessibility.</span> Profile of solvent accessibility of residues of {{ accession }}.-->
-  <!--                        </div>-->
-  <!--                    <br/>-->
-  <!--                  </el-row>-->
                   </div>
                 </div>
               </q-tab-panel>
@@ -252,18 +210,100 @@
   line-height: 200px;
   margin: 0;
 }
+
+.jumbotron {
+          padding-top: 10px;
+          padding-bottom: 10px;
+          text-align: center;
+}
+#labelleft, #labelright {
+      dominant-baseline: hanging;
+      font-size: 10px;
+}
+
+#labelleft {
+  text-anchor: end;
+}
+
+#labelright {
+  text-anchor: start;
+}
+
+rect.overlay {
+  stroke: black;
+}
+
+rect.selection {
+  stroke: none;
+  fill: lightblue;
+  fill-opacity: 0.4;
+}
+
+.social-media-sharers {
+  -ms-flex-positive: 0;
+  flex-grow: 0;
+  -ms-flex-preferred-size: 24px;
+  flex-basis: 24px
+}
+
+.social-media-sharer, .social-media-sharer__icon {
+  display: inline-block
+}
+
+.social-media-sharer {
+  background-color: #212121;
+  border-radius: 3px;
+  color: #fff;
+  margin: 0 8px;
+  height: 24px;
+  padding: 2px 0;
+  text-decoration: none;
+  transition: 25ms ease-out;
+  width: 24px
+}
+
+.content-header--image .social-media-sharer {
+  background-color: transparent;
+  border: 1px solid #fff;
+  padding: 1px 0
+}
+
+.content-header:not(.content-header--image) .social-media-sharer:hover,
+.content-header:not(.content-header--image) .social-media-sharer:active {
+  background-color: #0288d1
+}
+
+.social-media-sharer__icon svg {
+  width: 16px;
+  height: 16px;
+  margin-right: 7px;
+  vertical-align: top
+}
+
+.social-media-sharer__icon_wrapper--small svg {
+  margin: 0;
+  vertical-align: middle
+}
+
+.social-media-sharer__icon--solid {
+  fill: #fff;
+  stroke: none
+}
 </style>
 
 <script>
 import Plotly from "../components/Plotly"
 import * as clipboard from "clipboard-polyfill/text"
 import { Notify } from "quasar"
+import HelicalWheel from '@/components/HelicalWheel'
+// import drawHelicalWheel from "../components/helical-wheel-vis";
 
 
 export default {
   name: 'AMP_card',
   components: {
     Plotly,
+    HelicalWheel
   },
   data() {
     const default_distribution = {
@@ -272,21 +312,6 @@ export default {
       microbial_source: {type: "bar plot", labels: [], values: []}
     }
     return {
-      // echartOption: {
-      //   xAxis: {
-      //     type: 'category',
-      //     data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-      //   },
-      //   yAxis: {
-      //     type: 'value'
-      //   },
-      //   series: [
-      //     {
-      //       data: [150, 230, 224, 218, 135, 147, 260],
-      //       type: 'line'
-      //     }
-      //   ]
-      // },
       tabName: 'overview',
       amp: {
         accession: this.$route.query.accession,
@@ -353,6 +378,7 @@ export default {
   },
   mounted() {
     this.setMetadataPageSize(5)
+    // drawHelicalWheel(this.amp.accession)
   },
   computed: {
     currentMetadata() {
@@ -367,6 +393,7 @@ export default {
           .then(function (response) {
             console.log(response.data)
             self.amp = response.data
+            self.amp.charge_at_pH_7 = response.data.charge
             self.amp.helicalwheel = 'https://ampsphere-api.big-data-biology.org/v1/amps/' + self.amp.accession +  '/helicalwheel'
             self.amp.metadata.info.totalRow = response.data.metadata.info.totalItem
             self.getFamilyFeatures()
@@ -455,23 +482,24 @@ export default {
       let data = this.distribution.geo
       return [{
         type: 'scattergeo',
-        //locationmode: 'USA-states',
+        mode: 'markers',
         lat: data.lat,
         lon: data.lon,
         marker: {
-          // size: data.size,
-          // sizeref: 10,
-          // // color: this.MapColors(data.colors, this.ColorPalette('quanlitative')),
-        size: 10,
-        sizeref: 10,
-        color: data.size,
-        colorscale: 'Greens',
-        colorbar: {
-            title: '# smORF genes',
-        },
+          symbol: 'circle',
+          size: 10,
+          sizeref: 10,
+          color: data.size,
+          cmax: 1000,
+          cmin: 0,
+          colorscale: 'Greens',
+          reversescale: true,
+          colorbar: {
+              title: '# smORF genes',
+          },
           line: {
-            color: 'black',
-            size: 2
+            color: 'rgb(0, 0, 0)',
+            width: 1
           }
         },
       }]
@@ -636,12 +664,12 @@ export default {
         {
           type: 'violin',
           y: data,
-          points: 'none',
+          points: 'all',
           box: {
             visible: true
           },
           hoverinfo: 'y',
-          boxpoints: 'none',
+          // boxpoints: 'all',
           line: {
             color: 'black'
           },
@@ -656,13 +684,14 @@ export default {
       ]
     },
     familyFeatureGraphLayout(value) {
+      // console.log(value)
       return {
         // title: name,
         autosize: true,
         margin: {l: 50, r: 20, b: 20, t: 20},
         annotations: [{
           x: 0,
-          xanchor: 'right',
+          xanchor: 'left',
           y: value,
           yanchor: 'bottom',
           text: this.amp.accession,
@@ -673,8 +702,8 @@ export default {
             size: 14,
             color: 'red'
           },
-          align: 'left',
-          ax: -40,
+          align: 'right',
+          ax: 40,
           ay: 0,
         }],
         // shapes: [

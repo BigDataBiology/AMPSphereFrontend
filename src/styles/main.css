@@ -19,11 +19,11 @@
     text-align: left;
     margin-top: 16px;
 }
-.subsection-title-center {
-    font-size: 1.5rem;
-    font-weight: 400;
+.subsubsection-title-center {
+    font-size: 1.25rem;
+    font-weight: 500;
     line-height: 2rem;
-    letter-spacing: normal;
+    letter-spacing: 0.0125em;
     text-align: center;
     margin-top: 16px;
 }
