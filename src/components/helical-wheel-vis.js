@@ -19,7 +19,7 @@ function drawHelicalWheel(amp_seq){
                 options: [
                   { label: "Alpha Helix: 100", value: 100 },
                   { label: "Pi-Helix: 87", value: 87 },
-                  { label: "3-10 Helix: 120", value: 120 },
+                  // { label: "3-10 Helix: 120", value: 120 },
                 ],
                 value: startingAngle,
               });
