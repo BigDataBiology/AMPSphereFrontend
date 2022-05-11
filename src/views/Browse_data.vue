@@ -9,7 +9,7 @@
               <div class="row q-px-xs q-py-xs filter-subsection-title">Filter by quality</div>
               <div class="row q-px-md q-py-xs">
                 <q-select filled v-model="options.exp_evidence" label="Evidence" @update:model-value="onExpEvidenceChange"
-                          :options="['Yes', 'No']" hint="transcription/translation" @clear="onExpEvidenceClear"
+                          :options="['Passed', 'Failed']" hint="transcription/translation" @clear="onExpEvidenceClear"
                           style="width: 250px" behavior="menu" align="center" clearable/>
               </div>
               <div class="row q-px-xs q-py-xs filter-toggle-label">
@@ -19,17 +19,17 @@
                 <div v-show="qualitySpecFiltersVisible">
                   <div class="row q-px-md q-py-xs">
                     <q-select filled v-model="options.antifam" label="Antifam" @update:model-value="onAntifamChange"
-                          :options="['Yes', 'No']" @clear="onAntifamClear"
+                          :options="['Passed', 'Failed']" @clear="onAntifamClear"
                           style="width: 250px" behavior="menu" align="center" clearable/>
                   </div>
                   <div class="row q-px-md q-py-xs">
                     <q-select filled v-model="options.RNAcode" label="RNAcode" @update:model-value="onRNAcodeChange"
-                          :options="['Yes', 'No']" @clear="onRNAcodeClear"
+                          :options="['Passed', 'Failed']" @clear="onRNAcodeClear"
                           style="width: 250px" behavior="menu" align="center" clearable/>
                   </div>
                   <div class="row q-px-md q-py-xs">
                     <q-select filled v-model="options.coordinates" label="terminal placement" @update:model-value="onCoordinatesChange"
-                          :options="['Yes', 'No']" @clear="onCoordinatesClear"
+                          :options="['Passed', 'Failed']" @clear="onCoordinatesClear"
                           style="width: 250px" behavior="menu" align="center" clearable/>
                   </div>
                 </div>
@@ -37,13 +37,13 @@
               <div class="row q-px-xs q-py-xs filter-subsection-title">Filter by metadata</div>
               <div class="row q-px-md q-py-xs">
                 <q-select filled v-model="options.habitat" label="Habitat" @update:model-value="onHabitatChange"
-                          :options="availableOptions.habitat" @filter="filterHabitat" @clear="onHabitatChange"
+                          :options="availableOptions.habitat" @filter="filterHabitat" @clear="onHabitatClear"
                           input-debounce="0" use-input fill-input hide-selected style="width: 250px"
                           behavior="menu" align="center" clearable/>
               </div>
               <div class="row q-px-md">
                 <q-select filled v-model="options.microbial_source" label="Microbial source"
-                          @update:model-value="onMicrobialSourceChange" @clear="onMicrobialSourceChange"
+                          @update:model-value="onMicrobialSourceChange" @clear="onMicrobialSourceClear"
                           :options="availableOptions.microbial_source" @filter="filterMicrobialSource"
                           style="width: 250px"
                           input-debounce="0" use-input fill-input hide-selected hint="GTDB taxonomy name"
@@ -109,7 +109,7 @@
 
           <div class="col-12 col-md-9 q-py-sm q-px-lg">
             <div class="row">
-              <div class="col-6 main-text">Displaying: {{ info.pageSize }} out of {{ info.totalRow }} results.</div>
+              <div class="col-6 main-text">Displaying: <span v-if="info.totalRow >= info.pageSize">{{info.pageSize}}</span> <span v-else>{{info.totalRow}}</span> out of {{ info.totalRow }} results.</div>
               <div class="col-6" style="padding-right: 10rem;">
                 <el-button @click="downloadSearchResults" type="primary" class="download-btn">
                   <BootstrapIcon icon="cloud-download" variant="light" size="1x" />
@@ -135,9 +135,7 @@
               </el-table-column>
               <el-table-column label="# smORF genes" width="120%">
                 <template #default="props">
-                  <!--                <el-tooltip class="item" effect="dark" content="Associated number of small ORF genes." placement="right">-->
-                  <span>{{ props.row.metadata.info.totalItem }}</span>
-                  <!--                </el-tooltip>-->
+                  <span>{{ props.row.num_genes }}</span>
                 </template>
               </el-table-column>
               <el-table-column label="Quality" width="150%">
@@ -271,7 +269,13 @@ export default {
       this.axios.get('/amps', config)
           .then(function (response) {
             console.log(response.data.data)
-            self.amps = self.initQualityTag(response.data.data)
+            self.amps = response.data.data
+            for(let amp of self.amps){
+              amp.num_genes = amp.metadata.info.totalItem
+              delete amp.metadata
+              delete amp.feature_graph_points
+              delete amp.secondary_structure
+            }
             self.info.totalPage = response.data.info.totalPage
             self.info.totalRow = response.data.info.totalItem
           })
@@ -383,14 +387,18 @@ export default {
       this.setAMPsPage(1)
       // this.grayOutOptions()
     },
-    // onSampleChange(option) {
-    //   this.options.sample = option;
-    //   this.setAMPsPage(1)
-    // },
     onMicrobialSourceChange(option) {
       this.options.microbial_source = option;
       this.setAMPsPage(1)
       // this.grayOutOptions()
+    },
+    onHabitatClear(){
+      this.options.habitat = ''
+      this.onHabitatChange(this.options.habitat)
+    },
+    onMicrobialSourceClear(){
+      this.options.microbial_source = ''
+      this.onMicrobialSourceChange(this.options.microbial_source)
     },
     onPepLengthChange(value) {
       // this.options.pep_length = {min: 0, max: 100}
@@ -428,12 +436,6 @@ export default {
     //     }
     //   }
     // },
-    initQualityTag(amps) {
-      for (let i = 0; i < amps.length; i++) {
-        Object.assign(amps[i], {quality_tag: {msg: 'Not available', level: 'warning'}})
-      }
-      return amps
-    },
     transQualityOptions(quality_level){
       const quality_level_mapping = {
         'Passed': 'gold',
