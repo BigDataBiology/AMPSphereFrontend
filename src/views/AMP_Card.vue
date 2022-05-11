@@ -106,7 +106,17 @@
                       </el-table-column>
                       <el-table-column prop="sample" label="Sample/Genome" sortable width="150%"/>
                       <el-table-column prop="general_envo_name" label="Habitat" sortable width="150%"/>
-                      <el-table-column prop="microbial_source_s" label="microbial source" sortable width="150%"/>
+                      <el-table-column label="Microbial source" sortable width="150%">
+                        <template #default="props">
+                          <div v-if="props.row.microbial_source_s">{{ props.row.microbial_source_s }}</div>
+                          <div v-else-if="props.row.microbial_source_g">{{ props.row.microbial_source_g }}</div>
+                          <div v-else-if="props.row.microbial_source_f">{{ props.row.microbial_source_f }}</div>
+                          <div v-else-if="props.row.microbial_source_o">{{ props.row.microbial_source_o }}</div>
+                          <div v-else-if="props.row.microbial_source_c">{{ props.row.microbial_source_c }}</div>
+                          <div v-else-if="props.row.microbial_source_p">{{ props.row.microbial_source_p }}</div>
+                          <div v-else-if="props.row.microbial_source_d">{{ props.row.microbial_source_d }}</div>
+                        </template>
+                      </el-table-column>
                     </el-table>
                     <div class="block">
                       <el-pagination
@@ -133,7 +143,6 @@
                         <HelicalWheel :amp_seq="amp.sequence"></HelicalWheel>
                       </div>
                     </div>
-
                     <q-separator></q-separator>
                     <div class="subsection-title">
                       Feature positioning within family
@@ -141,34 +150,34 @@
                     <div class="row">
                       <div class="col-12 col-md-4">
                         <div class="subsubsection-title-center">Molecular weight<q-tooltip max-width="30rem">{{ featuresHelpMessages.MW }}</q-tooltip></div>
-                        <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.molecular_weight)"
+                        <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.molecular_weight, 'rgba(93, 164, 214, 0.5)')"
                                 :layout="familyFeatureGraphLayout(amp.molecular_weight)"/>
                       </div>
                       <div class="col-12 col-md-4">
                         <div class="subsubsection-title-center">Aromaticity<q-tooltip max-width="30rem">{{ featuresHelpMessages.Aromaticity }}</q-tooltip></div>
-                        <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.aromaticity)"
+                        <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.aromaticity, 'rgba(255, 144, 14, 0.5)')"
                                 :layout="familyFeatureGraphLayout(amp.aromaticity)" />
                       </div>
                       <div  class="col-12 col-md-4">
                         <div class="subsubsection-title-center">GRAVY<q-tooltip max-width="30rem">{{ featuresHelpMessages.GRAVY }}</q-tooltip></div>
-                        <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.gravy)"
+                        <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.gravy, 'rgba(44, 160, 101, 0.5)')"
                                 :layout="familyFeatureGraphLayout(amp.gravy)" />
                       </div>
                     </div>
                     <div class="row">
                       <div class="col-12 col-md-4">
                         <div class="subsubsection-title-center">Instability index<q-tooltip max-width="30rem">{{ featuresHelpMessages.Instability_index }}</q-tooltip></div>
-                        <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.instability_index)"
+                        <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.instability_index, 'rgba(255, 65, 54, 0.5)')"
                                 :layout="familyFeatureGraphLayout(amp.instability_index)" />
                       </div>
                       <div class="col-12 col-md-4">
                         <div class="subsubsection-title-center">Isoelectric point<q-tooltip max-width="30rem">{{ featuresHelpMessages.pI }}</q-tooltip></div>
-                        <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.isoelectric_point)"
+                        <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.isoelectric_point, 'rgba(207, 114, 255, 0.5)')"
                                 :layout="familyFeatureGraphLayout(amp.isoelectric_point)" />
                       </div>
                       <div class="col-12 col-md-4">
                         <div class="subsubsection-title-center">Charge at pH 7.0<q-tooltip max-width="30rem">{{ featuresHelpMessages.Charge_at_pH_7 }}</q-tooltip></div>
-                        <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.charge_at_pH_7)"
+                        <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.charge_at_pH_7, 'rgba(127, 96, 0, 0.5)')"
                                 :layout="familyFeatureGraphLayout(amp.charge_at_pH_7)" />
                       </div>
                       <div class="info-item-value">
@@ -296,7 +305,6 @@ import Plotly from "../components/Plotly"
 import * as clipboard from "clipboard-polyfill/text"
 import { Notify } from "quasar"
 import HelicalWheel from '@/components/HelicalWheel'
-// import drawHelicalWheel from "../components/helical-wheel-vis";
 
 
 export default {
@@ -340,7 +348,6 @@ export default {
           },
           data: [],
         },
-        helicalwheel: '',
         quality: {
           Antifam: "yellow",
           RNAcode: "yellow",
@@ -378,7 +385,6 @@ export default {
   },
   mounted() {
     this.setMetadataPageSize(5)
-    // drawHelicalWheel(this.amp.accession)
   },
   computed: {
     currentMetadata() {
@@ -394,7 +400,6 @@ export default {
             console.log(response.data)
             self.amp = response.data
             self.amp.charge_at_pH_7 = response.data.charge
-            self.amp.helicalwheel = 'https://ampsphere-api.big-data-biology.org/v1/amps/' + self.amp.accession +  '/helicalwheel'
             self.amp.metadata.info.totalRow = response.data.metadata.info.totalItem
             self.getFamilyFeatures()
           })
@@ -454,8 +459,6 @@ export default {
       }
     },
     setMetadataPage(page) {
-      // this.$message('setting to ' + page + 'th page')
-      // Important: page index starting from zero.
       this.amp.metadata.info.currentPage = page - 1
       console.log(this.amp.metadata.info.currentPage)
       let config = {
@@ -652,14 +655,10 @@ export default {
             self.famFeaturesGraphData.aromaticity.push(amp_features.Aromaticity)
             self.famFeaturesGraphData.charge_at_pH_7.push(amp_features.Charge_at_pH_7)
             self.famFeaturesGraphData.isoelectric_point.push(amp_features.Isoelectric_point)
-            // self.famFeaturesGraphData.Secondary_structure.helix.push(amp_features.Secondary_structure.helix)
-            // self.famFeaturesGraphData.Secondary_structure.turn.push(amp_features.SecStructureBarData.turn)
-            // self.famFeaturesGraphData.Secondary_structure.sheet.push(amp_features.Secondary_structure.sheet)
           }
       )
     },
-    makeFamilyFeatureTraces(data) {
-      // console.log(data)
+    makeFamilyFeatureTraces(data, color) {
       return [
         {
           type: 'violin',
@@ -673,7 +672,7 @@ export default {
           line: {
             color: 'black'
           },
-          fillcolor: '#8dd3c7',
+          fillcolor: color,
           opacity: 0.6,
           meanline: {
             visible: true
