@@ -137,29 +137,29 @@
                       </div>
                       <div class="row">
                         <div class="col-12 col-md-4">
-                          <div class="subsection-title-center">Molecular weight<q-tooltip max-width="30rem">{{ featuresHelpMessages.MW }}</q-tooltip></div>
+                          <div class="subsubsection-title-center">Molecular weight<q-tooltip max-width="30rem">{{ featuresHelpMessages.MW }}</q-tooltip></div>
                           <Plotly :data="featuresGraphData.MW" :layout="featuresBoxplotLayout()" />
                         </div>
                         <div class="col-12 col-md-4">
-                          <div class="subsection-title-center">Aromaticity<q-tooltip max-width="30rem">{{ featuresHelpMessages.Aromaticity }}</q-tooltip></div>
+                          <div class="subsubsection-title-center">Aromaticity<q-tooltip max-width="30rem">{{ featuresHelpMessages.Aromaticity }}</q-tooltip></div>
                           <Plotly :data="featuresGraphData.Aromaticity" :layout="featuresBoxplotLayout()" />
                         </div>
                         <div class="col-12 col-md-4">
-                          <div class="subsection-title-center">GRAVY<q-tooltip max-width="30rem">{{ featuresHelpMessages.GRAVY }}</q-tooltip></div>
+                          <div class="subsubsection-title-center">GRAVY<q-tooltip max-width="30rem">{{ featuresHelpMessages.GRAVY }}</q-tooltip></div>
                           <Plotly :data="featuresGraphData.GRAVY" :layout="featuresBoxplotLayout()" />
                         </div>
                       </div>
                       <div class="row">
                         <div class="col-12 col-md-4">
-                          <div class="subsection-title-center">Instability index<q-tooltip max-width="30rem">{{ featuresHelpMessages.Instability_index }}</q-tooltip></div>
+                          <div class="subsubsection-title-center">Instability index<q-tooltip max-width="30rem">{{ featuresHelpMessages.Instability_index }}</q-tooltip></div>
                           <Plotly :data="featuresGraphData.Instability_index" :layout="featuresBoxplotLayout()" />
                         </div>
                         <div class="col-12 col-md-4">
-                          <div class="subsection-title-center">Isoelectric point<q-tooltip max-width="30rem">{{ featuresHelpMessages.pI }}</q-tooltip></div>
+                          <div class="subsubsection-title-center">Isoelectric point<q-tooltip max-width="30rem">{{ featuresHelpMessages.pI }}</q-tooltip></div>
                           <Plotly :data="featuresGraphData.Isoelectric_point" :layout="featuresBoxplotLayout()" />
                         </div>
                         <div class="col-12 col-md-4">
-                          <div class="subsection-title-center">Charge at pH 7.0<q-tooltip max-width="30rem">{{ featuresHelpMessages.Charge_at_pH_7 }}</q-tooltip></div>
+                          <div class="subsubsection-title-center">Charge at pH 7.0<q-tooltip max-width="30rem">{{ featuresHelpMessages.Charge_at_pH_7 }}</q-tooltip></div>
                           <Plotly :data="featuresGraphData.Charge_at_pH_7" :layout="featuresBoxplotLayout()" />
                         </div>
                       </div>
@@ -186,7 +186,7 @@
                         </el-table>
                       </div>
                       <div class="row" v-else>
-                        <p>There is no file generated for {{ accession }}, as it has too few (less than 8) AMPs.</p>
+                        <p>We only provide sequences (in fasta format) for SPHEREs with number of AMPs less than 8. Click <q-btn @click="downloadSeqs" flat label="here" color="primary"></q-btn> to download.</p>
                       </div>
                     </div>
                   </div>
@@ -606,29 +606,6 @@ export default {
     featureGraphLayout(){
       return {
         height: 400, margin: {l: 100, r: 100, b: 80, t: 40},
-        // xaxis: {
-        //   title: {
-        //     text: 'Window start position'
-        //   },
-        //   showticklabels: true,
-        //   tickfont: {
-        //     // family: 'Old Standard TT, serif',
-        //     size: 10,
-        //     tickangle: 90,
-        //     color: ['green', 'red', 'blue']//this.features.graph_points.surface_accessibility.c
-        //   },
-        //   // label: {
-        //   //   font: {
-        //   //     size: 10,
-        //   //     color: this.features.graph_points.surface_accessibility.c
-        //   //   }
-        //   // }
-        // },
-        // yaxis: {
-        //   title: {
-        //     text: 'Selected feature'
-        //   }
-        // },
         updatemenus: [
           {
             direction: 'left', type: 'buttons', pad: {r: 10, t: 10},
@@ -690,17 +667,8 @@ export default {
           Instability_index = [],
           Isoelectric_point = [],
           Charge_at_pH_7 = []
-      // console.log(MW)
-      // let Molar_extinction = {
-      //   cysteines_reduced: [],
-      //   cystines_residues: []
-      // }
       for (const amp_features of Object.values(this.features)){
         MW.push(amp_features.MW)
-        // console.log(Molar_extinction)
-        // console.log(Molar_extinction.cystines_residues)
-        // Molar_extinction.cystines_residues.push(amp_features.Molar_extinction.cystines_residues)
-        // Molar_extinction.cysteines_reduced.push(amp_features.Molar_extinction.cysteines_reduced)
         Aromaticity.push(amp_features.Aromaticity)
         GRAVY.push(amp_features.GRAVY)
         Instability_index.push(amp_features.Instability_index)
@@ -709,13 +677,11 @@ export default {
       }
       return {
         MW: [this.makefeaturesBoxplotTrace(MW, colors[0])],
-        // this.makeTrace(Molar_extinction.cysteines_reduced, "Molar extinction (cysteines_reduced)", colors[2]),
-        // this.makeTrace(Molar_extinction.cystines_residues, "Molar extinction (cystines residues)", colors[3]),
-        Aromaticity: [this.makefeaturesBoxplotTrace(Aromaticity, colors[4])],
-        GRAVY: [this.makefeaturesBoxplotTrace(GRAVY, colors[5])],
-        Instability_index: [this.makefeaturesBoxplotTrace(Instability_index, colors[6])],
-        Isoelectric_point: [this.makefeaturesBoxplotTrace(Isoelectric_point, colors[7])],
-        Charge_at_pH_7: [this.makefeaturesBoxplotTrace(Charge_at_pH_7, colors[8])],
+        Aromaticity: [this.makefeaturesBoxplotTrace(Aromaticity, colors[1])],
+        GRAVY: [this.makefeaturesBoxplotTrace(GRAVY, colors[2])],
+        Instability_index: [this.makefeaturesBoxplotTrace(Instability_index, colors[3])],
+        Isoelectric_point: [this.makefeaturesBoxplotTrace(Isoelectric_point, colors[4])],
+        Charge_at_pH_7: [this.makefeaturesBoxplotTrace(Charge_at_pH_7, colors[5])],
       }
     },
     featuresBoxplotLayout(){
@@ -748,21 +714,6 @@ export default {
         name: ''
         // x0: ''
       }
-      // return {
-      //   name: '',
-      //   type: 'violin',
-      //   y: data,
-      //   hoverinfo: 'y',
-      //   // xaxis:{
-      //   //   ticks: '',
-      //   // },
-      //   // boxpoints: 'none',
-      //   // jitter: 0.5,
-      //   // whiskerwidth: 0.2,
-      //   // fillcolor: 'cls',
-      //   marker: {size: 2, color: color},
-      //   line: {width: 1}
-      // };
     },
     makeBadgeURL(name, test_result) {
       const color_mapping = {
@@ -898,6 +849,32 @@ export default {
     },
     descStyle(){
       return 'download-desc'
+    },
+    async downloadSeqs() {
+      let config = {
+        params: {
+          family: this.accession,
+          page_size: this.num_amps,
+          page: 0,
+        }
+      }
+      let self = this
+      this.axios.get('/amps/', config)
+        .then(function (response) {
+        // console.log(response.data.data)
+        let amps = response.data.data
+        let fasta = ''
+        for (let amp of amps){
+          // console.log(amp)
+          fasta = fasta + '>' + amp.accession + '\n' + amp.sequence + '\n'
+        }
+        // console.log(fasta)
+        const blob = new Blob([fasta], {type: "text/plain;charset=utf-8"});
+        saveAs(blob, self.accession + ".faa");
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
     },
   }
 }
