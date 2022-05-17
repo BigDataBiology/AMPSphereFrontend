@@ -80,6 +80,7 @@
                     <div class="subsubsection-title text-center">Habitats</div>
                     <div v-if="distribution.habitat.labels.length !== 0">
                       <Plotly :data="EnvPlotData()" :layout="EnvPlotLayout()" :toImageButtonOptions="{format: 'svg', scale: 1}"/>
+                      <p class="text-center">Some environment names may be hidden due to space limit. <br>Use your curser to zoom in and browse.</p>
                     </div>
                     <div v-else style="height:500px; display: -webkit-flex; display: flex; align-items: center; " class="text-center q-px-md">
                       <p>Empty, all associated smORF genes were from Progenomes2 genomes (no habitat information).</p>
@@ -89,12 +90,15 @@
                     <div class="subsubsection-title text-center">Microbial sources</div>
                     <div>
                       <Plotly :data="MicrobialSourcePlotData()" :layout="MicrobialSourcePlotLayout()" :toImageButtonOptions="{format: 'svg', scale: 1}"/>
+                      <p class="text-center">Others *: Unknown microbial sources <b>at species level</b>.</p>
+
                     </div>
                   </div>
                 </div>
                 <q-separator></q-separator>
                 <div class="row">
                   <div class="col-12 q-px-md q-pt-md">
+                    <!-- TODO downloading button -->
                     <div class="subsection-title">Relationships</div>
 <!--                    TODO add download button here -->
                     <el-table :data="currentMetadata" stripe :default-sort="{prop: 'GMSC', order: 'ascending'}" width="100%">
@@ -548,7 +552,7 @@ export default {
     },
     EnvPlotLayout() {
       return {
-        margin: {l: 200, r: 50, b: 80, t: 20}, autosize: false, height: 500,
+        margin: {l: 200, r: 50, b: 80, t: 20}, autosize: false, height: 450,
         xaxis: {
           type: 'log', autorange: true,
           title: {
@@ -576,7 +580,7 @@ export default {
     },
     MicrobialSourcePlotLayout(){
       return {
-        margin: {l: 200, r: 50, b: 80, t: 20}, autosize: false, height: 500,
+        margin: {l: 200, r: 50, b: 80, t: 20}, autosize: false, height: 450,
         xaxis: {
           type: 'log', autorange: true,
           title: {
