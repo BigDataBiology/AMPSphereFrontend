@@ -98,9 +98,12 @@
                 <q-separator></q-separator>
                 <div class="row">
                   <div class="col-12 q-px-md q-pt-md">
-                    <!-- TODO downloading button -->
                     <div class="subsection-title">Relationships</div>
 <!--                    TODO add download button here -->
+                    <el-button @click="DownloadRelationships" type="primary" class="download-btn">
+                      <BootstrapIcon icon="cloud-download" variant="light" size="1x" />
+                    Download as CSV
+                    </el-button>
                     <el-table :data="currentMetadata" stripe :default-sort="{prop: 'GMSC', order: 'ascending'}" width="100%">
                       <el-table-column prop="GMSC_accession" label="Gene" sortable width="260%"/>
                       <el-table-column label="Gene sequense" sortable width="400%">
@@ -901,12 +904,14 @@ export default {
     },
     downloadCurrPage() {
       print()
+    },
+    async DownloadRelationships(){
+      const ObjectsToCsv = require('objects-to-csv');
+      const data = new ObjectsToCsv(this.currentMetadata);
+      const str = await data.toString()
+      const blob = new Blob([str], {type: "text/plain;charset=utf-8"});
+      saveAs(blob, "Relationships.csv");
     }
   }
 }
-// window.addEventListener("DOMContentLoaded", function () {
-//   const button = document.body.appendChild(document.createElement("button"));
-//   button.textContent = "Copy";
-//   button.addEventListener("click", this.CopyPeptideSequence);
-// });
 </script>
