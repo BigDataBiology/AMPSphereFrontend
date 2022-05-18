@@ -140,10 +140,16 @@
               </el-table-column>
               <el-table-column label="Quality" width="150%">
                 <template #default="props">
-                  <q-img :src="makeBadgeURL('transcription/translation', hasEvidence(props.row))" height="70%" fit="scale-down"></q-img>
+                  <div class="text-left text-bold">
+                    <font :color="hasEvidence(props.row) === 'Passed'?'green':'red'">E<q-tooltip max-width="30rem">Has experimental evidence ({{ hasEvidence(props.row) }})</q-tooltip></font> -
+                    <font :color="props.row.RNAcode === 'Passed'?'green':'red'">R<q-tooltip max-width="30rem">RNAcode ({{ props.row.RNAcode }})</q-tooltip></font> -
+                    <font :color="props.row.Antifam === 'Passed'?'green':'red'">A<q-tooltip max-width="30rem">Antifam ({{ props.row.Antifam }})</q-tooltip></font> -
+                    <font :color="props.row.coordinates === 'Passed'?'green':'red'">T<q-tooltip max-width="30rem">Terminal placement ({{ props.row.coordinates }})</q-tooltip></font>
+                  </div>
+                  <!-- <q-img :src="makeBadgeURL('transcription/translation', hasEvidence(props.row))" height="70%" fit="scale-down"></q-img>
                   <q-img :src="makeBadgeURL('RNAcode', props.row.RNAcode)" height="70%" fit="scale-down"></q-img>
                   <q-img :src="makeBadgeURL('Antifam', props.row.Antifam)" height="70%" fit="scale-down"></q-img>
-                  <q-img :src="makeBadgeURL('terminal placement', props.row.coordinates)" height="70%" fit="scale-down"></q-img>
+                  <q-img :src="makeBadgeURL('terminal placement', props.row.coordinates)" height="70%" fit="scale-down"></q-img> -->
                 </template>
               </el-table-column>
             </el-table>
@@ -175,7 +181,6 @@ export default {
 
   data() {
     const options_full = {
-
       quality: [],
       habitat: [],
       microbial_source: [],
