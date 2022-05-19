@@ -3,46 +3,37 @@
     <div class="row justify-center">
       <div class="col-xs-0 col-xl-2 bg-white"></div>
       <div class="col-12 col-xl-8 justify-center q-pr-md q-ma-auto">
-        <div class="row">
-          <div class="col-12">
-            <div class="row q-pa-md">
-              <div class="col-12 text-h4">
-                Antimicrobial peptide: {{ amp.accession }}
-              </div>
-              <div class="col-2">
-                  <span class="text-bold">Quality:</span>
-              </div>
-              <div class="col-10" style="display: inline-flex; height: 100%; width: 100%">
-                <img :src="makeQualityBadge('Antifam', amp.Antifam)" fit="scale-down"
-                      alt="Quality badge cannot be shown. Please check your internet connection."
-                      title="Search against Antifam, a database of profile-HMMs created from translations of commonly occurring non-coding RNAs"/> &nbsp; &nbsp;
-                <img :src="makeQualityBadge('coordinates', amp.coordinates)" fit="scale-down"
-                      alt="Quality badge cannot be shown. Please check your internet connection."
-                      title="Mapping genes to their coordinates in the contigs, marking those at 5' terminal as suspicious"/> &nbsp; &nbsp;
-                <img :src="makeQualityBadge('metaproteomes', amp.metaproteomes)" fit="scale-down"
-                      alt="Quality badge cannot be shown. Please check your internet connection."
-                      title="Mapping of exact matches in metaproteomic sets from PRIDE database"/> &nbsp; &nbsp;
-                <img :src="makeQualityBadge('metatranscriptomes', amp.metatranscriptomes)" fit="scale-down"
-                      alt="Quality badge cannot be shown. Please check your internet connection."
-                      title="No info."/> &nbsp; &nbsp;
-                <img :src="makeQualityBadge('RNAcode', amp.RNAcode)" fit="scale-down"
-                      alt="Quality badge cannot be shown. Please check your internet connection."
-                      title="Identification of protein-coding regions with RNAcode in alignments produced with nucleotide sequences from families of at least eight members. RNAcode assesses evolutionary signatures typical for protein genes"/>&nbsp; &nbsp;
-              </div>
-            </div>
-            <div class="text-body1">
-              The AMP belongs to
-              <a :href="getFamilyPageURL()">
-                <span class="text-body1">{{ amp.family }}</span>
-              </a>
-              family and has {{ amp.length }} amino acid residues.
-            </div>
+        <div class="row text-center">
+          <div class="col-12 text-h4">
+            Antimicrobial peptide: {{ amp.accession }}<br/><br/>
+          </div>
+          <div class="col-10 justify-center" style="display: inline-flex; height: 100%; width: 100%">
+            <img :src="makeQualityBadge('Antifam', amp.Antifam)" fit="scale-down"
+                  alt="Quality badge cannot be shown. Please check your internet connection."
+                  title="Search against Antifam, a database of profile-HMMs created from translations of commonly occurring non-coding RNAs"/> &nbsp; &nbsp;
+            <img :src="makeQualityBadge('coordinates', amp.coordinates)" fit="scale-down"
+                  alt="Quality badge cannot be shown. Please check your internet connection."
+                  title="Mapping genes to their coordinates in the contigs, marking those at 5' terminal as suspicious"/> &nbsp; &nbsp;
+            <img :src="makeQualityBadge('metaproteomes', amp.metaproteomes)" fit="scale-down"
+                  alt="Quality badge cannot be shown. Please check your internet connection."
+                  title="Mapping of exact matches in metaproteomic sets from PRIDE database"/> &nbsp; &nbsp;
+            <img :src="makeQualityBadge('metatranscriptomes', amp.metatranscriptomes)" fit="scale-down"
+                  alt="Quality badge cannot be shown. Please check your internet connection."
+                  title="No info."/> &nbsp; &nbsp;
+            <img :src="makeQualityBadge('RNAcode', amp.RNAcode)" fit="scale-down"
+                  alt="Quality badge cannot be shown. Please check your internet connection."
+                  title="Identification of protein-coding regions with RNAcode in alignments produced with nucleotide sequences from families of at least eight members. RNAcode assesses evolutionary signatures typical for protein genes"/>&nbsp; &nbsp;
+          </div>
+          <div class="col-12 text-body1">
+            The AMP belongs to
+            <a :href="getFamilyPageURL()"><span class="text-body1">{{ amp.family }}</span></a>
+            family and has {{ amp.length }} amino acid residues.
           </div>
         </div>
         
         <div class="row bg-white">
           <div class="col-12 q-pa-md">
-            <q-tabs v-model="tabName" dense align="left" class="text-teal text-white">
+            <q-tabs v-model="tabName" dense align="justify" class="bg-grey-3 text-secondary">
               <q-tab name="overview" label="Overview" tabindex="overview" index="overview"/>
               <q-tab name="features" label="Features" tabindex="features" index="features"/>
             </q-tabs>
@@ -75,7 +66,7 @@
                   <div class="col-12 q-px-md q-pt-md">
                     <div class="subsection-title">Distribution</div>
                   </div>
-                  <div class="col-12 col-md-6 q-px-md">
+                  <div class="col-12 col-lg-6 q-px-md">
 <!--                    TODO Bigger title  and figure captions-->
                     <div class="subsubsection-title text-center">Habitats</div>
                     <div v-if="distribution.habitat.labels.length !== 0">
@@ -86,12 +77,11 @@
                       <p>Empty, all associated smORF genes were from Progenomes2 genomes (no habitat information).</p>
                     </div>
                   </div>
-                  <div class="col-12 col-md-6 q-px-md">
+                  <div class="col-12 col-lg-6 q-px-md">
                     <div class="subsubsection-title text-center">Microbial sources</div>
                     <div>
                       <Plotly :data="MicrobialSourcePlotData()" :layout="MicrobialSourcePlotLayout()" :toImageButtonOptions="{format: 'svg', scale: 1}"/>
                       <p class="text-center">Others *: Unknown microbial sources <b>at species level</b>.</p>
-
                     </div>
                   </div>
                 </div>
@@ -111,9 +101,9 @@
                           <pre><code><small>{{ props.row.gene_sequence }}</small></code></pre>
                         </template>
                       </el-table-column>
-                      <el-table-column prop="sample" label="Sample/Genome" sortable width="150%"/>
+                      <el-table-column prop="sample" label="Sample/Genome" sortable width="200%"/>
                       <el-table-column prop="general_envo_name" label="Habitat" sortable width="150%"/>
-                      <el-table-column label="Microbial source" sortable width="150%">
+                      <el-table-column label="Microbial source" sortable width="200%">
                         <template #default="props">
                           <div v-if="props.row.microbial_source_s">{{ props.row.microbial_source_s }}</div>
                           <div v-else-if="props.row.microbial_source_g">{{ props.row.microbial_source_g }}</div>
@@ -151,8 +141,16 @@
                       </div>
                     </div>
                     <q-separator></q-separator>
-                    <div class="subsection-title">
-                      Feature positioning within family
+                    <div class="subsection-title">Feature positioning within family<br/><br/></div>
+                    <div class="main-text">
+                        These features below were calculated by using the
+                        <el-link href="https://biopython.org/docs/1.79/api/Bio.SeqUtils.ProtParam.html" type="primary">
+                          Bio.SeqUtils.ProtParam.ProteinAnalysis
+                        </el-link>
+                        module from
+                        <el-link href="https://doi.org/10.1093/bioinformatics/btp163" type="primary">
+                          BioPython
+                        </el-link> (version 1.79).
                     </div>
                     <div class="row">
                       <div class="col-12 col-md-4">
@@ -516,9 +514,6 @@ export default {
     },
     GeoPlotLayout() {
       return {
-        // title: {
-        //   text: 'Geographical distribution'
-        // },
         height: 400,
         showlegend: false,
         geo: {
