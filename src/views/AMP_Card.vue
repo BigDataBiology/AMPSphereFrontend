@@ -66,7 +66,7 @@
                   <div class="col-12 q-px-md q-pt-md">
                     <div class="subsection-title">Distribution</div>
                   </div>
-                  <div class="col-12 col-lg-6 q-px-md">
+                  <div class="col-12 col-md-6 q-px-md">
 <!--                    TODO Bigger title  and figure captions-->
                     <div class="subsubsection-title text-center">Habitats</div>
                     <div v-if="distribution.habitat.labels.length !== 0">
@@ -77,11 +77,11 @@
                       <p>Empty, all associated smORF genes were from Progenomes2 genomes (no habitat information).</p>
                     </div>
                   </div>
-                  <div class="col-12 col-lg-6 q-px-md">
+                  <div class="col-12 col-md-6 q-px-md">
                     <div class="subsubsection-title text-center">Microbial sources</div>
                     <div>
                       <Plotly :data="MicrobialSourcePlotData()" :layout="MicrobialSourcePlotLayout()" :toImageButtonOptions="{format: 'svg', scale: 1}"/>
-                      <p class="text-center">Others *: Unknown microbial sources <b>at species level</b>.</p>
+                      <p class="text-center">Others *: Also including unknown microbial sources <b>at species level</b>.</p>
                     </div>
                   </div>
                 </div>
@@ -89,7 +89,6 @@
                 <div class="row">
                   <div class="col-12 q-px-md q-pt-md">
                     <div class="subsection-title">Relationships</div>
-<!--                    TODO add download button here -->
                     <el-button @click="DownloadRelationships" type="primary" class="download-btn">
                       <BootstrapIcon icon="cloud-download" variant="light" size="1x" />
                     Download as CSV
@@ -132,9 +131,6 @@
               <q-tab-panel name="features">
                 <div class="row">
                   <div class="col-12 q-pa-md">
-                    <!-- <div class="subsection-title">
-                      Biochemical properties
-                    </div> -->
                     <div class="row">
                       <div class="col-12">
                         <HelicalWheel :amp_seq="amp.sequence"></HelicalWheel>

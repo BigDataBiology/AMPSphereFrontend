@@ -68,7 +68,7 @@
                       <div class="subsubsection-title text-center">Microbial sources</div>
                       <div>
                         <Plotly :data="MicrobialSourcePlotData()" :layout="MicrobialSourcePlotLayout()" :toImageButtonOptions="{format: 'svg', scale: 1}"/>
-                        <p class="text-center">Others *: Unknown microbial sources <b>at species level</b>.</p>
+                        <p class="text-center">Others *: Also including unknown microbial sources <b>at species level</b>.</p>
                       </div>
                     </div>
                   </div>
