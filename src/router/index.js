@@ -6,6 +6,7 @@ import Downloads from '../views/Downloads'
 import AMP_card from '../views/AMP_Card'
 import Family_card from "../views/Family_card";
 import About from '../views/About'
+import Quality_tests from '@/views/Quality_tests'
 import Contact from '../views/Contact'
 import SequenceSearch from "../views/SequenceSearch";
 import TextSearch from "../views/TextSearch";
@@ -95,6 +96,14 @@ const routes = [
         component: About,
         meta: {
             title: 'AMPSphere: About'
+        }
+    },
+    {
+        path: '/quality_tests',
+        name: 'Quality tests',
+        component: Quality_tests,
+        meta: {
+            title: 'AMPSphere: Quality tests'
         }
     }
 ]

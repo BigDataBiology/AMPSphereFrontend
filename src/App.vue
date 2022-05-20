@@ -27,6 +27,7 @@
                 <q-route-tab to="/home" label="Home" />
                 <q-route-tab to="/browse_data" label="Browse" />
                 <q-route-tab to="/about" label="About" />
+                <q-route-tab to="/quality_tests" label="Quality Tests" />
                 <q-route-tab to="/downloads" label="Downloads" />
                 <q-route-tab to="/contact" label="Contact" />
               </q-tabs>

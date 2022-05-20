@@ -4,21 +4,21 @@
       <div class="col-xs-0 col-lg-2 bg-white"></div>
       <div class="col-12 col-lg-8 justify-center q-pr-md q-ma-auto">
         <div class="row">
-          <div class="col-12 col-lg-2 offset-lg-10">
-            <el-button @click="downloadSearchResults" type="primary">
-              <BootstrapIcon icon="cloud-download" variant="light" size="1x" />
-              Download as CSV
-            </el-button>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12" v-if="result.length === 0">
-            <span class="info-item-value">
-              There is no match for your sequence(s).
-            </span>
+          <div class="col-12" v-if="result.length === 0 && updated">
+            <div class="info-item-value text-center h3">
+              No matching AMP found for your sequence(s).
+            </div>
             <!--        <el-empty :image-size="200" description=""></el-empty>-->
           </div>
           <div class="col-12" v-else-if="method === 'MMseqs'">
+            <div class="row">
+              <div class="col-12 col-lg-2 offset-lg-10">
+                <el-button @click="downloadSearchResults" type="primary">
+                  <BootstrapIcon icon="cloud-download" variant="light" size="1x" />
+                  Download as CSV
+                </el-button>
+              </div>
+            </div>
             <el-table :data="result" stripe style="width: 100%" v-loading="loading">
               <el-table-column label="Query" prop="query_identifier" :filters="queryFilters" :filter-method="filterTable" width="150"></el-table-column>
               <el-table-column label="Target" width="150">
@@ -55,16 +55,20 @@
                               {{props.row.domain_start_position_target}}{{'-'.repeat(props.row.domain_end_position_target - props.row.domain_start_position_target - 1)}}{{props.row.domain_end_position_target}}
                     </pre></code>
                   </div>
-<!--                  <p>Positions_Query: {{ props.row.domain_start_position_query }}, {{ props.row.domain_end_position_query }}</p>-->
-<!--                  <p>Positions_Target: {{ props.row.domain_start_position_target }}, {{ props.row.domain_end_position_target }}</p>-->
-<!--                  <p>Query: {{ props.row.align_query }}</p>-->
-<!--                  <p>Target: {{ props.row.align_target }}</p>-->
                 </template>
               </el-table-column>
             </el-table>
 
           </div>
           <div class="col-12" v-else-if="method === 'HMMER'">
+            <div class="row">
+              <div class="col-12 col-lg-2 offset-lg-10">
+                <el-button @click="downloadSearchResults" type="primary">
+                  <BootstrapIcon icon="cloud-download" variant="light" size="1x" />
+                  Download as CSV
+                </el-button>
+              </div>
+            </div>
             <el-table :data="result" stripe style="width: 100%" v-loading="loading">
               <el-table-column label="Query" prop="query_name" :filters="queryFilters" :filter-method="filterTable"></el-table-column>
               <el-table-column label="Target" width="200">
@@ -84,32 +88,6 @@
       </div>
       <div class="col-xs-0 col-lg-2 bg-white"></div>
     </div>
-<!--    <el-breadcrumb separator-class="el-icon-arrow-right">-->
-<!--      <el-breadcrumb-item :to="{ path: '/' }">Home</el-breadcrumb-item>-->
-<!--      <el-breadcrumb-item :to="{ path: '/sequence_search' }">Sequence search</el-breadcrumb-item>-->
-<!--    </el-breadcrumb>-->
-<!--    <br/>-->
-<!--    <el-row>-->
-<!--      <el-col :span="18">-->
-<!--        <br/>-->
-<!--&lt;!&ndash;        <div v-if="method === 'MMseqs'" class="desc">&ndash;&gt;-->
-<!--&lt;!&ndash;          <el-collapse>&ndash;&gt;-->
-<!--&lt;!&ndash;            MMseqs version<el-tag size="small">13.45111</el-tag>&ndash;&gt;-->
-<!--&lt;!&ndash;            <el-collapse-item title="Search command" name="search_command">&ndash;&gt;-->
-<!--&lt;!&ndash;              <pre><code><small>{{ search_command }}</small></code></pre>&ndash;&gt;-->
-<!--&lt;!&ndash;            </el-collapse-item>&ndash;&gt;-->
-<!--&lt;!&ndash;          </el-collapse>&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;            Search parameters:&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;            <el-table :data="searchParameters" title="Search parameters">&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;              <el-table-column prop="param_name" label="Parameter"></el-table-column>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;              <el-table-column prop="value" label="Value"></el-table-column>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;            </el-table>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;        </div>&ndash;&gt;-->
-<!--&lt;!&ndash;        <div v-if="method === 'HMMER'" class="desc">&ndash;&gt;-->
-<!--&lt;!&ndash;          You searched for AMP families with {{ queryFilters.length }} sequences.&ndash;&gt;-->
-<!--&lt;!&ndash;        </div>&ndash;&gt;-->
-<!--      </el-col>-->
-
   </div>
 </template>
 
@@ -130,7 +108,8 @@ export default {
       searchCommand: 'mmseqs createdb {query_seq} {query_seq}.mmseqsdb &&  \\\n' +
           'mmseqs search {query_seq}.mmseqsdb  {database} {out}.mmseqsdb {tmp_dir} &&  \\\n' +
           'mmseqs convertalis {query_seq}.mmseqsdb {database} {out}.mmseqsdb {out}',
-      result: ['example'],
+      result: [],
+      updated: false,
       queryFilters: [],
       loading: false
     }
@@ -180,7 +159,12 @@ export default {
       this.axios.get(path, config)
         .then(function (response) {
           console.log(response.data)
-          self.result = response.data
+          if (response.data) {
+            self.result = response.data
+          } else {
+            self.result = []
+          }
+          self.updated = true
           self.queryFilters = []
           let included = []
           for (let i = 0; i < self.result.length; i++) {
@@ -196,6 +180,8 @@ export default {
           }
         })
         .catch(function (error) {
+          self.result = []
+          self.updated = true
           console.log(error);
         })
     },

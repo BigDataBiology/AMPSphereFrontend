@@ -9,7 +9,8 @@
           <el-table-column prop="type" label="Type" width="150%"></el-table-column>
           <el-table-column label="URL" width="150%">
             <template #default="props">
-              <el-link :href="props.row.file" type="primary">Download</el-link>
+              <!-- <el-button @click="download(props.row.file)" label="download"></el-button> -->
+              <a :href="props.row.file" :download="props.row.file.split('/').pop()">Download</a>
             </template>
           </el-table-column>
           <el-table-column prop="desc" label="Description" width="700%"></el-table-column>
@@ -33,50 +34,56 @@
 export default {
   name: "Downloads",
   data () {
+    let prefix = this.axios.defaults.baseURL
     return {
       downloadable_files: [
         {
           name: 'AMPSphere database',
           type: 'Full database',
-          file: "http://18.140.248.253:443/v1/downloads/main_db",
+          file: prefix + "/downloads/AMPSphere_latest.sqlite",
           desc: "Full sqlite3 database containing all individual tables below.",
         },
         {
           name: "AMP",
           type: "Individual table",
-          file: "http://18.140.248.253:443/v1/downloads/tables:AMP",
+          file: prefix + "/downloads/AMP.tsv",
           desc: "All AMP families and sequences."
         },
         {
-          name: "GMSC",
+          name: "GMSC and Metadata",
           type: "Individual table",
-          file: "http://18.140.248.253:443/v1/downloads/tables:GMSC",
-          desc: "All AMP-associated smORF genes and sequences."
-        },
-        {
-          name: "Metadata",
-          type: "Individual table",
-          file: "http://18.140.248.253:443/v1/downloads/tables:Metadata",
-          desc: "Host and taxonomic origins, associated habitats, metagenome samples and genomes."},
-        {
-          name: "Statistics",
-          type: "Individual table",
-          file: "http://18.140.248.253:443/v1/downloads/tables:Statistics",
-          desc: "Basic statistics of the AMPSphere database."
+          file: prefix + "/downloads/GMSCMetadata.tsv",
+          desc: "All AMP-associated smORF genes, sequences and associated metadata (microbial source, habitats, etc.)."
         },
         {
           name: "MMseqs database",
           type: "Search database",
-          file: "http://18.140.248.253:443/v1/downloads/search_db:mmseqs",
+          file: prefix + "/downloads/AMPSphere_latest.mmseqsdb",
           desc: 'Search database for offline or large scale query, can be directly used by the MMseqs software.'
         },
         {
           name: "HMM profile database",
           type: "Search database",
-          file: "http://18.140.248.253:443/v1/downloads/search_db:hmmer",
+          file: prefix + "/downloads/AMPSphere_latest.hmm",
           desc: 'Search database for offline or large scale query, can be directly used by the HMMER software.'
         }
       ]
+    }
+  },
+  methods: {
+    download(url) {
+      this.axios.get(url, {responseType: 'arraybuffer'})
+      .then(function (response) {
+          var headers = response.headers();
+          var blob = new Blob([response.data],{type:headers['content-type']});
+          var link = document.createElement('a');
+          link.href = window.URL.createObjectURL(blob);
+          // link.download = filename;
+          link.click();
+          })
+          .catch(function (error) {
+            console.log(error);
+          })
     }
   }
 }
