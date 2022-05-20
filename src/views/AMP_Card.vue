@@ -56,7 +56,7 @@
                     </div>
                     <div v-else>
                       <div style="height:400px; line-height: 400px" class="text-center q-px-md">
-                        Empty, all associated smORF genes were from Progenomes2 genomes (no geographical information).
+                        Empty, all associated smORF genes were from isolate genomes (no geographical information).
                       </div>
                     </div>
                   </div>
@@ -74,7 +74,7 @@
                       <p class="text-center">Some environment names may be hidden due to space limit. <br>Use your curser to zoom in and browse.</p>
                     </div>
                     <div v-else style="height:500px; display: -webkit-flex; display: flex; align-items: center; " class="text-center q-px-md">
-                      <p>Empty, all associated smORF genes were from Progenomes2 genomes (no habitat information).</p>
+                      <p>Empty, all associated smORF genes were from isolate genomes (no habitat information).</p>
                     </div>
                   </div>
                   <div class="col-12 col-md-6 q-px-md">
@@ -370,10 +370,10 @@ export default {
       },
       featuresHelpMessages: {
         MW: 'Molecular weight of a protein in Daltons.',
-        Aromaticity: 'Aromaticity according to Lobry (1994), simply the relative frequency of Phe+Trp+Tyr.',
-        Instability_index: 'Instability index according to Guruprasad et al (1990) is a test of a protein for stability. Values above 40 correspont to unstable proteins (short half lives).',
-        GRAVY: 'Grand average of hydropathicity index (GRAVY) represents the hydrophobicity value of a peptide, and consists of the sum of the hydropathy values of all the amino acids divided by the sequence length. If GRAVY is positive, it indicates a hydrophobic protein as well as its opposite, when GRAVY is negative.',
-        Charge_at_pH_7: 'Charge corresponds to the net electrical charge of a protein at pH 7.0',
+        Aromaticity: 'Aromaticity according to Lobry (1994), namely the relative frequency of Phe+Trp+Tyr.',
+        Instability_index: 'Instability index according to Guruprasad et al. (1990). Values above 40 correspont to unstable proteins (short half lives).',
+        GRAVY: 'Grand average of hydropathicity index (GRAVY) represents the hydrophobicity value of a peptide, and consists of the sum of the hydropathy values of all the amino acids divided by the sequence length. If GRAVY is positive, it indicates a hydrophobic protein.',
+        Charge_at_pH_7: 'Net electrical charge at pH 7.0',
         pI: 'Isoelectric point (pI) is the pH at which a particular molecule carries no net electrical charge.'
       },
     }
@@ -445,7 +445,7 @@ export default {
         name: '',
         x: Object.keys(strucData),
         y: Object.values(strucData),
-        marker: {color: this.ColorPalette('quanlitative')},
+        marker: {color: this.ColorPalette('qualitative')},
         textinfo: "label+percent", insidetextorientation: "radial"
       }]
     },
@@ -538,7 +538,7 @@ export default {
         y: data.habitat.labels,
         orientation: 'h',
         marker: {
-          color: this.ColorPalette('quanlitative')[0],
+          color: this.ColorPalette('qualitative')[0],
           width: 1
         },
       }
@@ -550,7 +550,7 @@ export default {
         xaxis: {
           type: 'log', autorange: true,
           title: {
-            text: '# smORF genes (in exponential)',
+            text: '# smORF genes (log scale)',
             font: {
               size: 18,
             }
@@ -566,7 +566,7 @@ export default {
         y: data.microbial_source.labels,
         orientation: 'h',
         marker: {
-          color: this.ColorPalette('quanlitative')[1],
+          color: this.ColorPalette('qualitative')[1],
           width: 1
         },
       }
@@ -578,7 +578,7 @@ export default {
         xaxis: {
           type: 'log', autorange: true,
           title: {
-            text: '# smORF genes (in exponential)',
+            text: '# smORF genes (log scale)',
             font: {
               size: 18,
             }
@@ -613,7 +613,7 @@ export default {
     // DistributionGraphLayout() {
     //   return {
     //     height: 400, margin: {l: 40, r: 40, b: 40, t: 40}, autosize: true,
-    //     sunburstcolorway: this.ColorPalette('quanlitative'),
+    //     sunburstcolorway: this.ColorPalette('qualitative'),
     //     updatemenus: [{
     //       direction: 'left', type: 'buttons', pad: {r: 10, t: 10},
     //       showactive: true, x: 0.5, y: 1.2, yanchor: 'top', xanchor: 'center',
@@ -833,7 +833,7 @@ export default {
         return ['#ffffe5', '#fff7bc', '#fee391', '#fec44f', '#fe9929', '#ec7014', '#cc4c02', '#8c2d04']
       } else if (kind === 'diverging') {
         return ['#8c510a', '#bf812d', '#dfc27d', '#f6e8c3', '#c7eae5', '#80cdc1', '#35978f', '#01665e']
-      } else if (kind === 'quanlitative') {
+      } else if (kind === 'qualitative') {
         return ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d', '#666666']
       } else {
         console.log('please set the `kind` option for color palette.')
