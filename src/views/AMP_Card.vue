@@ -8,7 +8,11 @@
             Antimicrobial peptide: {{ amp.accession }}<br/><br/>
           </div>
           <div class="col-10 justify-center" style="display: inline-flex; height: 100%; width: 100%">
-            <img :src="makeQualityBadge('Antifam', amp.Antifam)" fit="scale-down"
+            <!-- <font :color="hasEvidence(amp) === 'Passed'?'green':'red'">E<q-tooltip max-width="30rem">Has experimental evidence ({{ hasEvidence(amp) }})</q-tooltip></font> -
+            <font :color="amp.RNAcode === 'Passed'?'green':'red'">R<q-tooltip max-width="30rem">RNAcode ({{ amp.RNAcode }})</q-tooltip></font> -
+            <font :color="amp.Antifam === 'Passed'?'green':'red'">A<q-tooltip max-width="30rem">Antifam ({{ amp.Antifam }})</q-tooltip></font> -
+            <font :color="amp.coordinates === 'Passed'?'green':'red'">T<q-tooltip max-width="30rem">Terminal placement ({{ amp.coordinates }})</q-tooltip></font> -->
+      <img :src="makeQualityBadge('Antifam', amp.Antifam)" fit="scale-down"
                   alt="Quality badge cannot be shown. Please check your internet connection."
                   title="Search against Antifam, a database of profile-HMMs created from translations of commonly occurring non-coding RNAs"/> &nbsp; &nbsp;
             <img :src="makeQualityBadge('coordinates', amp.coordinates)" fit="scale-down"
@@ -703,22 +707,6 @@ export default {
           ax: 40,
           ay: 0,
         }],
-        // shapes: [
-        //   {
-        //     type: 'line',
-        //     xref: 'paper',
-        //     yref: 'y',
-        //     x0: 0,
-        //     y0: value,
-        //     x1: 1,
-        //     y1: value,
-        //     line: {
-        //         color: 'red',
-        //         width: 2,
-        //         dash:'dot'
-        //     }
-        //   }
-        // ]
       }
     },
     featureGraphData() {
@@ -742,29 +730,6 @@ export default {
     featureGraphLayout() {
       return {
         height: 600, width: 1000, margin: {l: 100, r: 100, b: 80, t: 40},
-        // xaxis: {
-        //   title: {
-        //     text: 'Window start position'
-        //   },
-        //   showticklabels: true,
-        //   tickfont: {
-        //     // family: 'Old Standard TT, serif',
-        //     size: 10,
-        //     tickangle: 90,
-        //     color: ['green', 'red', 'blue']//this.features.graph_points.surface_accessibility.c
-        //   },
-        //   // label: {
-        //   //   font: {
-        //   //     size: 10,
-        //   //     color: this.features.graph_points.surface_accessibility.c
-        //   //   }
-        //   // }
-        // },
-        // yaxis: {
-        //   title: {
-        //     text: 'Selected feature'
-        //   }
-        // },
         updatemenus: [
           {
             direction: 'left', type: 'buttons', pad: {r: 10, t: 10},
@@ -898,11 +863,31 @@ export default {
     },
     async DownloadRelationships(){
       const ObjectsToCsv = require('objects-to-csv');
-      const data = new ObjectsToCsv(this.currentMetadata);
+      let config = {
+        params: {page: 0, page_size: this.amp.metadata.info.totalRow}
+      }
+      let all_metadata
+      await this.axios.get('/amps/' + this.amp.accession + '/metadata', config)
+      .then(function (response) {
+        console.log(response.data)
+        all_metadata = response.data.data
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
+      console.log(all_metadata)
+      const data = new ObjectsToCsv(all_metadata);
       const str = await data.toString()
       const blob = new Blob([str], {type: "text/plain;charset=utf-8"});
       saveAs(blob, "Relationships.csv");
-    }
+    },
+    hasEvidence(AMP){
+      if (AMP.metaproteomes === 'Passed' || AMP.metatranscriptomes === 'Passed'){
+        return "Passed"
+      } else {
+        return "Failed"
+      }
+    },
   }
 }
 </script>
