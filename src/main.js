@@ -58,7 +58,7 @@ app.component(Download.name, Download)
 app.component('BootstrapIcon', BootstrapIcon);
 
 // Production backend
-axios.defaults.baseURL = 'https://ampsphere-api.big-data-biology.org/v1'
+// axios.defaults.baseURL = 'https://ampsphere-api.big-data-biology.org/v1'
 // Devlopment backend
-// axios.defaults.baseURL = 'http://119.3.146.10:80/v1'
+axios.defaults.baseURL = 'http://119.3.146.10:80/v1'
 app.mount('#app')
