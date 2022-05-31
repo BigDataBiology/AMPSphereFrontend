@@ -76,7 +76,7 @@
                   <div class="row">
                     <div class="col-12">
                       <h5 id="amps" class="subsection-title">Associated AMPs</h5>
-                      <el-button @click="DownloadRelationships" type="primary" class="download-btn">
+                      <el-button @click="DownloadAssociatedAMPs" type="primary" class="download-btn">
                         <BootstrapIcon icon="cloud-download" variant="light" size="1x" />
                         Download as CSV
                       </el-button>
@@ -881,7 +881,21 @@ export default {
     },
     async DownloadAssociatedAMPs(){
       const ObjectsToCsv = require('objects-to-csv');
-      const data = new ObjectsToCsv(this.associatedAMPs.currentData);
+      console.log('accessing all amps')
+      let config = {
+        params: {page: 0, page_size: this.associatedAMPs.info.totalRow, family: this.accession}
+      }
+      let all_amps
+      await this.axios.get('/amps/', config)
+      .then(function (response) {
+        console.log(response.data)
+        all_amps = response.data.data
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
+      console.log(all_amps)
+      const data = new ObjectsToCsv(all_amps);
       const str = await data.toString()
       const blob = new Blob([str], {type: "text/plain;charset=utf-8"});
       saveAs(blob, "AssociatedAMPs.csv");
