@@ -4,10 +4,10 @@
       <div class="col-0 col-xl-2 bg-white"></div>
       <div class="col-12 col-md-7 col-xl-5 justify-center q-pr-md q-ma-auto">
         <div class="row">
-          <div class="col-12 text-center subsection-title-center q-mb-md">Overall statistics and distribution</div>
+          <div class="col-12 text-center subsubsection-title-center q-mb-md">Overall statistics and distribution</div>
           <div class="col-12 q-pa-md">
             <q-carousel animated v-model="slideIndex" control-color="primary" control-text-color="black"
-                        arrows height="30rem">
+                        arrows height="25rem">
               <q-carousel-slide :name="1" class="column ">
                 <q-img :src="distributionGraphs[0].image" fit="scale-down"></q-img>
               </q-carousel-slide>
@@ -19,13 +19,6 @@
               </q-carousel-slide>
             </q-carousel>
           </div>
-
-          <!--              <el-carousel :interval="5000" height="500px" :autoplay="true">-->
-          <!--                <el-carousel-item v-for="graph in distributioinGraphs" :key="graph">-->
-          <!--                  &lt;!&ndash;                <h3>{{ graph.type }}</h3>&ndash;&gt;-->
-          <!--                  <el-image :src="graph.image" fit="scale-down"></el-image>-->
-          <!--                </el-carousel-item>-->
-          <!--              </el-carousel>-->
         </div>
         <div class="row">
           <div class="col-md-4 col-xs-12">
@@ -66,7 +59,7 @@
       </div>
       <div class="col-12 col-md-5 col-xl-3 justify-center q-pl-md q-ma-auto">
         <div class="row">
-          <div class="col-12 text-center subsection-title-center q-mb-md">Search by sequence</div>
+          <div class="col-12 text-center subsubsection-title-center q-mb-md">Search by sequence</div>
           <div class="col-12">
             <div class="main-text">
               Paste (&leq; 10) peptide sequences here (FASTA format).
