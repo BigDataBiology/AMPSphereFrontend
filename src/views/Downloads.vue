@@ -70,7 +70,7 @@ export default {
         {
           name: "AMP density / sample",
           type: "Search database",
-          file: prefix + "/downloads/amp_density_per_species_and_sample.tsv.gz",
+          file: prefix + "/downloads/amp_density_per_sample.tsv.gz",
           desc: 'AMP density data accounting for all AMPs in AMPSphere and assembled base pairs in the metagenome samples.'
         },
         {
