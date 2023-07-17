@@ -161,6 +161,8 @@ export default {
       // fastaFile: [],
     }
   },
+  setup() {
+  },
   mounted() {
     this.retrieveStatistics()
   },
