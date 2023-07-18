@@ -9,8 +9,7 @@
 </style>
 
 <script>
-import { embedProteinLogo, ProteinAlphabet, loadGlyphComponents } from 'logojs-react';
-import reactive from 'vue';
+import { embedProteinLogo, ProteinAlphabet } from 'logojs-react';
 
 export default {
   name: 'SeqLogo',
@@ -70,7 +69,7 @@ export default {
     this.calM_drawSeqLogo()
   },
   watch: {
-    alignment(old_value, new_value){
+    alignment( ){
       console.log('alignment changed')
       this.calM_drawSeqLogo()
     }
@@ -108,7 +107,7 @@ export default {
       embedProteinLogo(document.getElementById(div_id), seq_props)
     },
     calM_drawSeqLogo(){
-      let m = this.calPSSM(this.$props.alignment.filter((ele, index, array) => !ele.startsWith('>')))
+      let m = this.calPSSM(this.$props.alignment.filter((ele) => !ele.startsWith('>')))
       this.drawSeqLogo(m, 'seq_logo')
     }
   },
