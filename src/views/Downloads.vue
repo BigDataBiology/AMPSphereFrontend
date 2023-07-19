@@ -69,13 +69,13 @@ export default {
         },
         {
           name: "AMP density for samples",
-          type: "Search database",
+          type: "Individual table",
           file: prefix + "/downloads/amp_density_per_sample.tsv.gz",
           desc: 'AMP density data accounting for all AMPs in AMPSphere and assembled base pairs in the metagenome samples.'
         },
         {
           name: "AMP density for species",
-          type: "Search database",
+          type: "Individual table",
           file: prefix + "/downloads/amp_density_per_species_and_sample.tsv.gz",
           desc: 'AMP density data accounting only for contigs with taxonomy in the metagenome samples.'
         }
