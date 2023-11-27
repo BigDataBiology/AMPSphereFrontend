@@ -149,8 +149,8 @@
                 </template>
               </el-table-column>
             </el-table>
-            <el-pagination @size-change="setAMPsPageSize" @current-change="setAMPsPage" :page-sizes="[20, 50, 100, 200]"
-                           :page-size="20" layout="sizes, pager, jumper" :total="info.totalRow">
+            <el-pagination @size-change="setAMPsPageSize" @current-change="setAMPsPage" :page-sizes="[100, 200, 500, 1000]"
+                           :page-size="100" layout="sizes, pager, jumper" :total="info.totalRow">
             </el-pagination>
           </div>
         </div>
