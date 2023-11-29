@@ -191,7 +191,7 @@ export default {
       loading: false,
       amps: [],
       axiosRefCount: 0,
-      info: {currentPage: 1, pageSize: 20, totalRow: 0, totalPage: 1,},
+      info: {currentPage: 1, pageSize: 100, totalRow: 0, totalPage: 1,},
       options: {
         exp_evidence: null, antifam: null, RNAcode: null, coordinates: null,
         family: null, habitat: null, sample: null, microbial_source: null,
@@ -233,7 +233,7 @@ export default {
     });
   },
   mounted() {
-    this.setAMPsPageSize(20)
+    this.setAMPsPageSize(100)
     this.getAvailableOptions()
     // this.grayOutOptions()
   },
