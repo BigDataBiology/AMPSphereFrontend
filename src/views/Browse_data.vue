@@ -51,8 +51,6 @@
               </div>
               <div class="row q-px-xs q-py-xs filter-subsection-title">Peptide length:</div>
               <div class="row q-px-md">
-                <!--                    <q-input v-model.number="options.pep_length.min" type="number" label="Min" filled style="max-width: 100px" /> &nbsp; &nbsp;-->
-                <!--                    <q-input v-model.number="options.pep_length.max" type="number" label="Max" filled style="max-width: 100px" />-->
                 <q-range v-model="options.pep_length" @change="onPepLengthChange"
                          :min="staticOptions.pep_length.min" :max="staticOptions.pep_length.max"
                          :inner-min="filteredAvailableOptions.pep_length.min" style="width: 240px"
@@ -180,7 +178,7 @@ export default {
       quality: [],
       habitat: [],
       microbial_source: [],
-      pep_length: {min: 8, max: 98},
+      pep_length: {min: 8, max: 99},
       molecular_weight: {min: 813, max: 12286},
       isoelectric_point: {min: 4, max: 12},
       charge_at_pH_7: {min: -57, max: 44}
@@ -242,7 +240,7 @@ export default {
   computed: {},
   methods: {
     getParams(){
-      return {
+      let params = {
           exp_evidence: this.options.exp_evidence,
           antifam: this.options.antifam, 
           RNAcode: this.options.RNAcode, 
@@ -252,13 +250,22 @@ export default {
           host: this.options.host,
           sample: this.options.sample,
           microbial_source: this.options.microbial_source,
-          pep_length_interval: this.options.pep_length.min.toString() + ',' + this.options.pep_length.max.toString(),
-          mw_interval: this.options.molecular_weight.min.toString() + ',' + this.options.molecular_weight.max.toString(),
-          pI_interval: this.options.isoelectric_point.min.toString() + ',' + this.options.isoelectric_point.max.toString(),
-          charge_interval: this.options.charge_at_pH_7.min.toString() + ',' + this.options.charge_at_pH_7.max.toString(),
           page: this.info.currentPage,
           page_size: this.info.pageSize
+      };
+      function setOptionIfNotDefault(optName, optValue, defValue) {
+          console.log("Checking for " + optName + " " +
+                 optValue.min.toString() + " != " +defValue.min.toString() + " || " + optValue.max.toString() + " != " + defValue.max.toString());
+          if (optValue.min != defValue.min || optValue.max != defValue.max) {
+              params[optName] = optValue.min.toString() + ',' + optValue.max.toString();
+          }
       }
+      setOptionIfNotDefault('pep_length_interval', this.options.pep_length, this.availableOptions.pep_length);
+      setOptionIfNotDefault('pI_interval', this.options.isoelectric_point, this.availableOptions.isoelectric_point);
+      setOptionIfNotDefault('mw_interval', this.options.molecular_weight, this.availableOptions.molecular_weight);
+      setOptionIfNotDefault('charge_interval', this.options.charge_at_pH_7, this.availableOptions.charge_at_pH_7);
+
+      return params;
     },
     setAMPsPage(page) {
       this.info.currentPage = page - 1
