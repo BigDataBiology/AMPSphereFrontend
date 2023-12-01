@@ -118,12 +118,12 @@
             <el-table :data="amps" stripe style="width: 100%" v-loading="loading">
               <el-table-column label="Accession" width="150%">
                 <template #default="props">
-                  <el-button @click="AMPDetail(props.row.accession)" type="text">{{ props.row.accession }}</el-button>
+		  <a :href="'/amp?accession=' + props.row.accession"> {{ props.row.accession }}</a>
                 </template>
               </el-table-column>
               <el-table-column label="Family" width="150%">
                 <template #default="props">
-                  <el-button @click="familyDetail(props.row.family)" type="text">{{ props.row.family }}</el-button>
+                  <a :href="'/family?accession=' + props.row.accession">{{ props.row.family }}</a>
                 </template>
               </el-table-column>
               <el-table-column label="Peptide sequence" width="300%">
@@ -485,12 +485,6 @@ export default {
       const URL = 'https://img.shields.io/static/v1?style=flat&label=' + name + '&color=' + color_mapping[test_result] + '&message=' + test_result + '&style=flat'
       // console.log(URL)
       return URL
-    },
-    AMPDetail(accession) {
-      window.open('/amp?accession=' + accession, '_blank')
-    },
-    familyDetail(accession) {
-      window.open('/family?accession=' + accession, '_blank')
     },
     setLoading(isLoading) {
       if (isLoading) {
