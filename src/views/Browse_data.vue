@@ -107,7 +107,7 @@
 
           <div class="col-12 col-md-9 q-py-sm q-px-lg">
             <div class="row">
-              <div class="col-6 main-text">Displaying: <span v-if="info.totalRow >= info.pageSize">{{info.pageSize}}</span> <span v-else>{{info.totalRow}}</span> out of {{ info.totalRow }} results.</div>
+              <div class="col-6 main-text">Displaying: <span v-if="info.totalRow >= info.pageSize">{{info.pageSize}}</span> <span v-else>{{ info.totalRow.toLocaleString() }}</span> out of {{ info.totalRow.toLocaleString() }} results.</div>
               <div class="col-6" style="padding-right: 10rem;">
                 <el-button @click="downloadSearchResults" type="primary" class="download-btn">
                   <BootstrapIcon icon="cloud-download" variant="light" size="1x" />
@@ -133,7 +133,7 @@
               </el-table-column>
               <el-table-column label="# smORF genes" width="120%">
                 <template #default="props">
-                  <span>{{ props.row.num_genes }}</span>
+                  <span>{{ props.row.num_genes.toLocaleString() }}</span>
                 </template>
               </el-table-column>
               <el-table-column label="Quality" width="150%">
