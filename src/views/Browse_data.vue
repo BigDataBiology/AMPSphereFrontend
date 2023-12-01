@@ -123,7 +123,7 @@
               </el-table-column>
               <el-table-column label="Family" width="150%">
                 <template #default="props">
-                  <a :href="'/family?accession=' + props.row.accession">{{ props.row.family }}</a>
+                  <a :href="'/family?accession=' + props.row.family">{{ props.row.family }}</a>
                 </template>
               </el-table-column>
               <el-table-column label="Peptide sequence" width="300%">
