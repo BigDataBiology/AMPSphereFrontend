@@ -61,13 +61,8 @@
         <div class="row">
           <div class="col-12 text-center subsubsection-title-center q-mb-md">Search by sequence</div>
           <div class="col-12">
-            <div class="main-text">
-              Paste (&leq; 10) peptide sequences here (FASTA format).
-            </div>
-          </div>
-          <div class="col-12">
             <q-input class="q-my-md" v-model="sequences" filled clearable type="textarea" color="primary"
-                     label="Please enter up to 10 sequences" rows="20"/>
+                     label="Enter up to 10 amino acid sequences (in FASTA format)" rows="10"/>
 <!--            TODO update here.-->
 <!--            <q-uploader-->
 <!--                style="max-width: 300px"-->
@@ -80,6 +75,8 @@
             <!--            <q-input-->
 <!--                type="textarea" :rows="20" :autosize="{ minRows: 15, maxRows: 20}" :placeholder="exampleSequences" v-model="sequences">-->
 <!--            </q-input>-->
+           <el-button type="text" @click="setExampleSearch()">Example data</el-button>
+
             <div class="text-bold">
               Search for:
               <q-btn-toggle
@@ -147,17 +144,8 @@ export default {
         {type: 'microbial_source', image: require('../assets/microbial_source_distribution.svg')},
         {type: 'habitat', image: require('../assets/habitat_distribution.svg')},
       ],
-      // exampleSequences:
-      //     ">AMP10.000_002 | SPHERE-III.010_054\n" +
-      //     "KRVKSFFKGYMRAIEINAALMYGYRPK\n" +
-      //     ">AMP10.000_003 | SPHERE-III.001_008\n" +
-      //     "GRVIGKQGRIAKAIRVVMRAAAVRVDEKVLVEID\n",
       searchMethod: 'MMseqs',
-      sequences:
-          ">AMP10.000_002 | SPHERE-III.010_054\n" +
-          "KRVKSFFKGYMRAIEINAALMYGYRPK\n" +
-          ">AMP10.000_003 | SPHERE-III.001_008\n" +
-          "GRVIGKQGRIAKAIRVVMRAAAVRVDEKVLVEID\n",
+      sequences: null,
       // fastaFile: [],
     }
   },
@@ -212,6 +200,14 @@ export default {
           .catch(function (error) {
             console.log(error);
           });
+    },
+    setExampleSearch() {
+      const exampleSequences =
+          ">Query1\n" +// AMP10.000_002 | SPHERE-III.010_054
+          "KRVKSFFKGYMRAIEINAALMYGYRPK\n" +
+          ">Query2\n" + // AMP10.000_003 | SPHERE-III.001_008
+          "GRVIGKQGRIAKAIRVVMRAAAVRVDEKVLVEID\n";
+      this.sequences = exampleSequences;
     },
     sequenceSearch() {
       if ((this.sequences.match(/\n/g) || '').length + 1 > 20) {
