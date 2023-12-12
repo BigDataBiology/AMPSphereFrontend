@@ -58,7 +58,7 @@
                       <div class="subsubsection-title text-center">Habitats</div>
                       <div v-if="distribution.habitat.labels.length !== 0">
                         <Plotly :data="EnvPlotData()" :layout="EnvPlotLayout()" :toImageButtonOptions="{format: 'svg', scale: 1}"/>
-                        <p class="text-center">Some environment names may be hidden due to space limit. <br>Use your curser to zoom in and browse.</p>
+                        <p class="text-center">Some environment names may be hidden due to space limits. <br>Use your cursor to zoom in.</p>
                       </div>
                       <div v-else style="height:500px; display: -webkit-flex; display: flex; align-items: center; " class="text-center q-px-md">
                         <p>Empty, all associated smORF genes were from isolate genomes (no habitat information).</p>
