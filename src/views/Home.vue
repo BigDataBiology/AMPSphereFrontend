@@ -109,7 +109,7 @@
 
 <script>
 import {ref} from "vue"
-import {useQuasar} from 'quasar'
+import {} from 'quasar'
 
 
 export default {
