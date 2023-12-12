@@ -281,7 +281,6 @@ export default {
             for(let amp of self.amps){
               amp.num_genes = amp.metadata.info.totalItem
               delete amp.metadata
-              delete amp.feature_graph_points
               delete amp.secondary_structure
             }
             self.info.totalPage = response.data.info.totalPage

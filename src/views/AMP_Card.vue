@@ -338,12 +338,6 @@ export default {
         isoelectric_point: 0,
         charge_at_pH_7: 0,
         secondary_structure: {helix: 0, turn: 0, sheet: 0},
-        feature_graph_points: {
-          transfer_energy: {type: "line plot", x: [], y: [], c: []},
-          hydrophobicity_parker: {type: "line plot", x: [], y: [], c: []},
-          surface_accessibility: {type: "line plot", x: [], y: [], c: []},
-          flexibility: {type: "line plot", x: [], y: [], c: []}
-        },
         metadata: {
           info: {
             pageSize: 5,
