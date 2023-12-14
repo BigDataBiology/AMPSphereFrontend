@@ -8,9 +8,13 @@
             <div>
               <div class="row q-px-xs q-py-xs filter-subsection-title">Filter by quality</div>
               <div class="row q-px-md q-py-xs">
-                <q-select filled v-model="options.exp_evidence" label="Evidence" @update:model-value="onExpEvidenceChange"
-                          :options="['Passed', 'Failed']" hint="transcription/translation" @clear="onExpEvidenceClear"
-                          style="width: 250px" behavior="menu" align="center" clearable/>
+                <q-toggle v-model="hqOnly" label="High-quality only" left-label @update:model-value="onHQChange" />
+              </div>
+              <div class="row q-px-md q-py-xs">
+                <q-toggle v-model="options.exp_evidence" label="With matched experimental data only" left-label
+                       @update:model-value="onExpEvidenceChange"
+                          hint="transcription/translation"
+                          clearable/>
               </div>
               <div class="row q-px-xs q-py-xs filter-toggle-label">
                  <q-toggle v-model="qualitySpecFiltersVisible" label="Specific tests" left-label />
@@ -186,6 +190,7 @@ export default {
     return {
       advancedFiltersVisible: false,
       qualitySpecFiltersVisible: false,
+      hqOnly: false,
       familyInDB: true,
       sampleInDB: true,
       loading: false,
@@ -193,7 +198,7 @@ export default {
       axiosRefCount: 0,
       info: {currentPage: 1, pageSize: 100, totalRow: 0, totalPage: 1,},
       options: {
-        exp_evidence: null, antifam: null, RNAcode: null, coordinates: null,
+        exp_evidence: false, antifam: null, RNAcode: null, coordinates: null,
         family: null, habitat: null, sample: null, microbial_source: null,
         pep_length: {min: 8, max: 99},
         molecular_weight: {min: 813, max: 12286},
@@ -241,9 +246,9 @@ export default {
   methods: {
     getParams(){
       let params = {
-          exp_evidence: this.options.exp_evidence,
-          antifam: this.options.antifam, 
-          RNAcode: this.options.RNAcode, 
+          exp_evidence: this.options.exp_evidence ? "Passed" : null,
+          antifam: this.options.antifam,
+          RNAcode: this.options.RNAcode,
           coordinates: this.options.coordinates,  // four filters to be added.
           family: this.options.family,
           habitat: this.options.habitat,
@@ -331,44 +336,57 @@ export default {
         this.availableOptions.microbial_source = this.staticOptions.microbial_source.filter(v => v.toLowerCase().indexOf(val) > -1)
       })
     },
+    onHQChange(option) {
+        if (option) {
+            this.options.antifam = "Passed"
+            this.options.coordinates = "Passed"
+            this.options.RNAcode = "Passed"
+        } else {
+            this.options.antifam = null
+            this.options.coordinates = null
+            this.options.RNAcode = null
+        }
+        this.setAMPsPage(1)
+    },
+    recomputeHQOnly() {
+        this.hqOnly = (
+            this.options.antifam == "Passed" &&
+            this.options.coordinates == "Passed" &&
+            this.options.RNAcode == "Passed"
+            );
+    },
     onExpEvidenceChange(option){
       this.options.exp_evidence = option
-      console.log('exp_evidence filter applied', option)
       this.setAMPsPage(1)
     },
     onAntifamChange(option){
       this.options.antifam = option
-      console.log('antifam filter applied', option)
+      this.recomputeHQOnly()
       this.setAMPsPage(1)
     },
     onRNAcodeChange(option){
       this.options.RNAcode = option
-      console.log('RNAcode filter applied', option)
+      this.recomputeHQOnly()
       this.setAMPsPage(1)
     },
     onCoordinatesChange(option){
       this.options.coordinates = option
-      console.log('coordinates filter applied', option)
-      this.setAMPsPage(1)
-    },
-    onExpEvidenceClear(option){
-      this.options.exp_evidence = null
-      console.log('exp_evidence filter applied', option)
+      this.recomputeHQOnly()
       this.setAMPsPage(1)
     },
     onAntifamClear(option){
       this.options.antifam = null
-      console.log('antifam filter applied', option)
+      this.recomputeHQOnly()
       this.setAMPsPage(1)
     },
     onRNAcodeClear(option){
       this.options.RNAcode = null
-      console.log('RNAcode filter applied', option)
+      this.recomputeHQOnly()
       this.setAMPsPage(1)
     },
     onCoordinatesClear(option){
       this.options.coordinates = null
-      console.log('coordinates filter applied', option)
+      this.recomputeHQOnly()
       this.setAMPsPage(1)
     },
     onFamilyChange(option) {
