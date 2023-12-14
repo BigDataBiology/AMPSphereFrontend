@@ -99,7 +99,7 @@
                              error-message="The input does not match any family" />
                   </div>
                   <div class="row q-px-md q-py-xs">
-                    <q-input v-model.number="options.sample" type="text" label="Sample/Genome" filled style="width: 250px"
+                    <q-input v-model="options.sample" type="text" label="Sample/Genome" filled style="width: 250px"
                              :error="(!sampleInDB && options.sample !== '')" lazy-rules
                              @change="onSampleChange" clearable @clear="onSampleClear"
                              error-message="The input does not match any sample/genome" />
@@ -253,7 +253,7 @@ export default {
           family: this.options.family,
           habitat: this.options.habitat,
           host: this.options.host,
-          sample: this.options.sample,
+          sample_genome: this.options.sample,
           microbial_source: this.options.microbial_source,
           page: this.info.currentPage,
           page_size: this.info.pageSize
