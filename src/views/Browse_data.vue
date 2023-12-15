@@ -187,15 +187,15 @@
               <el-table-column label="Quality" width="150%" v-if="showColumns.quality">
                 <template #default="props">
                   <div class="text-left text-bold">
-                    <font :color="hasEvidence(props.row) ?'green':'red'">E
+                    <span :style="greenRed(hasEvidence(props.row))">E
                         <q-tooltip max-width="30rem">Has experimental evidence
-                        ({{ hasEvidence(props.row) ? "Passed" : "Failed" }})</q-tooltip></font> -
-                    <font :color="props.row.RNAcode === 'Passed'?'green':'red'">R
-                        <q-tooltip max-width="30rem">RNAcode ({{ props.row.RNAcode }})</q-tooltip></font> -
-                    <font :color="props.row.Antifam === 'Passed'?'green':'red'">A
-                        <q-tooltip max-width="30rem">Antifam ({{ props.row.Antifam }})</q-tooltip></font> -
-                    <font :color="props.row.coordinates === 'Passed'?'green':'red'">T
-                        <q-tooltip max-width="30rem">Terminal placement ({{ props.row.coordinates }})</q-tooltip></font>
+                        ({{ hasEvidence(props.row) ? "Passed" : "Failed" }})</q-tooltip></span> -
+                    <span :style="greenRed(props.row.RNAcode === 'Passed')">R
+                        <q-tooltip max-width="30rem">RNAcode ({{ props.row.RNAcode }})</q-tooltip></span> -
+                    <span :style="greenRed(props.row.Antifam === 'Passed')">A
+                        <q-tooltip max-width="30rem">Antifam ({{ props.row.Antifam }})</q-tooltip></span> -
+                    <span :style="greenRed(props.row.coordinates === 'Passed')">T
+                        <q-tooltip max-width="30rem">Terminal placement ({{ props.row.coordinates }})</q-tooltip></span>
                   </div>
                 </template>
               </el-table-column>
@@ -455,6 +455,11 @@ export default {
     onMicrobialSourceClear(){
       this.options.microbial_source = ''
       this.onMicrobialSourceChange(this.options.microbial_source)
+    },
+    greenRed(val) {
+      return {
+          color: val ? 'green' : 'red'
+      }
     },
     hasEvidence(AMP) {
       return (AMP.metaproteomes === "Passed" || AMP.metatranscriptomes === "Passed");
