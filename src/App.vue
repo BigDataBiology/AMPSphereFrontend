@@ -61,6 +61,9 @@
         <div class="col-12 text-black">
           &copy;2021-{{year}}
           <cite>AMPSphere authors</cite>.
+          The resource is described in detail in (<a
+          href="https://doi.org/10.1101/2023.08.31.555663">Santos-Júnior et
+          al., 2023</a>).
         </div>
 <!--        <div class="col-0 col-sm-1 col-md-2 bg-white"></div>-->
       </div>
