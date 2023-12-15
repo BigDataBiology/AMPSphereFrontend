@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from "../views/Home"
 import BrowseData from "../views/Browse_data"
 import Downloads from '../views/Downloads'
-// import Help from '../views/Help.vue'
 import AMP_card from '../views/AMP_Card'
 import Family_card from "../views/Family_card";
 import About from '../views/About'
@@ -74,14 +73,6 @@ const routes = [
             title: 'AMPSphere: Downloads'
         }
     },
-    // {
-    //     path: '/help',
-    //     name: 'Help',
-    //     component: Help,
-    //     meta:{
-    //         title: 'AMPSphere: Help'
-    //     }
-    // },
     {
         path: '/contact',
         name: 'Contact',
