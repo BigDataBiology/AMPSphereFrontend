@@ -33,6 +33,15 @@
               <div class="row q-px-xs q-py-xs filter-subsection-title">Filter by quality</div>
               <div class="row q-px-md q-py-xs">
                 <q-toggle v-model="hqOnly" label="High-quality only" @update:model-value="onHQChange" icon="check" />
+                <q-icon name="help" class="q-ml-xs" size="16px" color="grey-7">
+                  <q-tooltip
+                    transition-show="scale"
+                    transition-hide="scale"
+                    hide-delay="2500"
+                    class="bg-amber text-black shadow-4 text-body2"
+                  >High-quality predictions are those that have passed all <i>in silico</i> tests.
+                  </q-tooltip>
+                  </q-icon>
               </div>
               <div class="row q-px-md q-py-xs">
                 <q-toggle v-model="options.exp_evidence" label="With matched experimental data only"
