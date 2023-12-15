@@ -86,7 +86,7 @@
                                 element-loading-spinner="el-icon-loading">
                         <el-table-column label="Accession" width="200">
                           <template #default="props">
-                            <el-button @click="AMPDetail(props.row.accession)" type="text">{{ props.row.accession }}</el-button>
+                            <a :href="'/amp?accession=' + props.row.accession">{{ props.row.accession }}</a>
                           </template>
                         </el-table-column>
                         <el-table-column label="Peptide sequence" width="300%">
@@ -94,16 +94,18 @@
                             <code class="sequence"><small>{{ props.row.sequence }}</small></code>
                           </template>
                         </el-table-column>
-                        <el-table-column label="# smORF genes" width="150%">
-                          <template #default="props"><span>{{ props.row.metadata.info.totalItem }}</span></template>
+                        <el-table-column label="# smORF genes" width="150%" align="right">
+                          <template #default="props">
+                            <span>{{ props.row.metadata.info.totalItem.toLocaleString() }}</span>
+                          </template>
                         </el-table-column>
-                        <el-table-column label="Molecular weight" width="150%">
+                        <el-table-column label="Molecular weight" width="150%" align="right">
                           <template #default="props">{{ props.row.molecular_weight.toFixed(2) }}</template>
                         </el-table-column>
-                        <el-table-column label="Isoelectric point" width="150%">
+                        <el-table-column label="Isoelectric point" width="150%" align="right">
                           <template #default="props">{{ props.row.isoelectric_point.toFixed(2) }}</template>
                         </el-table-column>
-                        <el-table-column label="Charge at pH 7.0" width="150%">
+                        <el-table-column label="Charge at pH 7.0" width="150%" align="right">
                           <template #default="props">{{ props.row.charge.toFixed(2) }}</template>
                         </el-table-column>
                         <el-table-column label="Quality" width="150%">
