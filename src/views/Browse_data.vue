@@ -55,7 +55,7 @@
               </div>
               <div class="row q-px-xs q-py-xs filter-subsection-title">Peptide length:</div>
               <div class="row q-px-md">
-                <q-range v-model="options.pep_length" @change="onPepLengthChange"
+                <q-range v-model="options.pep_length" @change="refreshSearch"
                          :min="staticOptions.pep_length.min" :max="staticOptions.pep_length.max"
                          :inner-min="filteredAvailableOptions.pep_length.min" style="width: 240px"
                          :inner-max="filteredAvailableOptions.pep_length.max" label color="secondary"/>
@@ -64,7 +64,7 @@
               <div class="row q-px-md">
                 <!--                    <q-input v-model.number="options.molecular_weight.min" type="number" label="Min" filled style="max-width: 100px" /> &nbsp; &nbsp;-->
                 <!--                    <q-input v-model.number="options.molecular_weight.max" type="number" label="Max" filled style="max-width: 100px" />-->
-                <q-range v-model="options.molecular_weight" @change="onMWChange"
+                <q-range v-model="options.molecular_weight" @change="refreshSearch"
                          :min="staticOptions.molecular_weight.min" :max="staticOptions.molecular_weight.max"
                          :inner-min="filteredAvailableOptions.molecular_weight.min" style="width: 240px"
                          :inner-max="filteredAvailableOptions.molecular_weight.max" label color="secondary"/>
@@ -73,7 +73,7 @@
               <div class="row q-px-md">
                 <!--                    <q-input v-model.number="options.isoelectric_point.min" type="number" label="Min" filled style="max-width: 100px" /> &nbsp; &nbsp;-->
                 <!--                    <q-input v-model.number="options.isoelectric_point.max" type="number" label="Max" filled style="max-width: 100px" />-->
-                <q-range v-model="options.isoelectric_point" @change="onpIChange"
+                <q-range v-model="options.isoelectric_point" @change="refreshSearch"
                          :min="staticOptions.isoelectric_point.min" :max="staticOptions.isoelectric_point.max"
                          :inner-min="filteredAvailableOptions.isoelectric_point.min" style="width: 240px"
                          :inner-max="filteredAvailableOptions.isoelectric_point.max" label color="secondary"/>
@@ -82,7 +82,7 @@
               <div class="row q-px-md">
                 <!--                    <q-input v-model.number="options.charge_at_pH_7.min" type="number" label="Min" filled style="max-width: 100px" /> &nbsp; &nbsp;-->
                 <!--                    <q-input v-model.number="options.charge_at_pH_7.max" type="number" label="Max" filled style="max-width: 100px" />-->
-                <q-range v-model="options.charge_at_pH_7" @change="onChargechange"
+                <q-range v-model="options.charge_at_pH_7" @change="refreshSearch"
                          :min="staticOptions.charge_at_pH_7.min" :max="staticOptions.charge_at_pH_7.max"
                          :inner-min="filteredAvailableOptions.charge_at_pH_7.min" label style="width: 240px"
                          :inner-max="filteredAvailableOptions.charge_at_pH_7.max" color="secondary"/>
@@ -122,7 +122,7 @@
             <el-table :data="amps" stripe style="width: 100%" v-loading="loading">
               <el-table-column label="Accession" width="150%">
                 <template #default="props">
-		  <a :href="'/amp?accession=' + props.row.accession"> {{ props.row.accession }}</a>
+                    <a :href="'/amp?accession=' + props.row.accession"> {{ props.row.accession }}</a>
                 </template>
               </el-table-column>
               <el-table-column label="Family" width="150%">
@@ -143,10 +143,15 @@
               <el-table-column label="Quality" width="150%">
                 <template #default="props">
                   <div class="text-left text-bold">
-                    <font :color="hasEvidence(props.row) === 'Passed'?'green':'red'">E<q-tooltip max-width="30rem">Has experimental evidence ({{ hasEvidence(props.row) }})</q-tooltip></font> -
-                    <font :color="props.row.RNAcode === 'Passed'?'green':'red'">R<q-tooltip max-width="30rem">RNAcode ({{ props.row.RNAcode }})</q-tooltip></font> -
-                    <font :color="props.row.Antifam === 'Passed'?'green':'red'">A<q-tooltip max-width="30rem">Antifam ({{ props.row.Antifam }})</q-tooltip></font> -
-                    <font :color="props.row.coordinates === 'Passed'?'green':'red'">T<q-tooltip max-width="30rem">Terminal placement ({{ props.row.coordinates }})</q-tooltip></font>
+                    <font :color="hasEvidence(props.row) ?'green':'red'">E
+                        <q-tooltip max-width="30rem">Has experimental evidence
+                        ({{ hasEvidence(props.row) ? "Passed" : "Failed" }})</q-tooltip></font> -
+                    <font :color="props.row.RNAcode === 'Passed'?'green':'red'">R
+                        <q-tooltip max-width="30rem">RNAcode ({{ props.row.RNAcode }})</q-tooltip></font> -
+                    <font :color="props.row.Antifam === 'Passed'?'green':'red'">A
+                        <q-tooltip max-width="30rem">Antifam ({{ props.row.Antifam }})</q-tooltip></font> -
+                    <font :color="props.row.coordinates === 'Passed'?'green':'red'">T
+                        <q-tooltip max-width="30rem">Terminal placement ({{ props.row.coordinates }})</q-tooltip></font>
                   </div>
                 </template>
               </el-table-column>
@@ -171,7 +176,8 @@
 </style>
 
 <script>
-import {useQuasar} from 'quasar'
+import {} from 'quasar'
+import { saveAs } from 'file-saver';
 
 
 export default {
@@ -211,8 +217,6 @@ export default {
     }
   },
   setup() {
-    const $q = useQuasar()
-    let timer
     return {}
   },
   created() {
@@ -240,7 +244,6 @@ export default {
   mounted() {
     this.setAMPsPageSize(100)
     this.getAvailableOptions()
-    // this.grayOutOptions()
   },
   computed: {},
   methods: {
@@ -249,7 +252,7 @@ export default {
           exp_evidence: this.options.exp_evidence ? "Passed" : null,
           antifam: this.options.antifam,
           RNAcode: this.options.RNAcode,
-          coordinates: this.options.coordinates,  // four filters to be added.
+          coordinates: this.options.coordinates,
           family: this.options.family,
           habitat: this.options.habitat,
           host: this.options.host,
@@ -259,8 +262,6 @@ export default {
           page_size: this.info.pageSize
       };
       function setOptionIfNotDefault(optName, optValue, defValue) {
-          console.log("Checking for " + optName + " " +
-                 optValue.min.toString() + " != " +defValue.min.toString() + " || " + optValue.max.toString() + " != " + defValue.max.toString());
           if (optValue.min != defValue.min || optValue.max != defValue.max) {
               params[optName] = optValue.min.toString() + ',' + optValue.max.toString();
           }
@@ -311,19 +312,6 @@ export default {
             console.log(error);
           })
     },
-    grayOutOptions(){
-      let config = {
-        params: this.getParams()
-      }
-      this.axios.get('/current_available_options', config)
-          .then(function (response) {
-            console.log(response.data)
-            self.filteredAvailableOptions = response.data
-          })
-          .catch(function (error) {
-            console.log(error);
-          })
-    },
     filterHabitat(val, update, abort) {
       update(() => {
         val = val.toLowerCase()
@@ -348,12 +336,13 @@ export default {
         }
         this.setAMPsPage(1)
     },
-    recomputeHQOnly() {
+    refreshSearch() {
         this.hqOnly = (
             this.options.antifam == "Passed" &&
             this.options.coordinates == "Passed" &&
             this.options.RNAcode == "Passed"
             );
+      this.setAMPsPage(1)
     },
     onExpEvidenceChange(option){
       this.options.exp_evidence = option
@@ -361,43 +350,35 @@ export default {
     },
     onAntifamChange(option){
       this.options.antifam = option
-      this.recomputeHQOnly()
-      this.setAMPsPage(1)
+      this.refreshSearch()
     },
     onRNAcodeChange(option){
       this.options.RNAcode = option
-      this.recomputeHQOnly()
-      this.setAMPsPage(1)
+      this.refreshSearch()
     },
     onCoordinatesChange(option){
       this.options.coordinates = option
-      this.recomputeHQOnly()
-      this.setAMPsPage(1)
+      this.refreshSearch()
     },
-    onAntifamClear(option){
+    onAntifamClear(){
       this.options.antifam = null
-      this.recomputeHQOnly()
-      this.setAMPsPage(1)
+      this.refreshSearch()
     },
-    onRNAcodeClear(option){
+    onRNAcodeClear(){
       this.options.RNAcode = null
-      this.recomputeHQOnly()
-      this.setAMPsPage(1)
+      this.refreshSearch()
     },
-    onCoordinatesClear(option){
+    onCoordinatesClear(){
       this.options.coordinates = null
-      this.recomputeHQOnly()
-      this.setAMPsPage(1)
+      this.refreshSearch()
     },
-    onFamilyChange(option) {
+    onFamilyChange() {
       this.inDBChecking(this.options.family, 'family')
       this.setAMPsPage(1)
-      // this.grayOutOptions()
     },
-    onSampleChange(option) {
+    onSampleChange() {
       this.inDBChecking(this.options.sample, 'sample')
       this.setAMPsPage(1)
-      // this.grayOutOptions()
     },
     onFamilyClear(){
       this.options.family = ''
@@ -410,12 +391,10 @@ export default {
     onHabitatChange(option) {
       this.options.habitat = option;
       this.setAMPsPage(1)
-      // this.grayOutOptions()
     },
     onMicrobialSourceChange(option) {
       this.options.microbial_source = option;
       this.setAMPsPage(1)
-      // this.grayOutOptions()
     },
     onHabitatClear(){
       this.options.habitat = ''
@@ -425,72 +404,8 @@ export default {
       this.options.microbial_source = ''
       this.onMicrobialSourceChange(this.options.microbial_source)
     },
-    onPepLengthChange(value) {
-      // this.options.pep_length = {min: 0, max: 100}
-      console.log('peplength changed.')
-      this.setAMPsPage(1)
-      // this.grayOutOptions()
-    },
-    onMWChange(value) {
-      // this.options.pep_length = {min: 0, max: 100}
-      console.log('MW changed.')
-      this.setAMPsPage(1)
-      // this.grayOutOptions()
-    },
-    onpIChange(value) {
-      // this.options.pep_length = {min: 0, max: 100}
-      console.log('pI changed.')
-      this.setAMPsPage(1)
-      // this.grayOutOptions()
-    },
-    onChargechange(value) {
-      // this.options.pep_length = {min: 0, max: 100}
-      console.log('Charge changed.')
-      this.setAMPsPage(1)
-      // this.grayOutOptions()
-    },
-    // clearFilters() {
-    //   this.options = {
-    //     family: null,
-    //     habitat: null,
-    //     sample: null,
-    //     microbial_source: null,
-    //     pep_length: {
-    //       min: 0,
-    //       max: 100
-    //     }
-    //   }
-    // },
-    transQualityOptions(quality_level){
-      const quality_level_mapping = {
-        'Passed': 'gold',
-        'Not tested': 'silver',
-        'Failed': 'bronze'
-      }
-      return quality_level_mapping[quality_level]
-    },
-    getBadgeColor(quality_level) {
-      const color_mapping = {
-        Passed: 'green',
-        'Not tested': 'yellow',
-        Failed: 'red'
-      }
-      return color_mapping[quality_level]
-    },
-    getBadgeLabel(quality_level) {
-      const quality_level_mapping = {
-        Passed: 'High',
-        'Not tested': 'Medium',
-        Failed: 'Low'
-      }
-      return quality_level_mapping[quality_level]
-    },
-    hasEvidence(AMP){
-      if (AMP.metaproteomes === 'Passed' || AMP.metatranscriptomes === 'Passed'){
-        return "Passed"
-      } else {
-        return "Failed"
-      }
+    hasEvidence(AMP) {
+      return (AMP.metaproteomes === "Passed" || AMP.metatranscriptomes === "Passed");
     },
     makeBadgeURL(name, test_result) {
       const color_mapping = {
@@ -520,7 +435,7 @@ export default {
       saveAs(blob, "AMPs.csv");
     },
     inDBChecking(val, entity_type){
-      self = this
+      let self = this;
       this.axios.get('/in_db/' + entity_type + '/' + val)
           .then(function (response) {
             console.log(entity_type, val, response.data)
