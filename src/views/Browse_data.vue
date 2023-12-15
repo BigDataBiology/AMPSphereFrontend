@@ -6,14 +6,39 @@
         <div class="row">
           <div class="col-12 col-md-3 q-pa-sm">
             <div>
-              <div class="row q-px-xs q-py-xs filter-subsection-title">Filter by quality</div>
+              <div class="row q-px-xs q-py-xs filter-subsection-title">Select columns to show</div>
               <div class="row q-px-md q-py-xs">
-                <q-toggle v-model="hqOnly" label="High-quality only" left-label @update:model-value="onHQChange" />
+                <q-toggle v-model="showColumns.sequence" label="Peptide sequence" icon="check" />
               </div>
               <div class="row q-px-md q-py-xs">
-                <q-toggle v-model="options.exp_evidence" label="With matched experimental data only" left-label
+                <q-toggle v-model="showColumns.pI" label="Isoelectric point" icon="check" />
+              </div>
+              <div class="row q-px-md q-py-xs">
+                <q-toggle v-model="showColumns.num_genes" label="Number of smORF genes" icon="check" />
+                <q-icon name="help" class="q-ml-xs" size="16px" color="grey-7">
+                  <q-tooltip
+                    transition-show="scale"
+                    transition-hide="scale"
+                    hide-delay="2500"
+                    class="bg-amber text-black shadow-4 text-body2"
+                  >Number of smORFs that encode the peptide. A peptide can be found in multiple samples/genome and slightly different DNA sequences can code for the same peptide</q-tooltip>
+              </q-icon>
+              </div>
+              <div class="row q-px-md q-py-xs">
+                <q-toggle v-model="showColumns.molecular_weight" label="Molecular weight" icon="check" />
+              </div>
+              <div class="row q-px-md q-py-xs">
+                <q-toggle v-model="showColumns.quality" label="Quality" icon="check" />
+              </div>
+              <div class="row q-px-xs q-py-xs filter-subsection-title">Filter by quality</div>
+              <div class="row q-px-md q-py-xs">
+                <q-toggle v-model="hqOnly" label="High-quality only" @update:model-value="onHQChange" icon="check" />
+              </div>
+              <div class="row q-px-md q-py-xs">
+                <q-toggle v-model="options.exp_evidence" label="With matched experimental data only"
                        @update:model-value="onExpEvidenceChange"
                           hint="transcription/translation"
+                          icon="check"
                           clearable/>
               </div>
               <div class="row q-px-xs q-py-xs filter-toggle-label">
@@ -130,17 +155,27 @@
                   <a :href="'/family?accession=' + props.row.family">{{ props.row.family }}</a>
                 </template>
               </el-table-column>
-              <el-table-column label="Peptide sequence" width="300%">
+              <el-table-column label="Peptide sequence" width="300%" v-if="showColumns.sequence">
                 <template #default="props">
                   <code class="sequence">{{ props.row.sequence }}</code>
                 </template>
               </el-table-column>
-              <el-table-column label="# smORF genes" width="120%">
+              <el-table-column label="# smORF genes" width="120%" align="right" v-if="showColumns.num_genes">
                 <template #default="props">
                   <span>{{ props.row.num_genes.toLocaleString() }}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="Quality" width="150%">
+              <el-table-column label="Molecular weight" width="150%" align="right" v-if="showColumns.molecular_weight">
+                <template #default="props">
+                  <span>{{ props.row.molecular_weight.toFixed(2) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="Isoelectric point" width="130%" align="right" v-if="showColumns.pI">
+                <template #default="props">
+                  <span>{{ props.row.isoelectric_point.toFixed(2) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="Quality" width="150%" v-if="showColumns.quality">
                 <template #default="props">
                   <div class="text-left text-bold">
                     <font :color="hasEvidence(props.row) ?'green':'red'">E
@@ -197,6 +232,14 @@ export default {
       advancedFiltersVisible: false,
       qualitySpecFiltersVisible: false,
       hqOnly: false,
+      showColumns: {
+        sequence: true,
+        num_genes: true,
+        molecular_weight: false,
+        pI: false,
+        charge: false,
+        quality: true,
+      },
       familyInDB: true,
       sampleInDB: true,
       loading: false,
