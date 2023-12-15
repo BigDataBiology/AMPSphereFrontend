@@ -49,7 +49,6 @@ app.use(
             }
     }
 )
-app.use(Quasar, quasarUserOptions)
 app.use(ElementPLus, {locale})
 app.use(VueAxios, axios)
 app.use(JsonViewer)
