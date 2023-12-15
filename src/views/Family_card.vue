@@ -110,10 +110,15 @@
                         </el-table-column>
                         <el-table-column label="Quality" width="150%">
                           <template #default="props">
-                            <font :color="hasEvidence(props.row) === 'Passed'?'green':'red'">E<q-tooltip max-width="30rem">Has experimental evidence ({{ hasEvidence(props.row) }})</q-tooltip></font> -
-                            <font :color="props.row.RNAcode === 'Passed'?'green':'red'">R<q-tooltip max-width="30rem">RNAcode ({{ props.row.RNAcode }})</q-tooltip></font> -
-                            <font :color="props.row.Antifam === 'Passed'?'green':'red'">A<q-tooltip max-width="30rem">Antifam ({{ props.row.Antifam }})</q-tooltip></font> -
-                            <font :color="props.row.coordinates === 'Passed'?'green':'red'">T<q-tooltip max-width="30rem">Terminal placement ({{ props.row.coordinates }})</q-tooltip></font>
+                            <font :color="hasEvidence(props.row)?'green':'red'">E
+                                <q-tooltip max-width="30rem">Has experimental evidence
+                                ({{ hasEvidence(props.row) }})</q-tooltip></font> -
+                            <font :color="props.row.RNAcode === 'Passed'?'green':'red'">R
+                                <q-tooltip max-width="30rem">RNAcode ({{ props.row.RNAcode }})</q-tooltip></font> -
+                            <font :color="props.row.Antifam === 'Passed'?'green':'red'">A
+                                <q-tooltip max-width="30rem">Antifam ({{ props.row.Antifam }})</q-tooltip></font> -
+                            <font :color="props.row.coordinates === 'Passed'?'green':'red'">T
+                                <q-tooltip max-width="30rem">Terminal placement ({{ props.row.coordinates }})</q-tooltip></font>
                           </template>
                         </el-table-column>
                       </el-table>
@@ -250,6 +255,7 @@ import * as clipboard from "clipboard-polyfill/text";
 import { std, mean } from 'mathjs'
 import {Notify} from "quasar";
 import SeqLogo from '@/components/SeqLogo'
+import { saveAs } from 'file-saver';
 
 
 export default {
@@ -341,7 +347,6 @@ export default {
     this.setAMPsPageSize(5)
   },
   mounted() {
-    
   },
   computed: {
     currentMetadata () {
@@ -375,7 +380,6 @@ export default {
     },
     getAlignment(){
       const url = '/families/' + this.accession + '/downloads/' + this.accession + '.aln'
-      console.log(url)
       let self = this
       self.axios.get(url, {})
       .then(function(response){
@@ -394,9 +398,7 @@ export default {
         // disordered: []
       }
       Object.values(this.features).forEach(function(amp_features) {
-        // console.log(amp_features)
         const amp_structure = amp_features.Secondary_structure
-        // console.log(amp_structure)
         probabilities.helix.push(amp_structure.helix)
         probabilities.sheet.push(amp_structure.sheet)
         probabilities.turn.push(amp_structure.turn)
@@ -404,10 +406,6 @@ export default {
       })
       console.log(probabilities)
       let data = [{
-        // Deprecated since Oct 20 2021.
-        // x: ['Alpha helix', 'Beta sheet', 'Beta turn', 'Disordered'],
-        // y: [mean(probabilities.helix), mean(probabilities.sheet),
-        //   mean(probabilities.turn), mean(probabilities.disordered)],
         x: ['Alpha helix', 'Beta turn', 'Beta sheet'],
         y: [mean(probabilities.helix), mean(probabilities.turn), mean(probabilities.sheet)],
         name: '',
@@ -433,8 +431,6 @@ export default {
       }
     },
     setAMPsPage(page) {
-      // this.$message('setting to ' + page + 'th page')
-      // Important: page index starting from zero.
       this.associatedAMPs.info.currentPage = page - 1
       console.log(this.associatedAMPs.info.currentPage)
       let config = {
@@ -562,7 +558,7 @@ export default {
       let habitat_data = {
         type: "sunburst",
         labels: data.habitat.labels,
-        parents: data.habitat.parents, 
+        parents: data.habitat.parents,
         values:  data.habitat.values,
         leaf: {opacity: 0.4},
         branchvalues: 'total'
@@ -633,7 +629,6 @@ export default {
             color: 'black'
           },
           visible: i === 0,
-          //name: ['EZenergy', 'Flexibility', 'Hydrophobicity Parker', 'SA AMPs'].slice(i),
         };
       }
       return [0, 1, 2, 3, 4, 5, 6, 7].map(makeTrace)
@@ -728,8 +723,10 @@ export default {
         Failed: 'red'
       }
       // const URL = 'https://badgen.net/badge/quality/' + quality_level_mapping[quality]  + '/' +
-      const URL = 'https://img.shields.io/static/v1?style=flat&label=' + name + '&color=' + color_mapping[test_result] + '&message=' + test_result + '&style=flat'
-      // console.log(URL)
+      const URL = 'https://img.shields.io/static/v1?style=flat' +
+                            '&label=' + name +
+                            '&color=' + color_mapping[test_result] +
+                            '&message=' + test_result;
       return URL
     },
     MapColors(categories, colors){
@@ -769,13 +766,9 @@ export default {
         }
       }
     },
-    getFamilyPageURL(){
-      return "http://119.3.63.164/family?accession=" + this.family
-    },
     CopyPeptideSequence(){
       clipboard.writeText(this.sequence).then(
           () => {
-            console.log("success!");
             this.showNotif('Peptide sequences copied.')
           },
           () => { console.log("error!"); }
@@ -805,15 +798,6 @@ export default {
     },
     UnpackCol(rows, key) {
       return rows.map(function(row) { return row[key]; });
-    },
-    downloadCurrPage(){
-      print()
-    },
-    AMPDetail(accession){
-      window.open('/amp?accession='+accession, '_blank')
-    },
-    indexByStatsName(index){
-      return Object.keys(this.features)[index + 1]
     },
     toDownloadsTable(downloads){
       let tableData = []
@@ -847,11 +831,7 @@ export default {
       window.open(encodeURI(url), '_blank')
     },
     hasEvidence(AMP){
-      if (AMP.metaproteomes === 'Passed' || AMP.metatranscriptomes === 'Passed'){
-        return "Passed"
-      } else {
-        return "Failed"
-      }
+      return (AMP.metaproteomes === 'Passed' || AMP.metatranscriptomes === 'Passed');
     },
     descStyle(){
       return 'download-desc'
