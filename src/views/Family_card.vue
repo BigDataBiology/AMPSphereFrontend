@@ -26,7 +26,7 @@
                         Consensus sequence <q-btn @click="CopyPeptideSequence()" icon="content_copy" size="sm"></q-btn>
                       </div>
                       <div v-if="consensusSequence !== ''">
-                        <pre><code id="aa-sequence">{{ consensusSequence }}</code></pre>
+                        <code id="aa-sequence" class="sequence">{{ consensusSequence }}</code>
                       </div>
                     </div>
                     <div class="col-12 col-md-8 offset-md-1 q-pt-md q-px-md justify-left" id="seq-logo">
@@ -91,7 +91,7 @@
                         </el-table-column>
                         <el-table-column label="Peptide sequence" width="300%">
                           <template #default="props">
-                            <pre><code><small>{{ props.row.sequence }}</small></code></pre>
+                            <code class="sequence"><small>{{ props.row.sequence }}</small></code>
                           </template>
                         </el-table-column>
                         <el-table-column label="# smORF genes" width="150%">

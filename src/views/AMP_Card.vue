@@ -48,7 +48,7 @@
                     <div class="subsubsection-title">
                       Peptide sequence <q-btn @click="CopyPeptideSequence()" icon="content_copy" size="sm"></q-btn>
                     </div>
-                    <pre><code id="aa-sequence">{{ amp.sequence }}</code></pre>
+                    <code id="aa-sequence" class="sequence">{{ amp.sequence }}</code>
                     <div class="subsubsection-title">Secondary Structure</div>
                     <Plotly :data="SecStructureBarData()" :layout="secondaryStructureLayout()"
                             :toImageButtonOptions="{format: 'svg', scale: 1}"/>
@@ -101,7 +101,7 @@
                       <el-table-column prop="GMSC_accession" label="Gene" sortable width="260%"/>
                       <el-table-column label="Gene sequense" sortable width="400%">
                         <template #default="props">
-                          <pre><code><small>{{ props.row.gene_sequence }}</small></code></pre>
+                          <code class="sequence">{{ props.row.gene_sequence }}</code>
                         </template>
                       </el-table-column>
                       <el-table-column prop="sample" label="Sample/Genome" sortable width="200%"/>

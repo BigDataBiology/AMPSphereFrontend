@@ -100,10 +100,6 @@ pre {
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
 code {
-    -webkit-user-select: all;
-    user-select: all;
-    display: block;
-    padding: 20px;
     border: 1px;
     /*color: #7F7F7F;*/
     background-color: #F5F5F5;
@@ -116,6 +112,13 @@ code:focus {
     outline: none;
     animation: select 100ms step-end forwards;
 }
+code.sequence {
+    font-size: small;
+    display: block;
+    padding: 20px;
+    user-select: all;
+}
+
 @keyframes select {
     to {
         -webkit-user-select: text;

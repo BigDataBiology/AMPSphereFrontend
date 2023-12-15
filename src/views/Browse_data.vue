@@ -132,7 +132,7 @@
               </el-table-column>
               <el-table-column label="Peptide sequence" width="300%">
                 <template #default="props">
-                  <pre><code><small>{{ props.row.sequence }}</small></code></pre>
+                  <code class="sequence">{{ props.row.sequence }}</code>
                 </template>
               </el-table-column>
               <el-table-column label="# smORF genes" width="120%">
