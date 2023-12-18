@@ -31,7 +31,7 @@
           <div class="col-12 text-body1">
             The AMP belongs to
             <a :href="getFamilyPageURL()"><span class="text-body1">{{ amp.family }}</span></a>
-            family and has {{ amp.length }} amino acid residues.
+            family and has {{ amp.sequence.length }} amino acid residues.
           </div>
         </div>
         
@@ -329,7 +329,6 @@ export default {
       amp: {
         accession: this.$route.query.accession,
         sequence: '',
-        length: 0,
         family: '',
         molecular_weight: 0,
         aromaticity: 0,
