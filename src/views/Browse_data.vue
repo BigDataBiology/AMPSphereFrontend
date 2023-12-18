@@ -334,13 +334,7 @@ export default {
       let self = this
       this.axios.get('/amps', config)
           .then(function (response) {
-            console.log(response.data.data)
             self.amps = response.data.data
-            for(let amp of self.amps){
-              amp.num_genes = amp.metadata.info.totalItem
-              delete amp.metadata
-              delete amp.secondary_structure
-            }
             self.info.totalPage = response.data.info.totalPage
             self.info.totalRow = response.data.info.totalItem
           })
