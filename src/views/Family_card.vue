@@ -96,7 +96,7 @@
                         </el-table-column>
                         <el-table-column label="# smORF genes" width="150%" align="right">
                           <template #default="props">
-                            <span>{{ props.row.metadata.info.totalItem.toLocaleString() }}</span>
+                            <span>{{ props.row.num_genes.toLocaleString() }}</span>
                           </template>
                         </el-table-column>
                         <el-table-column label="Molecular weight" width="150%" align="right">
