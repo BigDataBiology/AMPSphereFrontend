@@ -158,7 +158,6 @@ export default {
       let config = {params: {query: this.sequences}}
       this.axios.get(path, config)
         .then(function (response) {
-          console.log(response.data)
           if (response.data) {
             self.result = response.data
           } else {
@@ -169,12 +168,15 @@ export default {
           let included = []
           for (let i = 0; i < self.result.length; i++) {
             let query
-            if (self.method === 'MMseqs'){query = self.result[i].query_identifier; console.log('filter:', query)}
-            else if (self.method === 'HMMER'){query = self.result[i].query_name; console.log('filter:', query)}
-            else {console.log('no matching method.')}
+            if (self.method === 'MMseqs') {
+                query = self.result[i].query_identifier
+            } else if (self.method === 'HMMER') {
+                query = self.result[i].query_name
+            } else {
+                console.log('no matching method.')
+            }
             if (!included.includes(query)) {
               included.push(query)
-              console.log('filter appended', query)
               self.queryFilters.push({text: query, value: query})
             }
           }
@@ -190,10 +192,8 @@ export default {
       let included = []
       for (let i = 0; i < this.result.length; i++) {
         let query = this.result[i].query_identifier
-        console.log('filter:', query)
         if (!included.includes(query)) {
           included.push(query)
-          console.log('filter appended', query)
           this.queryFilters.push({text: query, value: query})
         }
       }
@@ -203,10 +203,8 @@ export default {
       let included = []
       for (let i = 0; i < this.result.length; i++) {
         let query = this.result[i].query_name
-        console.log('filter:', query)
         if (!included.includes(query)) {
           included.push(query)
-          console.log('filter appended', query)
           this.queryFilters.push({text: query, value: query})
         }
       }

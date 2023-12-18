@@ -362,7 +362,6 @@ export default {
       let fam_accession = this.accession
       this.axios.get('/families/' + fam_accession, {})
           .then(function (response) {
-            console.log(response.data)
             // self.consensusSequence = response.data.sequence
             self.num_amps = response.data.num_amps
             self.consensusSequence = response.data.consensus_sequence
@@ -371,8 +370,6 @@ export default {
             self.downloads = self.toDownloadsTable(response.data.downloads)
             self.secondaryStructureGraphData = self.SecStructureBarData()
             self.featuresGraphData = self.featuresBoxplotData()
-            console.log(self.secondaryStructureGraphData)
-            console.log(self.featuresGraphData)
           })
           .catch(function (error) {
             console.log(error);
@@ -384,7 +381,6 @@ export default {
       self.axios.get(url, {})
       .then(function(response){
         self.alignment = response.data.split('\n')
-        console.log(self.alignment)
       })
       .catch(function(error){
         console.log(error)
@@ -404,7 +400,6 @@ export default {
         probabilities.turn.push(amp_structure.turn)
         // probabilities.disordered.push(1 - amp_structure.helix - amp_structure.sheet - amp_structure.turn)
       })
-      console.log(probabilities)
       let data = [{
         x: ['Alpha helix', 'Beta turn', 'Beta sheet'],
         y: [mean(probabilities.helix), mean(probabilities.turn), mean(probabilities.sheet)],
@@ -432,7 +427,6 @@ export default {
     },
     setAMPsPage(page) {
       this.associatedAMPs.info.currentPage = page - 1
-      console.log(this.associatedAMPs.info.currentPage)
       let config = {
         params: {
           family: this.accession,
@@ -443,7 +437,6 @@ export default {
       let self = this
       this.axios.get('/amps/', config)
           .then(function (response) {
-            console.log(response.data)
             self.associatedAMPs.currentData = response.data.data
             self.associatedAMPs.info.totalPage = response.data.info.totalPage
             self.associatedAMPs.info.totalRow = response.data.info.totalItem
@@ -457,7 +450,6 @@ export default {
       this.setAMPsPage(1)
     },
     handleDialogClose(){
-      console.log('dialog closed')
     },
     GeoPlotData(){
       let data = this.distribution.geo
@@ -731,7 +723,6 @@ export default {
     },
     MapColors(categories, colors){
       const levels = [...new Set(categories)]
-      console.log(levels)
       const mapping = []
       for (let i=0; i<=categories.length; i++){
         mapping[levels[i]] = colors[i]
@@ -793,7 +784,6 @@ export default {
         visibility[i] = false
       }
       visibility[index] = true
-      console.log(visibility)
       return visibility
     },
     UnpackCol(rows, key) {
@@ -827,7 +817,6 @@ export default {
       return tableData
     },
     download(url){
-      console.log(url)
       window.open(encodeURI(url), '_blank')
     },
     hasEvidence(AMP){
@@ -847,13 +836,11 @@ export default {
       let self = this
       this.axios.get('/amps/', config)
         .then(function (response) {
-        // console.log(response.data.data)
         let amps = response.data.data
         let fasta = ''
         for (let amp of amps){
           fasta = fasta + '>' + amp.accession + '\n' + amp.sequence + '\n'
         }
-        // console.log(fasta)
         const blob = new Blob([fasta], {type: "text/plain;charset=utf-8"});
         saveAs(blob, self.accession + ".faa");
         })
@@ -863,20 +850,17 @@ export default {
     },
     async DownloadAssociatedAMPs(){
       const ObjectsToCsv = require('objects-to-csv');
-      console.log('accessing all amps')
       let config = {
         params: {page: 0, page_size: this.associatedAMPs.info.totalRow, family: this.accession}
       }
       let all_amps
       await this.axios.get('/amps/', config)
       .then(function (response) {
-        console.log(response.data)
         all_amps = response.data.data
       })
       .catch(function (error) {
         console.log(error);
       })
-      console.log(all_amps)
       const data = new ObjectsToCsv(all_amps);
       const str = await data.toString()
       const blob = new Blob([str], {type: "text/plain;charset=utf-8"});

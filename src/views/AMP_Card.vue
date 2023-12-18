@@ -395,7 +395,6 @@ export default {
       let amp_accession = self.$route.query.accession
       this.axios.get('/amps/' + amp_accession, {})
           .then(function (response) {
-            console.log(response.data)
             self.amp = response.data
             self.amp.charge_at_pH_7 = response.data.charge
             self.amp.metadata.info.totalRow = response.data.metadata.info.totalItem
@@ -406,7 +405,6 @@ export default {
           })
       this.axios.get('/amps/' + amp_accession + '/distributions', {})
           .then(function (response) {
-            console.log(response.data)
             self.distribution = response.data
           })
           .catch(function (error) {
@@ -420,14 +418,12 @@ export default {
         Failed: "red",
       }
       const URL = 'https://img.shields.io/static/v1?style=flat&label=' + name + '&color=' + colors_mapping[value] + '&message=' + value + '&style=flat'
-      // console.log(URL)
       return URL
     },
     getFamilyFeatures() {
       let self = this
       this.axios.get('/families/' + self.amp.family + '/features', {})
           .then(function (response) {
-            console.log(response.data)
             self.updateFamilyFeatures(response.data)
           })
           .catch(function (error) {
@@ -458,18 +454,15 @@ export default {
     },
     setMetadataPage(page) {
       this.amp.metadata.info.currentPage = page - 1
-      console.log(this.amp.metadata.info.currentPage)
       let config = {
         params: {page: this.amp.metadata.info.currentPage, page_size: this.amp.metadata.info.pageSize}
       }
       let self = this
       this.axios.get('/amps/' + this.amp.accession + '/metadata', config)
           .then(function (response) {
-            console.log(response.data)
             self.amp.metadata.data = response.data.data
             self.amp.metadata.info.totalPage = response.data.info.totalPage
             self.amp.metadata.info.totalRow = response.data.info.totalItem
-            console.log(self.amp.metadata.data)
           })
           .catch(function (error) {
             console.log(error);
@@ -678,7 +671,6 @@ export default {
       ]
     },
     familyFeatureGraphLayout(value) {
-      // console.log(value)
       return {
         // title: name,
         autosize: true,
@@ -777,7 +769,6 @@ export default {
     },
     MapColors(categories, colors) {
       const levels = [...new Set(categories)]
-      console.log(levels)
       const mapping = []
       for (let i = 0; i <= categories.length; i++) {
         mapping[levels[i]] = colors[i]
@@ -816,7 +807,6 @@ export default {
     CopyPeptideSequence() {
       clipboard.writeText(this.amp.sequence).then(
           () => {
-            console.log("success!");
             this.showNotif('Peptide sequences copied.')
           },
           () => {
@@ -843,7 +833,6 @@ export default {
         visibility[i] = false
       }
       visibility[index] = true
-      console.log(visibility)
       return visibility
     },
     UnpackCol(rows, key) {
@@ -862,13 +851,11 @@ export default {
       let all_metadata
       await this.axios.get('/amps/' + this.amp.accession + '/metadata', config)
       .then(function (response) {
-        console.log(response.data)
         all_metadata = response.data.data
       })
       .catch(function (error) {
         console.log(error);
       })
-      console.log(all_metadata)
       const data = new ObjectsToCsv(all_metadata);
       const str = await data.toString()
       const blob = new Blob([str], {type: "text/plain;charset=utf-8"});

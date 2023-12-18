@@ -156,7 +156,6 @@ export default {
   },
   methods: {
     handleFamilyDetail(accession) {
-      console.log('goto', '/family?accession=' + accession)
       window.open('/family?accession=' + accession)
     },
     handleBrowse(by) {
@@ -166,7 +165,6 @@ export default {
       var self = this
       this.axios.get('/statistics', {})
           .then(function (response) {
-            console.log(response.data)
             self.statistics = response.data
             self.distributionData =  {
               genes_amps: [

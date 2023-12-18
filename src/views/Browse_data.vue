@@ -327,7 +327,6 @@ export default {
     },
     setAMPsPage(page) {
       this.info.currentPage = page - 1
-      console.log(this.info.currentPage)
       let config = {
         params: this.getParams()
       }
@@ -350,7 +349,6 @@ export default {
       let self = this
       this.axios.get('/all_available_options')
           .then(function (response) {
-            console.log(response.data)
             self.staticOptions = Object.assign({}, response.data)
             self.availableOptions = response.data
           })
@@ -464,9 +462,7 @@ export default {
         "Not tested": 'yellow',
         Failed: 'red'
       }
-      // const URL = 'https://badgen.net/badge/quality/' + quality_level_mapping[quality]  + '/' +
       const URL = 'https://img.shields.io/static/v1?style=flat&label=' + name + '&color=' + color_mapping[test_result] + '&message=' + test_result + '&style=flat'
-      // console.log(URL)
       return URL
     },
     setLoading(isLoading) {
@@ -489,7 +485,6 @@ export default {
       let self = this;
       this.axios.get('/in_db/' + entity_type + '/' + val)
           .then(function (response) {
-            console.log(entity_type, val, response.data)
             if (entity_type === 'family'){
               self.familyInDB = response.data
             }
