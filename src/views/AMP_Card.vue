@@ -310,7 +310,7 @@ import Plotly from "../components/Plotly"
 import * as clipboard from "clipboard-polyfill/text"
 import { Notify } from "quasar"
 import HelicalWheel from '@/components/HelicalWheel'
-
+import { saveAs } from 'file-saver';
 
 export default {
   name: 'AMP_card',
@@ -377,9 +377,6 @@ export default {
       },
     }
   },
-  // setup (){
-  //   const $q = useQuasar()
-  // },
   created() {
     this.getAMP()
   },
@@ -441,7 +438,6 @@ export default {
     },
     SecStructureBarData() {
       let strucData = this.amp.secondary_structure
-      // strucData.disordered = 1 - strucData.turn - strucData.helix - strucData.sheet
       return [{
         type: 'bar',
         name: '',
@@ -573,7 +569,7 @@ export default {
     },
     MicrobialSourcePlotLayout(){
       return {
-        margin: {l: 200, r: 50, b: 80, t: 20}, autosize: false, height: 500, width: 600, 
+        margin: {l: 200, r: 50, b: 80, t: 20}, autosize: false, height: 500, width: 600,
         xaxis: {
           type: 'log', autorange: true,
           title: {
@@ -589,47 +585,14 @@ export default {
       let data = this.distribution
       let habitat_data = {
         type: "sunburst",
-        labels: data.habitat.labels, //["Eve", "Cain", "Seth", "Enos", "Noam", "Abel", "Awan", "Enoch", "Azura"],
-        parents: data.habitat.parents, //["", "Eve", "Eve", "Seth", "Seth", "Eve", "Eve", "Awan", "Eve" ],
-        values: data.habitat.values, //[65, 14, 12, 10, 2, 6, 6, 4, 4],
+        labels: data.habitat.labels,
+        parents: data.habitat.parents,
+        values: data.habitat.values,
         leaf: {opacity: 0.4},
-        // marker: {line: {"width": 2}},
         branchvalues: 'total'
       }
-      // let host_data = {
-      //   type: "sunburst",
-      //   labels: data.host.labels, //['Viruses', "Anelloviridae", "unclassified Anelloviridae", "Small anellovirus", "cellular organisms", "Bacteria", "Terrabacteria group", "Actinobacteria"],
-      //   parents: data.host.parents, // ["", 'Viruses', "Anelloviridae", "unclassified Anelloviridae", "", "cellular organisms", "Bacteria", "Terrabacteria group"],
-      //   values: data.host.values, //[14, 14, 14, 14, 6, 6, 6, 6],
-      //   outsidetextfont: {size: 20, color: "#377eb8"},
-      //   leaf: {opacity: 0.4},
-      //   // marker: {line: {width: 2}},
-      //   branchvalues: 'total',
-      //   visible: false,
-      // }
       return [habitat_data]
     },
-    // DistributionGraphLayout() {
-    //   return {
-    //     height: 400, margin: {l: 40, r: 40, b: 40, t: 40}, autosize: true,
-    //     sunburstcolorway: this.ColorPalette('qualitative'),
-    //     updatemenus: [{
-    //       direction: 'left', type: 'buttons', pad: {r: 10, t: 10},
-    //       showactive: true, x: 0.5, y: 1.2, yanchor: 'top', xanchor: 'center',
-    //       buttons: [{
-    //         method: 'update',
-    //         args: [{'visible': this.makeTraceVisible(0, 2)}],
-    //         label: 'Habitats'
-    //       }, {
-    //         method: 'update',
-    //         args: [{'visible': this.makeTraceVisible(1, 2)}],
-    //         label: 'Hosts'
-    //       },
-    //       ]
-    //     }
-    //     ]
-    //   }
-    // },
     initFamilyFeatures() {
       this.famFeaturesGraphData = {
         molecular_weight: [],
@@ -816,7 +779,7 @@ export default {
     CopyPeptideSequence() {
       clipboard.writeText(this.amp.sequence).then(
           () => {
-            this.showNotif('Peptide sequences copied.')
+            this.showNotif('Peptide sequence copied.')
           },
           () => {
             console.log("error!");
@@ -831,9 +794,6 @@ export default {
         position: 'bottom',
         timeout: 3000,
         icon: 'announcement',
-        // actions: [
-        //   { label: 'Got it', color: 'yellow', handler: () => { /* ... */ } }
-        // ]
       })
     },
     makeTraceVisible(index, totalTrace) {
