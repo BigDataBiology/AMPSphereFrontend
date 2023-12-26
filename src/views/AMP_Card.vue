@@ -312,6 +312,7 @@ import { Notify } from "quasar"
 import HelicalWheel from '@/components/HelicalWheel'
 import { saveAs } from 'file-saver';
 
+
 export default {
   name: 'AMP_card',
   components: {
@@ -400,6 +401,10 @@ export default {
             self.getFamilyFeatures()
           })
           .catch(function (error) {
+            Notify.create({
+                  type: 'negative',
+                  message: ('Error while loading data: API may be down: ' + error),
+                })
             console.log(error);
           })
       this.axios.get('/amps/' + amp_accession + '/distributions', {})
