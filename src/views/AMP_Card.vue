@@ -45,9 +45,17 @@
                       Peptide sequence <q-btn @click="CopyPeptideSequence()" icon="content_copy" size="sm"></q-btn>
                     </div>
                     <code id="aa-sequence" class="sequence">{{ amp.sequence }}</code>
-                    <div class="subsubsection-title">Secondary Structure</div>
-                    <Plotly :data="SecStructureBarData()" :layout="secondaryStructureLayout()"
-                            :toImageButtonOptions="{format: 'svg', scale: 1}"/>
+                      <div class="subsection-title">Co-prediction</div>
+
+                      <el-table :data="coprediction" width="100%">
+                          <el-table-column prop="predictor" label="Predictor" width="200%"/>
+                          <el-table-column prop="value" label="Value" width="200%">
+                            <template #default="props">
+                              {{ props.row.value.toFixed(2) }}
+                            </template>
+                          </el-table-column>
+                      </el-table>
+                      <p>All peptides in the AMPSphere were predicted by <a href="https://peerj.com/articles/10555/">Macrel</a> (p &gt; 0.5), but were subsequently run through several additional predictors (shown above)</p>
                   </div>
                   <div class="col-12 col-md-8 offset-md-1 q-pt-md q-px-md justify-center" id="global distribution">
                     <div class="subsubsection-title text-center">Geographical Distribution</div>
@@ -180,14 +188,11 @@
                         <Plotly :data="makeFamilyFeatureTraces(famFeaturesGraphData.charge_at_pH_7, 'rgba(127, 96, 0, 0.5)')"
                                 :layout="familyFeatureGraphLayout(amp.charge_at_pH_7)" />
                       </div>
-                      <div class="info-item-value">
-                        The features were calculated by using the
-                        <a href="https://biopython.org/docs/1.79/api/Bio.SeqUtils.ProtParam.html">
-                          Bio.SeqUtils.ProtParam.ProteinAnalysis</a> module from<a href="https://doi.org/10.1093/bioinformatics/btp163">
-                          BioPython
-                        </a> (version 1.79).
-                      </div>
                     </div>
+                    <q-separator></q-separator>
+                        <div class="subsubsection-title">Secondary Structure</div>
+                        <Plotly :data="SecStructureBarData()" :layout="secondaryStructureLayout()"
+                                :toImageButtonOptions="{format: 'svg', scale: 1}"/>
                   </div>
                 </div>
               </q-tab-panel>
@@ -319,6 +324,7 @@ export default {
       habitat: {type: "bar plot", labels: [], values: []},
       microbial_source: {type: "bar plot", labels: [], values: []}
     }
+    const default_coprediction = null
     return {
       tabName: 'overview',
       amp: {
@@ -350,6 +356,7 @@ export default {
         },
       },
       distribution: default_distribution,
+      coprediction: default_coprediction,
       default_distribution: default_distribution,
       famFeaturesGraphData: {
         molecular_weight: [],
@@ -401,6 +408,13 @@ export default {
       this.axios.get('/amps/' + amp_accession + '/distributions', {})
           .then(function (response) {
             self.distribution = response.data
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      this.axios.get('/amps/' + amp_accession + '/coprediction', {})
+          .then(function (response) {
+            self.coprediction = response.data
           })
           .catch(function (error) {
             console.log(error)
