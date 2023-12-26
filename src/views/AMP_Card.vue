@@ -8,10 +8,6 @@
             Antimicrobial peptide: {{ amp.accession }}<br/><br/>
           </div>
           <div class="col-10 justify-center" style="display: inline-flex; height: 100%; width: 100%">
-            <!-- <font :color="hasEvidence(amp) === 'Passed'?'green':'red'">E<q-tooltip max-width="30rem">Has experimental evidence ({{ hasEvidence(amp) }})</q-tooltip></font> -
-            <font :color="amp.RNAcode === 'Passed'?'green':'red'">R<q-tooltip max-width="30rem">RNAcode ({{ amp.RNAcode }})</q-tooltip></font> -
-            <font :color="amp.Antifam === 'Passed'?'green':'red'">A<q-tooltip max-width="30rem">Antifam ({{ amp.Antifam }})</q-tooltip></font> -
-            <font :color="amp.coordinates === 'Passed'?'green':'red'">T<q-tooltip max-width="30rem">Terminal placement ({{ amp.coordinates }})</q-tooltip></font> -->
       <img :src="makeQualityBadge('Antifam', amp.Antifam)" fit="scale-down"
                   alt="Quality badge cannot be shown. Please check your internet connection."
                   title="Search against Antifam, a database of profile-HMMs created from translations of commonly occurring non-coding RNAs"/> &nbsp; &nbsp;
@@ -34,7 +30,7 @@
             family and has {{ amp.sequence.length }} amino acid residues.
           </div>
         </div>
-        
+
         <div class="row bg-white">
           <div class="col-12 q-pa-md">
             <q-tabs v-model="tabName" dense align="justify" class="bg-grey-3 text-secondary">
@@ -71,7 +67,6 @@
                     <div class="subsection-title">Distribution</div>
                   </div>
                   <div class="col-12 col-md-6 q-px-md">
-<!--                    TODO Bigger title  and figure captions-->
                     <div class="subsubsection-title text-center">Habitats</div>
                     <div v-if="distribution.habitat.labels.length !== 0">
                       <Plotly :data="EnvPlotData()" :layout="EnvPlotLayout()" :toImageButtonOptions="{format: 'svg', scale: 1}"/>
