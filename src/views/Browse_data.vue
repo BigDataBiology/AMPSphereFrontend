@@ -356,13 +356,13 @@ export default {
             console.log(error);
           })
     },
-    filterHabitat(val, update, abort) {
+    filterHabitat(val, update) {
       update(() => {
         val = val.toLowerCase()
         this.availableOptions.habitat = this.staticOptions.habitat.filter(v => v.toLowerCase().indexOf(val) > -1)
       })
     },
-    filterMicrobialSource(val, update, abort) {
+    filterMicrobialSource(val, update) {
       update(() => {
         val = val.toLowerCase()
         this.availableOptions.microbial_source = this.staticOptions.microbial_source.filter(v => v.toLowerCase().indexOf(val) > -1)
