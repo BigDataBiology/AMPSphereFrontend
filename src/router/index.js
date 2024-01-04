@@ -96,7 +96,15 @@ const routes = [
         meta: {
             title: 'AMPSphere: Quality tests'
         }
-    }
+    },
+    {
+        path: "/sample",
+        name: "Sample",
+        component: BrowseData,
+        meta:{
+            title: 'AMPSphere: Sample data'
+        }
+    },
 ]
 
 const router = createRouter({

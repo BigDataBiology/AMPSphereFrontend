@@ -134,6 +134,7 @@
                   </div>
                   <div class="row q-px-md q-py-xs">
                     <q-input v-model="options.sample" type="text" label="Sample/Genome" filled style="width: 250px"
+                             v-if="!isSampleMode"
                              :error="(!sampleInDB && options.sample !== '')" lazy-rules
                              @change="onSampleChange" clearable @clear="onSampleClear"
                              error-message="The input does not match any sample/genome" />
@@ -144,6 +145,9 @@
           </div>
 
           <div class="col-12 col-md-9 q-py-sm q-px-lg">
+            <div class="row text-h4" v-if="isSampleMode">
+                AMPs in sample {{ options.sample }}
+            </div>
             <div class="row">
               <div class="col-6 main-text">Displaying: <span v-if="info.totalRow >= info.pageSize">{{info.pageSize}}</span> <span v-else>{{ info.totalRow.toLocaleString() }}</span> out of {{ info.totalRow.toLocaleString() }} results.</div>
               <div class="col-6" style="padding-right: 10rem;">
@@ -265,7 +269,8 @@ export default {
       },
       staticOptions: options_full,
       availableOptions: options_full,
-      filteredAvailableOptions: options_full
+      filteredAvailableOptions: options_full,
+      isSampleMode: false
     }
   },
   setup() {
@@ -294,6 +299,11 @@ export default {
     });
   },
   mounted() {
+    if (this.$route.query.sample) {
+      this.options.sample = this.$route.query.sample
+      this.isSampleMode = true
+      this.inDBChecking(this.options.sample, 'sample')
+    }
     this.setAMPsPageSize(100)
     this.getAvailableOptions()
   },
