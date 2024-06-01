@@ -39,15 +39,6 @@
     </q-header>
 
     <q-page-container>
-      <!--     TODO  Define space on different screen size inside each view component.-->
-      <!--     template-->
-      <!--      <div class="row justify-center">-->
-      <!--        <div class="col-xs-0 col-xl-2 bg-white"></div>-->
-      <!--        <div class="col-12 col-xl-8 justify-center q-pr-md q-ma-auto">-->
-      <!--          content...-->
-      <!--        </div>-->
-      <!--        <div class="col-xs-0 col-xl-2 bg-white"></div>-->
-      <!--      </div>-->
       <router-view class="q-px-md q-pt-md" />
     </q-page-container>
 
@@ -65,7 +56,6 @@
           href="https://doi.org/10.1101/2023.08.31.555663">Santos-Júnior et
           al., 2023</a>).
         </div>
-<!--        <div class="col-0 col-sm-1 col-md-2 bg-white"></div>-->
       </div>
     </q-footer>
   </q-layout>
