@@ -135,26 +135,6 @@ export default {
     }
   },
   created() {
-    // let self = this
-    // // https://stackoverflow.com/questions/50768678/axios-ajax-show-loading-when-making-ajax-request
-    // this.axios.interceptors.request.use((config) => {
-    //   self.loading = true
-    //   // trigger 'loading=true' event here
-    //   return config;
-    // }, (error) => {
-    //   self.loading = false
-    //   // trigger 'loading=false' event here
-    //   return Promise.reject(error);
-    // });
-    // this.axios.interceptors.response.use((response) => {
-    //   self.loading = true
-    //   // trigger 'loading=false' event here
-    //   return response;
-    // }, (error) => {
-    //   self.loading = false
-    //   // trigger 'loading=false' event here
-    //   return Promise.reject(error);
-    // });
   },
   mounted() {
     this.activeMenuItem=window.location.href.split('/')[3];
@@ -172,7 +152,6 @@ export default {
         window.open('/family?accession=' + this.searchTerm, '_self')
       } else {
         this.showInputAccNotif()
-        // window.open(encodeURI('/text_search?query=' + this.searchTerm), '_self')
       }
     }
   }

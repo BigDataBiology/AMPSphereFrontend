@@ -7,19 +7,13 @@
         </div>
         <p id="viewof-inputAngle"></p>
         <p id="viewof-currColors"></p>
-        <!-- <p id="viewof-labelOption"></p> -->
-        <!-- <div id="viewof-numsOn"></div>
-        <div id="viewof-residuesOn"></div> -->
-        <!-- <p id="viewof-strokeThickness"></p> -->
-        <!-- <p id="viewof-labelColor"></p>
-        <p id="viewof-numColor"></p> -->
         <p id="viewof-hMoment"></p>
         <p id="viewof-hFace"></p>
 
         <q-separator></q-separator>
         <div class="info-item-value q-py-md">
           <p>Click <span id="svgSave"></span> to download.</p>
-          <p>Generated based on Tina Wang and Shyam Saladi's work 
+          <p>Generated based on Tina Wang and Shyam Saladi's work
           (<a href="https://clemlab.github.io/helicalwheel/">https://clemlab.github.io/helicalwheel/</a>).
           If you want to customize the graph, please use their original website.</p>
         </div>
