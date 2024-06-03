@@ -11,9 +11,6 @@
                 <q-toggle v-model="showColumns.sequence" label="Peptide sequence" icon="check" />
               </div>
               <div class="row q-px-md q-py-xs">
-                <q-toggle v-model="showColumns.pI" label="Isoelectric point" icon="check" />
-              </div>
-              <div class="row q-px-md q-py-xs">
                 <q-toggle v-model="showColumns.num_genes" label="Number of smORF genes" icon="check" />
                 <q-icon name="help" class="q-ml-xs" size="16px" color="grey-7">
                   <q-tooltip
@@ -23,6 +20,9 @@
                     class="bg-amber text-black shadow-4 text-body2"
                   >Number of smORFs that encode the peptide. A peptide can be found in multiple samples/genome and slightly different DNA sequences can code for the same peptide</q-tooltip>
               </q-icon>
+              </div>
+              <div class="row q-px-md q-py-xs">
+                <q-toggle v-model="showColumns.pI" label="Isoelectric point" icon="check" />
               </div>
               <div class="row q-px-md q-py-xs">
                 <q-toggle v-model="showColumns.molecular_weight" label="Molecular weight" icon="check" />
