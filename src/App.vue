@@ -52,8 +52,7 @@
           &copy;2021-{{year}}
           <cite>AMPSphere authors</cite>.
           The resource is described in detail in (<a
-          href="https://doi.org/10.1101/2023.08.31.555663">Santos-Júnior et
-          al., 2023</a>).
+          href="https://doi.org/10.1016/j.cell.2024.05.013">Santos-Júnior, Torres, et al., 2024</a>).
         </div>
       </div>
     </q-footer>
