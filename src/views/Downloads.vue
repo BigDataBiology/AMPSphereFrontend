@@ -58,7 +58,7 @@ export default {
         {
           name: "MMseqs database",
           type: "Search database",
-          file: prefix + "/downloads/AMPSphere_latest.mmseqsdb",
+          file: prefix + "/downloads/AMPSphere_latest.mmseqsdb.tar.xz",
           desc: 'Search database for offline or large scale query, can be directly used by the MMseqs software.'
         },
         {
