@@ -1,0 +1,31 @@
+{
+  "app": {
+    "elm": {
+      "development": { "debugger": true },
+      "production": { "debugger": false }
+    },
+    "env": ["API_BASE_URL"],
+    "html": {
+      "attributes": {
+        "html": { "lang": "en" },
+        "head": {}
+      },
+      "title": "AMPSphere",
+      "meta": [
+        { "charset": "UTF-8" },
+        { "http-equiv": "X-UA-Compatible", "content": "IE=edge" },
+        { "name": "viewport", "content": "width=device-width, initial-scale=1.0" }
+      ],
+      "link": [
+        { "rel": "stylesheet", "href": "/styles.css" }
+      ],
+      "script": [
+        { "type": "text/javascript", "src": "https://cdn.plot.ly/plotly-2.35.2.min.js" }
+      ]
+    },
+    "router": {
+      "useHashRouting": false
+    },
+    "proxy": null
+  }
+}
