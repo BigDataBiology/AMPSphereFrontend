@@ -16,8 +16,9 @@ import Bootstrap.Spinner as Spinner
 import Bootstrap.Table as Table
 import Dict
 import Effect exposing (Effect)
+import Set exposing (Set)
 import Html exposing (Html)
-import Html.Attributes exposing (class, href, selected, value)
+import Html.Attributes exposing (class, href, selected, style, value)
 import Html.Events exposing (onClick)
 import Json.Decode
 import Http
@@ -61,6 +62,8 @@ type alias Model =
     , filterPiMax : String
     , filterChargeMin : String
     , filterChargeMax : String
+    , showAdvancedFilters : Bool
+    , visibleColumns : Set String
     }
 
 
@@ -94,6 +97,8 @@ init route _ =
       , filterPiMax = ""
       , filterChargeMin = ""
       , filterChargeMax = ""
+      , showAdvancedFilters = False
+      , visibleColumns = Set.fromList [ "accession", "family", "sequence", "length" ]
       }
     , Effect.batch
         [ Api.AvailableOptions.get { onResponse = GotOptions }
@@ -165,6 +170,8 @@ type Msg
     | SetChargeMax String
     | ApplyFilters
     | GoToPage Int
+    | ToggleAdvancedFilters
+    | ToggleColumn String
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -255,6 +262,21 @@ update msg model =
             , fetchAmps model pg
             )
 
+        ToggleAdvancedFilters ->
+            ( { model | showAdvancedFilters = not model.showAdvancedFilters }, Effect.none )
+
+        ToggleColumn col ->
+            ( { model
+                | visibleColumns =
+                    if Set.member col model.visibleColumns then
+                        Set.remove col model.visibleColumns
+
+                    else
+                        Set.insert col model.visibleColumns
+              }
+            , Effect.none
+            )
+
 
 fetchAmps : Model -> Int -> Effect Msg
 fetchAmps model pg =
@@ -312,7 +334,6 @@ viewSidebar model =
                     Api.Success opts ->
                         Html.div []
                             [ viewSelectFilter "Habitat" (List.map (\h -> ( h, h )) opts.habitat) SetHabitat (Maybe.withDefault "" model.filterHabitat)
-                            , viewSelectFilter "Microbial Source" (List.take 50 (List.map (\m -> ( m, m )) opts.microbialSource)) SetMicrobialSource (Maybe.withDefault "" model.filterMicrobialSource)
                             , viewSelectFilter "Quality" (List.map (\q -> ( q, q )) opts.quality) SetQuality (Maybe.withDefault "" model.filterQuality)
                             , Form.group []
                                 [ Form.label [] [ Html.text "Family" ]
@@ -323,10 +344,30 @@ viewSidebar model =
                                     , Input.small
                                     ]
                                 ]
-                            , viewRangeFilter "Peptide Length" model.filterPepLengthMin model.filterPepLengthMax SetPepLengthMin SetPepLengthMax
-                            , viewRangeFilter "Molecular Weight" model.filterMwMin model.filterMwMax SetMwMin SetMwMax
-                            , viewRangeFilter "Isoelectric Point" model.filterPiMin model.filterPiMax SetPiMin SetPiMax
-                            , viewRangeFilter "Charge at pH 7" model.filterChargeMin model.filterChargeMax SetChargeMin SetChargeMax
+                            , Html.a
+                                [ href "#"
+                                , class "d-block mb-3 small"
+                                , onClick ToggleAdvancedFilters
+                                ]
+                                [ Html.text
+                                    (if model.showAdvancedFilters then
+                                        "Hide advanced filters \u{25B4}"
+
+                                     else
+                                        "Show advanced filters \u{25BE}"
+                                    )
+                                ]
+                            , if model.showAdvancedFilters then
+                                Html.div []
+                                    [ viewSelectFilter "Microbial Source" (List.take 50 (List.map (\m -> ( m, m )) opts.microbialSource)) SetMicrobialSource (Maybe.withDefault "" model.filterMicrobialSource)
+                                    , viewRangeFilter "Peptide Length" model.filterPepLengthMin model.filterPepLengthMax SetPepLengthMin SetPepLengthMax
+                                    , viewRangeFilter "Molecular Weight" model.filterMwMin model.filterMwMax SetMwMin SetMwMax
+                                    , viewRangeFilter "Isoelectric Point" model.filterPiMin model.filterPiMax SetPiMin SetPiMax
+                                    , viewRangeFilter "Charge at pH 7" model.filterChargeMin model.filterChargeMax SetChargeMin SetChargeMax
+                                    ]
+
+                              else
+                                Html.text ""
                             , Button.button
                                 [ Button.primary, Button.block, Button.attrs [ onClick ApplyFilters ] ]
                                 [ Html.text "Apply Filters" ]
@@ -392,28 +433,67 @@ viewRangeFilter label minVal maxVal toMsgMin toMsgMax =
         ]
 
 
+allColumns : List ( String, String )
+allColumns =
+    [ ( "accession", "Accession" )
+    , ( "family", "Family" )
+    , ( "sequence", "Sequence" )
+    , ( "length", "Length" )
+    , ( "mw", "MW" )
+    , ( "pi", "pI" )
+    , ( "charge", "Charge" )
+    , ( "antifam", "Antifam" )
+    , ( "rnaCode", "RNAcode" )
+    , ( "coordinates", "Coordinates" )
+    , ( "numGenes", "# Genes" )
+    ]
+
+
+viewColumnToggles : Set String -> Html Msg
+viewColumnToggles visibleColumns =
+    Html.div [ class "mb-3 d-flex flex-wrap align-items-center" ]
+        (Html.span [ class "text-muted small mr-2" ] [ Html.text "Columns:" ]
+            :: List.map
+                (\( key, label ) ->
+                    Html.button
+                        [ class
+                            (if Set.member key visibleColumns then
+                                "btn btn-sm btn-outline-primary active mr-1 mb-1"
+
+                             else
+                                "btn btn-sm btn-outline-secondary mr-1 mb-1"
+                            )
+                        , onClick (ToggleColumn key)
+                        ]
+                        [ Html.text label ]
+                )
+                allColumns
+        )
+
+
 viewMainContent : Model -> Html Msg
 viewMainContent model =
     case model.ampsList of
         Api.Success response ->
+            let
+                active =
+                    allColumns
+                        |> List.filter (\( key, _ ) -> Set.member key model.visibleColumns)
+            in
             Html.div []
-                [ Html.p [ class "text-muted mb-3" ]
-                    [ Html.text (String.fromInt response.info.totalItem ++ " AMPs found") ]
+                [ Html.div [ class "d-flex justify-content-between align-items-start mb-3" ]
+                    [ Html.p [ class "text-muted mb-0" ]
+                        [ Html.text (String.fromInt response.info.totalItem ++ " AMPs found") ]
+                    ]
+                , viewColumnToggles model.visibleColumns
                 , Table.table
                     { options = [ Table.striped, Table.hover, Table.responsive, Table.small ]
                     , thead =
                         Table.simpleThead
-                            [ Table.th [] [ Html.text "Accession" ]
-                            , Table.th [] [ Html.text "Family" ]
-                            , Table.th [] [ Html.text "Sequence" ]
-                            , Table.th [] [ Html.text "Length" ]
-                            , Table.th [] [ Html.text "MW" ]
-                            , Table.th [] [ Html.text "pI" ]
-                            , Table.th [] [ Html.text "Charge" ]
-                            ]
+                            (List.map (\( _, label ) -> Table.th [] [ Html.text label ]) active)
                     , tbody =
                         Table.tbody []
-                            (List.map viewAmpRow response.data)
+                            (List.map (viewAmpRow active) response.data)
                     }
                 , viewPagination model response.info
                 ]
@@ -431,31 +511,70 @@ viewMainContent model =
             Html.text ""
 
 
-viewAmpRow : AmpSummary -> Table.Row Msg
-viewAmpRow amp =
+viewAmpRow : List ( String, String ) -> AmpSummary -> Table.Row Msg
+viewAmpRow activeColumns amp =
     Table.tr []
-        [ Table.td []
-            [ Html.a [ Route.Path.href (Route.Path.Amp_Accession_ { accession = amp.accession }) ]
-                [ Html.text amp.accession ]
-            ]
-        , Table.td []
-            [ Html.a [ Route.Path.href (Route.Path.Family_Accession_ { accession = amp.family }) ]
-                [ Html.text amp.family ]
-            ]
-        , Table.td [ Table.cellAttr (class "text-monospace small") ]
-            [ Html.text
-                (if String.length amp.sequence > 25 then
-                    String.left 25 amp.sequence ++ "..."
+        (List.map (\( key, _ ) -> ampCell key amp) activeColumns)
 
-                 else
-                    amp.sequence
-                )
-            ]
-        , Table.td [] [ Html.text (String.fromInt amp.length) ]
-        , Table.td [] [ Html.text (formatFloat 1 amp.molecularWeight) ]
-        , Table.td [] [ Html.text (formatFloat 2 amp.isoelectricPoint) ]
-        , Table.td [] [ Html.text (formatFloat 2 amp.charge) ]
-        ]
+
+ampCell : String -> AmpSummary -> Table.Cell Msg
+ampCell key amp =
+    case key of
+        "accession" ->
+            Table.td []
+                [ Html.a [ Route.Path.href (Route.Path.Amp_Accession_ { accession = amp.accession }) ]
+                    [ Html.text amp.accession ]
+                ]
+
+        "family" ->
+            Table.td []
+                [ Html.a [ Route.Path.href (Route.Path.Family_Accession_ { accession = amp.family }) ]
+                    [ Html.text amp.family ]
+                ]
+
+        "sequence" ->
+            Table.td [ Table.cellAttr (class "text-monospace small") ]
+                [ Html.text
+                    (if String.length amp.sequence > 25 then
+                        String.left 25 amp.sequence ++ "..."
+
+                     else
+                        amp.sequence
+                    )
+                ]
+
+        "length" ->
+            Table.td [] [ Html.text (String.fromInt amp.length) ]
+
+        "mw" ->
+            Table.td [] [ Html.text (formatFloat 1 amp.molecularWeight) ]
+
+        "pi" ->
+            Table.td [] [ Html.text (formatFloat 2 amp.isoelectricPoint) ]
+
+        "charge" ->
+            Table.td [] [ Html.text (formatFloat 2 amp.charge) ]
+
+        "antifam" ->
+            Table.td [] [ Html.text amp.antifam ]
+
+        "rnaCode" ->
+            Table.td [] [ Html.text amp.rnaCode ]
+
+        "coordinates" ->
+            Table.td [] [ Html.text amp.coordinates ]
+
+        "numGenes" ->
+            Table.td []
+                [ Html.text
+                    (amp.numGenes
+                        |> Maybe.map String.fromInt
+                        |> Maybe.withDefault "-"
+                    )
+                ]
+
+        _ ->
+            Table.td [] []
 
 
 viewPagination : Model -> Api.AmpList.PageInfo -> Html Msg
