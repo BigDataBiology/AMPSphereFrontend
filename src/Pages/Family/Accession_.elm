@@ -6,6 +6,7 @@ import Api.AmpList exposing (AmpListResponse, AmpSummary)
 import Api.Family exposing (Family)
 import Api.FamilyDownloads exposing (FamilyDownloads)
 import Api.FamilyFeatures exposing (AmpFeatures, FamilyFeatures)
+import Components.SeqLogo
 import Bootstrap.Alert as Alert
 import Bootstrap.Card as Card
 import Bootstrap.Card.Block as Block
@@ -61,6 +62,7 @@ type alias Model =
     , ampsPage : Int
     , ampsPageSize : Int
     , ampsList : Api.Data AmpListResponse
+    , alignment : Api.Data String
     }
 
 
@@ -79,6 +81,7 @@ init route _ =
       , ampsPage = 0
       , ampsPageSize = 20
       , ampsList = Api.Loading
+      , alignment = Api.NotAsked
       }
     , Effect.batch
         [ Api.Family.get { accession = accession, onResponse = GotFamily }
@@ -117,6 +120,7 @@ type Msg
     | TabMsg Tab.State
     | SwitchToFeatures
     | SwitchToDownloads
+    | GotAlignment (Result Http.Error String)
     | AmpsGoToPage Int
 
 
@@ -124,12 +128,23 @@ update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
         GotFamily (Ok fam) ->
-            ( { model | family = Api.Success fam }
-            , Effect.none
+            ( { model | family = Api.Success fam, alignment = Api.Loading }
+            , Effect.sendCmd
+                (Http.get
+                    { url = fam.downloads.alignment
+                    , expect = Http.expectString GotAlignment
+                    }
+                )
             )
 
         GotFamily (Err err) ->
             ( { model | family = Api.Failure err }, Effect.none )
+
+        GotAlignment (Ok text) ->
+            ( { model | alignment = Api.Success text }, Effect.none )
+
+        GotAlignment (Err err) ->
+            ( { model | alignment = Api.Failure err }, Effect.none )
 
         GotFeatures (Ok features) ->
             ( { model | features = Api.Success features }, Effect.none )
@@ -248,6 +263,7 @@ viewOverview model =
             Html.div []
                 [ viewFamilyInfo fam
                 , viewConsensusSequence fam.consensusSequence
+                , viewSeqLogo model.alignment
                 , viewDistributionCharts fam.distributions
                 , viewAssociatedAmps model
                 ]
@@ -306,6 +322,35 @@ viewConsensusSequence sequence =
                     )
             ]
         |> Card.view
+
+
+viewSeqLogo : Api.Data String -> Html Msg
+viewSeqLogo alignmentData =
+    case alignmentData of
+        Api.Success text ->
+            Card.config [ Card.attrs [ class "mb-3" ] ]
+                |> Card.headerH5 [] [ Html.text "Sequence Logo" ]
+                |> Card.block []
+                    [ Block.custom <|
+                        Components.SeqLogo.view text
+                    ]
+                |> Card.view
+
+        Api.Loading ->
+            Card.config [ Card.attrs [ class "mb-3" ] ]
+                |> Card.headerH5 [] [ Html.text "Sequence Logo" ]
+                |> Card.block []
+                    [ Block.custom <|
+                        Html.div [ class "text-center py-3" ]
+                            [ Spinner.spinner [] [] ]
+                    ]
+                |> Card.view
+
+        Api.Failure _ ->
+            Html.text ""
+
+        Api.NotAsked ->
+            Html.text ""
 
 
 viewDistributionCharts : Distributions -> Html Msg
