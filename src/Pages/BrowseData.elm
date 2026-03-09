@@ -2,7 +2,7 @@ module Pages.BrowseData exposing (Model, Msg, page)
 
 import Api
 import Api.AmpList exposing (AmpListResponse, AmpSummary)
-import Api.AvailableOptions exposing (AvailableOptions)
+import Api.AvailableOptions exposing (AvailableOptions, Range)
 import Bootstrap.Alert as Alert
 import Bootstrap.Button as Button
 import Bootstrap.Card as Card
@@ -18,8 +18,8 @@ import Dict
 import Effect exposing (Effect)
 import Set exposing (Set)
 import Html exposing (Html)
-import Html.Attributes exposing (class, href, selected, style, value)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (attribute, class, href, selected, style, value)
+import Html.Events exposing (onClick, onInput)
 import Json.Decode
 import Http
 import Layouts
@@ -360,10 +360,10 @@ viewSidebar model =
                             , if model.showAdvancedFilters then
                                 Html.div []
                                     [ viewSelectFilter "Microbial Source" (List.take 50 (List.map (\m -> ( m, m )) opts.microbialSource)) SetMicrobialSource (Maybe.withDefault "" model.filterMicrobialSource)
-                                    , viewRangeFilter "Peptide Length" model.filterPepLengthMin model.filterPepLengthMax SetPepLengthMin SetPepLengthMax
-                                    , viewRangeFilter "Molecular Weight" model.filterMwMin model.filterMwMax SetMwMin SetMwMax
-                                    , viewRangeFilter "Isoelectric Point" model.filterPiMin model.filterPiMax SetPiMin SetPiMax
-                                    , viewRangeFilter "Charge at pH 7" model.filterChargeMin model.filterChargeMax SetChargeMin SetChargeMax
+                                    , viewRangeSlider "Peptide Length" opts.pepLength 0 model.filterPepLengthMin model.filterPepLengthMax SetPepLengthMin SetPepLengthMax
+                                    , viewRangeSlider "Molecular Weight" opts.molecularWeight 1 model.filterMwMin model.filterMwMax SetMwMin SetMwMax
+                                    , viewRangeSlider "Isoelectric Point" opts.isoelectricPoint 2 model.filterPiMin model.filterPiMax SetPiMin SetPiMax
+                                    , viewRangeSlider "Charge at pH 7" opts.chargeAtPH7 2 model.filterChargeMin model.filterChargeMax SetChargeMin SetChargeMax
                                     ]
 
                               else
@@ -406,29 +406,68 @@ viewSelectFilter label options toMsg currentValue =
         ]
 
 
-viewRangeFilter : String -> String -> String -> (String -> Msg) -> (String -> Msg) -> Html Msg
-viewRangeFilter label minVal maxVal toMsgMin toMsgMax =
+viewRangeSlider : String -> Range -> Int -> String -> String -> (String -> Msg) -> (String -> Msg) -> Html Msg
+viewRangeSlider label range decimals minVal maxVal toMsgMin toMsgMax =
+    let
+        currentMin =
+            String.toFloat minVal
+                |> Maybe.withDefault range.min
+
+        currentMax =
+            String.toFloat maxVal
+                |> Maybe.withDefault range.max
+
+        stepStr =
+            if decimals == 0 then
+                "1"
+
+            else
+                String.fromFloat (1 / toFloat (10 ^ decimals))
+
+        displayVal v =
+            if decimals == 0 then
+                String.fromInt (round v)
+
+            else
+                formatFloat decimals v
+
+        rangeMin =
+            String.fromFloat range.min
+
+        rangeMax =
+            String.fromFloat range.max
+    in
     Form.group []
-        [ Form.label [] [ Html.text label ]
-        , Grid.row []
-            [ Grid.col [ Col.xs5 ]
-                [ Input.number
-                    [ Input.placeholder "Min"
-                    , Input.value minVal
-                    , Input.onInput toMsgMin
-                    , Input.small
-                    ]
+        [ Form.label [ class "d-flex justify-content-between" ]
+            [ Html.text label
+            , Html.span [ class "text-muted small" ]
+                [ Html.text (displayVal currentMin ++ " \u{2013} " ++ displayVal currentMax) ]
+            ]
+        , Html.div [ class "d-flex align-items-center mb-1" ]
+            [ Html.span [ class "small text-muted mr-2", style "min-width" "28px" ] [ Html.text "Min" ]
+            , Html.input
+                [ attribute "type" "range"
+                , class "custom-range flex-grow-1"
+                , attribute "min" rangeMin
+                , attribute "max" rangeMax
+                , attribute "step" stepStr
+                , value (String.fromFloat currentMin)
+                , onInput toMsgMin
                 ]
-            , Grid.col [ Col.xs2, Col.attrs [ class "text-center pt-1" ] ]
-                [ Html.text "-" ]
-            , Grid.col [ Col.xs5 ]
-                [ Input.number
-                    [ Input.placeholder "Max"
-                    , Input.value maxVal
-                    , Input.onInput toMsgMax
-                    , Input.small
-                    ]
+                []
+            ]
+        , Html.div [ class "d-flex align-items-center" ]
+            [ Html.span [ class "small text-muted mr-2", style "min-width" "28px" ] [ Html.text "Max" ]
+            , Html.input
+                [ attribute "type" "range"
+                , class "custom-range flex-grow-1"
+                , attribute "min" rangeMin
+                , attribute "max" rangeMax
+                , attribute "step" stepStr
+                , value (String.fromFloat currentMax)
+                , onInput toMsgMax
                 ]
+                []
             ]
         ]
 
