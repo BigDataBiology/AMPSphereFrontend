@@ -18,7 +18,7 @@ import Dict
 import Effect exposing (Effect)
 import Set exposing (Set)
 import Html exposing (Html)
-import Html.Attributes exposing (attribute, class, href, selected, style, value)
+import Html.Attributes exposing (attribute, class, href, selected, value)
 import Html.Events exposing (onClick, onInput)
 import Json.Decode
 import Http
@@ -438,36 +438,31 @@ viewRangeSlider label range decimals minVal maxVal toMsgMin toMsgMax =
             String.fromFloat range.max
     in
     Form.group []
-        [ Form.label [ class "d-flex justify-content-between" ]
-            [ Html.text label
-            , Html.span [ class "text-muted small" ]
-                [ Html.text (displayVal currentMin ++ " \u{2013} " ++ displayVal currentMax) ]
-            ]
-        , Html.div [ class "d-flex align-items-center mb-1" ]
-            [ Html.span [ class "small text-muted mr-2", style "min-width" "28px" ] [ Html.text "Min" ]
-            , Html.input
-                [ attribute "type" "range"
-                , class "custom-range flex-grow-1"
-                , attribute "min" rangeMin
-                , attribute "max" rangeMax
-                , attribute "step" stepStr
-                , value (String.fromFloat currentMin)
-                , onInput toMsgMin
-                ]
-                []
-            ]
+        [ Form.label [] [ Html.text label ]
         , Html.div [ class "d-flex align-items-center" ]
-            [ Html.span [ class "small text-muted mr-2", style "min-width" "28px" ] [ Html.text "Max" ]
-            , Html.input
-                [ attribute "type" "range"
-                , class "custom-range flex-grow-1"
-                , attribute "min" rangeMin
-                , attribute "max" rangeMax
-                , attribute "step" stepStr
-                , value (String.fromFloat currentMax)
-                , onInput toMsgMax
+            [ Html.span [ class "small text-muted mr-2" ] [ Html.text (displayVal currentMin) ]
+            , Html.div [ class "dual-range flex-grow-1" ]
+                [ Html.div [ class "dual-range-track" ] []
+                , Html.input
+                    [ attribute "type" "range"
+                    , attribute "min" rangeMin
+                    , attribute "max" rangeMax
+                    , attribute "step" stepStr
+                    , value (String.fromFloat currentMin)
+                    , onInput toMsgMin
+                    ]
+                    []
+                , Html.input
+                    [ attribute "type" "range"
+                    , attribute "min" rangeMin
+                    , attribute "max" rangeMax
+                    , attribute "step" stepStr
+                    , value (String.fromFloat currentMax)
+                    , onInput toMsgMax
+                    ]
+                    []
                 ]
-                []
+            , Html.span [ class "small text-muted ml-2" ] [ Html.text (displayVal currentMax) ]
             ]
         ]
 

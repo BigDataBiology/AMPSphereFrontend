@@ -79,3 +79,56 @@ plotly-chart {
 .progress {
     border-radius: 3px;
 }
+
+/* Dual-handle range slider */
+
+.dual-range {
+    position: relative;
+    height: 32px;
+}
+
+.dual-range-track {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #bbb;
+    transform: translateY(-50%);
+}
+
+.dual-range input[type="range"] {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    pointer-events: none;
+    margin: 0;
+    padding: 0;
+    height: 0;
+}
+
+.dual-range input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #1ba39c;
+    cursor: pointer;
+    pointer-events: auto;
+    border: none;
+}
+
+.dual-range input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #1ba39c;
+    cursor: pointer;
+    pointer-events: auto;
+    border: none;
+}
