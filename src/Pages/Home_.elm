@@ -2,11 +2,23 @@ module Pages.Home_ exposing (Model, Msg, page)
 
 import Api
 import Api.Statistics exposing (Statistics)
+import Bootstrap.Alert as Alert
+import Bootstrap.Button as Button
+import Bootstrap.Card as Card
+import Bootstrap.Card.Block as Block
+import Bootstrap.Form as Form
+import Bootstrap.Form.Radio as Radio
+import Bootstrap.Form.Textarea as Textarea
+import Bootstrap.Grid as Grid
+import Bootstrap.Grid.Col as Col
+import Bootstrap.Spinner as Spinner
+import Bootstrap.Table as Table
+import Bootstrap.Text
 import Dict
 import Effect exposing (Effect)
 import Html exposing (Html)
-import Html.Attributes exposing (class, cols, placeholder, rows, type_, value)
-import Html.Events exposing (onClick, onInput, onSubmit)
+import Html.Attributes exposing (class)
+import Html.Events exposing (onClick, onSubmit)
 import Http
 import Layouts
 import Page exposing (Page)
@@ -127,14 +139,18 @@ view : Model -> View Msg
 view model =
     { title = "Home"
     , body =
-        [ Html.div [ class "page-home" ]
-            [ Html.section [ class "hero" ]
-                [ Html.h1 [] [ Html.text "AMPSphere" ]
-                , Html.p [ class "hero-subtitle" ]
-                    [ Html.text "A comprehensive catalog of antimicrobial peptides from metagenomes and microbial genomes" ]
-                ]
-            , viewStatistics model.statistics
-            , viewSequenceSearch model
+        [ Html.div [ class "text-center py-5" ]
+            [ Html.h1 [ class "display-4" ] [ Html.text "AMPSphere" ]
+            , Html.p [ class "lead text-muted" ]
+                [ Html.text "A comprehensive catalog of antimicrobial peptides from metagenomes and microbial genomes" ]
+            ]
+        , Grid.row []
+            [ Grid.col [ Col.md6, Col.attrs [ class "mx-auto" ] ]
+                [ viewStatistics model.statistics ]
+            ]
+        , Grid.row [ ]
+            [ Grid.col [ Col.md8, Col.attrs [ class "mx-auto mt-4" ] ]
+                [ viewSequenceSearch model ]
             ]
         ]
     }
@@ -142,80 +158,95 @@ view model =
 
 viewStatistics : Api.Data Statistics -> Html Msg
 viewStatistics data =
-    Html.section [ class "statistics-section" ]
-        [ Html.h2 [] [ Html.text "Database Statistics" ]
-        , case data of
-            Api.NotAsked ->
-                Html.text ""
+    Card.config [ Card.attrs [ class "mb-4" ] ]
+        |> Card.headerH5 [] [ Html.text "Database Statistics" ]
+        |> Card.block []
+            [ Block.custom <|
+                case data of
+                    Api.NotAsked ->
+                        Html.text ""
 
-            Api.Loading ->
-                Html.div [ class "loading" ] [ Html.text "Loading statistics..." ]
+                    Api.Loading ->
+                        Html.div [ class "text-center py-3" ]
+                            [ Spinner.spinner [ Spinner.color spinnerColor ] []
+                            , Html.p [ class "text-muted mt-2" ] [ Html.text "Loading statistics..." ]
+                            ]
 
-            Api.Failure _ ->
-                Html.div [ class "error" ] [ Html.text "Failed to load statistics." ]
+                    Api.Failure _ ->
+                        Alert.simpleDanger [] [ Html.text "Failed to load statistics." ]
 
-            Api.Success stats ->
-                Html.table [ class "data-table statistics-table" ]
-                    [ Html.tbody []
-                        [ statRow "Antimicrobial peptides" (formatNumber stats.numAmps)
-                        , statRow "AMP families" (formatNumber stats.numFamilies)
-                        , statRow "Metagenomes / genomes" (formatNumber stats.numGenomes)
-                        , statRow "smORF genes" (formatNumber stats.numGenes)
-                        , statRow "Habitats" (formatNumber stats.numHabitats)
-                        , statRow "Metagenomes" (formatNumber stats.numMetagenomes)
-                        ]
-                    ]
-        ]
+                    Api.Success stats ->
+                        Table.table
+                            { options = [ Table.hover ]
+                            , thead = Table.thead [] []
+                            , tbody =
+                                Table.tbody []
+                                    [ statRow "Antimicrobial peptides" (formatNumber stats.numAmps)
+                                    , statRow "AMP families" (formatNumber stats.numFamilies)
+                                    , statRow "Metagenomes / genomes" (formatNumber stats.numGenomes)
+                                    , statRow "smORF genes" (formatNumber stats.numGenes)
+                                    , statRow "Habitats" (formatNumber stats.numHabitats)
+                                    , statRow "Metagenomes" (formatNumber stats.numMetagenomes)
+                                    ]
+                            }
+            ]
+        |> Card.view
 
 
-statRow : String -> String -> Html msg
+statRow : String -> String -> Table.Row msg
 statRow label val =
-    Html.tr []
-        [ Html.td [ class "stat-label" ] [ Html.text label ]
-        , Html.td [ class "stat-value" ] [ Html.text val ]
+    Table.tr []
+        [ Table.td [] [ Html.text label ]
+        , Table.td [ Table.cellAttr (class "text-right font-weight-bold") ] [ Html.text val ]
         ]
 
 
 viewSequenceSearch : Model -> Html Msg
 viewSequenceSearch model =
-    Html.section [ class "search-section" ]
-        [ Html.h2 [] [ Html.text "Sequence Search" ]
-        , Html.form [ class "sequence-search-form", onSubmit SequenceSearchSubmitted ]
-            [ Html.div [ class "search-method-toggle" ]
-                [ Html.label [ class "method-option" ]
-                    [ Html.input
-                        [ type_ "radio"
-                        , Html.Attributes.name "method"
-                        , Html.Attributes.checked (model.searchMethod == MMseqs)
-                        , onClick (SearchMethodChanged MMseqs)
+    Card.config [ Card.attrs [ class "mb-4" ] ]
+        |> Card.headerH5 [] [ Html.text "Sequence Search" ]
+        |> Card.block []
+            [ Block.custom <|
+                Form.form [ onSubmit SequenceSearchSubmitted ]
+                    [ Form.group []
+                        [ Html.div [ class "mb-3" ]
+                            (Radio.radioList "search-method"
+                                [ Radio.create
+                                    [ Radio.id "method-mmseqs"
+                                    , Radio.inline
+                                    , Radio.checked (model.searchMethod == MMseqs)
+                                    , Radio.onClick (SearchMethodChanged MMseqs)
+                                    ]
+                                    "MMseqs2 (search AMPs)"
+                                , Radio.create
+                                    [ Radio.id "method-hmmer"
+                                    , Radio.inline
+                                    , Radio.checked (model.searchMethod == HMMER)
+                                    , Radio.onClick (SearchMethodChanged HMMER)
+                                    ]
+                                    "HMMER (search families)"
+                                ]
+                            )
                         ]
-                        []
-                    , Html.text " MMseqs2 (search AMPs)"
-                    ]
-                , Html.label [ class "method-option" ]
-                    [ Html.input
-                        [ type_ "radio"
-                        , Html.Attributes.name "method"
-                        , Html.Attributes.checked (model.searchMethod == HMMER)
-                        , onClick (SearchMethodChanged HMMER)
+                    , Form.group []
+                        [ Textarea.textarea
+                            [ Textarea.rows 6
+                            , Textarea.value model.sequenceQuery
+                            , Textarea.onInput SequenceQueryChanged
+                            , Textarea.attrs [ Html.Attributes.placeholder "Enter amino acid sequence(s) in FASTA format..." ]
+                            ]
                         ]
-                        []
-                    , Html.text " HMMER (search families)"
+                    , Button.button
+                        [ Button.primary, Button.attrs [ Html.Attributes.type_ "submit" ] ]
+                        [ Html.text "Search" ]
                     ]
-                ]
-            , Html.textarea
-                [ class "sequence-input"
-                , placeholder "Enter amino acid sequence(s) in FASTA format..."
-                , rows 6
-                , cols 60
-                , value model.sequenceQuery
-                , onInput SequenceQueryChanged
-                ]
-                []
-            , Html.button [ type_ "submit", class "btn btn-primary" ]
-                [ Html.text "Search" ]
             ]
-        ]
+        |> Card.view
+
+
+spinnerColor : Bootstrap.Text.Color
+spinnerColor =
+    Bootstrap.Text.primary
 
 
 formatNumber : Int -> String

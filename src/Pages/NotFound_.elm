@@ -1,8 +1,12 @@
 module Pages.NotFound_ exposing (Model, Msg, page)
 
+import Bootstrap.Alert as Alert
+import Bootstrap.Button as Button
+import Bootstrap.Grid as Grid
+import Bootstrap.Grid.Col as Col
 import Effect exposing (Effect)
 import Html exposing (Html)
-import Html.Attributes exposing (class, href)
+import Html.Attributes exposing (class)
 import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
@@ -71,11 +75,16 @@ view : Model -> View Msg
 view model =
     { title = "Page Not Found"
     , body =
-        [ Html.div [ class "page-not-found" ]
-            [ Html.h1 [] [ Html.text "404" ]
-            , Html.p [] [ Html.text "The page you're looking for doesn't exist." ]
-            , Html.p []
-                [ Html.a [ Route.Path.href Route.Path.Home_ ] [ Html.text "Go to the home page" ] ]
+        [ Grid.row []
+            [ Grid.col [ Col.md6, Col.attrs [ class "mx-auto text-center py-5" ] ]
+                [ Html.h1 [ class "display-1 text-muted" ] [ Html.text "404" ]
+                , Html.p [ class "lead" ] [ Html.text "The page you're looking for doesn't exist." ]
+                , Button.linkButton
+                    [ Button.primary
+                    , Button.attrs [ Route.Path.href Route.Path.Home_ ]
+                    ]
+                    [ Html.text "Go to Home Page" ]
+                ]
             ]
         ]
     }

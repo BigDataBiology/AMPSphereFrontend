@@ -3,11 +3,23 @@ module Pages.BrowseData exposing (Model, Msg, page)
 import Api
 import Api.AmpList exposing (AmpListResponse, AmpSummary)
 import Api.AvailableOptions exposing (AvailableOptions)
+import Bootstrap.Alert as Alert
+import Bootstrap.Button as Button
+import Bootstrap.Card as Card
+import Bootstrap.Card.Block as Block
+import Bootstrap.Form as Form
+import Bootstrap.Form.Input as Input
+import Bootstrap.Form.Select as Select
+import Bootstrap.Grid as Grid
+import Bootstrap.Grid.Col as Col
+import Bootstrap.Spinner as Spinner
+import Bootstrap.Table as Table
 import Dict
 import Effect exposing (Effect)
 import Html exposing (Html)
-import Html.Attributes exposing (class, href, placeholder, selected, type_, value)
-import Html.Events exposing (onClick, onInput)
+import Html.Attributes exposing (class, href, selected, value)
+import Html.Events exposing (onClick)
+import Json.Decode
 import Http
 import Layouts
 import Page exposing (Page)
@@ -279,12 +291,12 @@ view : Model -> View Msg
 view model =
     { title = "Browse Data"
     , body =
-        [ Html.div [ class "page-browse-data" ]
-            [ Html.h1 [] [ Html.text "Browse Data" ]
-            , Html.div [ class "browse-layout" ]
-                [ viewSidebar model
-                , viewMainContent model
-                ]
+        [ Html.h1 [ class "mb-3" ] [ Html.text "Browse Data" ]
+        , Grid.row []
+            [ Grid.col [ Col.md3 ]
+                [ viewSidebar model ]
+            , Grid.col [ Col.md9 ]
+                [ viewMainContent model ]
             ]
         ]
     }
@@ -292,117 +304,145 @@ view model =
 
 viewSidebar : Model -> Html Msg
 viewSidebar model =
-    Html.aside [ class "filter-sidebar" ]
-        [ Html.h2 [] [ Html.text "Filters" ]
-        , case model.options of
-            Api.Success opts ->
-                Html.div [ class "filters" ]
-                    [ viewSelect "Habitat" "" (List.map (\h -> ( h, h )) opts.habitat) SetHabitat (Maybe.withDefault "" model.filterHabitat)
-                    , viewSelect "Microbial Source" "" (List.take 50 (List.map (\m -> ( m, m )) opts.microbialSource)) SetMicrobialSource (Maybe.withDefault "" model.filterMicrobialSource)
-                    , viewSelect "Quality" "" (List.map (\q -> ( q, q )) opts.quality) SetQuality (Maybe.withDefault "" model.filterQuality)
-                    , viewTextFilter "Family" "e.g. SPHERE-III.001_493" model.filterFamily SetFamily
-                    , viewRangeFilter "Peptide Length" model.filterPepLengthMin model.filterPepLengthMax SetPepLengthMin SetPepLengthMax
-                    , viewRangeFilter "Molecular Weight" model.filterMwMin model.filterMwMax SetMwMin SetMwMax
-                    , viewRangeFilter "Isoelectric Point" model.filterPiMin model.filterPiMax SetPiMin SetPiMax
-                    , viewRangeFilter "Charge at pH 7" model.filterChargeMin model.filterChargeMax SetChargeMin SetChargeMax
-                    , Html.button [ class "btn btn-primary", onClick ApplyFilters ] [ Html.text "Apply Filters" ]
-                    ]
+    Card.config [ Card.attrs [ class "mb-3" ] ]
+        |> Card.headerH5 [] [ Html.text "Filters" ]
+        |> Card.block []
+            [ Block.custom <|
+                case model.options of
+                    Api.Success opts ->
+                        Html.div []
+                            [ viewSelectFilter "Habitat" (List.map (\h -> ( h, h )) opts.habitat) SetHabitat (Maybe.withDefault "" model.filterHabitat)
+                            , viewSelectFilter "Microbial Source" (List.take 50 (List.map (\m -> ( m, m )) opts.microbialSource)) SetMicrobialSource (Maybe.withDefault "" model.filterMicrobialSource)
+                            , viewSelectFilter "Quality" (List.map (\q -> ( q, q )) opts.quality) SetQuality (Maybe.withDefault "" model.filterQuality)
+                            , Form.group []
+                                [ Form.label [] [ Html.text "Family" ]
+                                , Input.text
+                                    [ Input.placeholder "e.g. SPHERE-III.001_493"
+                                    , Input.value model.filterFamily
+                                    , Input.onInput SetFamily
+                                    , Input.small
+                                    ]
+                                ]
+                            , viewRangeFilter "Peptide Length" model.filterPepLengthMin model.filterPepLengthMax SetPepLengthMin SetPepLengthMax
+                            , viewRangeFilter "Molecular Weight" model.filterMwMin model.filterMwMax SetMwMin SetMwMax
+                            , viewRangeFilter "Isoelectric Point" model.filterPiMin model.filterPiMax SetPiMin SetPiMax
+                            , viewRangeFilter "Charge at pH 7" model.filterChargeMin model.filterChargeMax SetChargeMin SetChargeMax
+                            , Button.button
+                                [ Button.primary, Button.block, Button.attrs [ onClick ApplyFilters ] ]
+                                [ Html.text "Apply Filters" ]
+                            ]
 
-            Api.Loading ->
-                Html.div [ class "loading" ] [ Html.text "Loading filters..." ]
+                    Api.Loading ->
+                        Html.div [ class "text-center py-3" ]
+                            [ Spinner.spinner [] []
+                            , Html.p [ class "text-muted mt-2 small" ] [ Html.text "Loading filters..." ]
+                            ]
 
-            Api.Failure _ ->
-                Html.div [ class "error" ] [ Html.text "Failed to load filter options." ]
+                    Api.Failure _ ->
+                        Alert.simpleDanger [] [ Html.text "Failed to load filter options." ]
 
-            Api.NotAsked ->
-                Html.text ""
-        ]
+                    Api.NotAsked ->
+                        Html.text ""
+            ]
+        |> Card.view
 
 
-viewSelect : String -> String -> List ( String, String ) -> (String -> Msg) -> String -> Html Msg
-viewSelect label defaultLabel options toMsg currentValue =
-    Html.div [ class "filter-group" ]
-        [ Html.label [] [ Html.text label ]
-        , Html.select [ onInput toMsg ]
-            (Html.option [ value "" ] [ Html.text ("All " ++ label ++ "s") ]
+viewSelectFilter : String -> List ( String, String ) -> (String -> Msg) -> String -> Html Msg
+viewSelectFilter label options toMsg currentValue =
+    Form.group []
+        [ Form.label [] [ Html.text label ]
+        , Select.select
+            [ Select.small
+            , Select.onChange toMsg
+            ]
+            (Select.item [ value "" ] [ Html.text ("All " ++ label ++ "s") ]
                 :: List.map
                     (\( val, lbl ) ->
-                        Html.option [ value val, selected (val == currentValue) ] [ Html.text lbl ]
+                        Select.item [ value val, selected (val == currentValue) ] [ Html.text lbl ]
                     )
                     options
             )
         ]
 
 
-viewTextFilter : String -> String -> String -> (String -> Msg) -> Html Msg
-viewTextFilter label placeholderText val toMsg =
-    Html.div [ class "filter-group" ]
-        [ Html.label [] [ Html.text label ]
-        , Html.input [ type_ "text", placeholder placeholderText, value val, onInput toMsg ] []
-        ]
-
-
 viewRangeFilter : String -> String -> String -> (String -> Msg) -> (String -> Msg) -> Html Msg
 viewRangeFilter label minVal maxVal toMsgMin toMsgMax =
-    Html.div [ class "filter-group" ]
-        [ Html.label [] [ Html.text label ]
-        , Html.div [ class "range-inputs" ]
-            [ Html.input [ type_ "number", placeholder "Min", value minVal, onInput toMsgMin ] []
-            , Html.span [ class "range-separator" ] [ Html.text "-" ]
-            , Html.input [ type_ "number", placeholder "Max", value maxVal, onInput toMsgMax ] []
+    Form.group []
+        [ Form.label [] [ Html.text label ]
+        , Grid.row []
+            [ Grid.col [ Col.xs5 ]
+                [ Input.number
+                    [ Input.placeholder "Min"
+                    , Input.value minVal
+                    , Input.onInput toMsgMin
+                    , Input.small
+                    ]
+                ]
+            , Grid.col [ Col.xs2, Col.attrs [ class "text-center pt-1" ] ]
+                [ Html.text "-" ]
+            , Grid.col [ Col.xs5 ]
+                [ Input.number
+                    [ Input.placeholder "Max"
+                    , Input.value maxVal
+                    , Input.onInput toMsgMax
+                    , Input.small
+                    ]
+                ]
             ]
         ]
 
 
 viewMainContent : Model -> Html Msg
 viewMainContent model =
-    Html.div [ class "browse-main" ]
-        [ case model.ampsList of
-            Api.Success response ->
-                Html.div []
-                    [ Html.p [ class "result-count" ]
-                        [ Html.text (String.fromInt response.info.totalItem ++ " AMPs found") ]
-                    , Html.table [ class "data-table browse-table" ]
-                        [ Html.thead []
-                            [ Html.tr []
-                                [ Html.th [] [ Html.text "Accession" ]
-                                , Html.th [] [ Html.text "Family" ]
-                                , Html.th [] [ Html.text "Sequence" ]
-                                , Html.th [] [ Html.text "Length" ]
-                                , Html.th [] [ Html.text "MW" ]
-                                , Html.th [] [ Html.text "pI" ]
-                                , Html.th [] [ Html.text "Charge" ]
-                                ]
+    case model.ampsList of
+        Api.Success response ->
+            Html.div []
+                [ Html.p [ class "text-muted mb-3" ]
+                    [ Html.text (String.fromInt response.info.totalItem ++ " AMPs found") ]
+                , Table.table
+                    { options = [ Table.striped, Table.hover, Table.responsive, Table.small ]
+                    , thead =
+                        Table.simpleThead
+                            [ Table.th [] [ Html.text "Accession" ]
+                            , Table.th [] [ Html.text "Family" ]
+                            , Table.th [] [ Html.text "Sequence" ]
+                            , Table.th [] [ Html.text "Length" ]
+                            , Table.th [] [ Html.text "MW" ]
+                            , Table.th [] [ Html.text "pI" ]
+                            , Table.th [] [ Html.text "Charge" ]
                             ]
-                        , Html.tbody []
+                    , tbody =
+                        Table.tbody []
                             (List.map viewAmpRow response.data)
-                        ]
-                    , viewPagination model response.info
-                    ]
+                    }
+                , viewPagination model response.info
+                ]
 
-            Api.Loading ->
-                Html.div [ class "loading" ] [ Html.text "Loading data..." ]
+        Api.Loading ->
+            Html.div [ class "text-center py-4" ]
+                [ Spinner.spinner [ Spinner.grow ] []
+                , Html.p [ class "text-muted mt-2" ] [ Html.text "Loading data..." ]
+                ]
 
-            Api.Failure _ ->
-                Html.div [ class "error" ] [ Html.text "Failed to load data." ]
+        Api.Failure _ ->
+            Alert.simpleDanger [] [ Html.text "Failed to load data." ]
 
-            Api.NotAsked ->
-                Html.text ""
-        ]
+        Api.NotAsked ->
+            Html.text ""
 
 
-viewAmpRow : AmpSummary -> Html Msg
+viewAmpRow : AmpSummary -> Table.Row Msg
 viewAmpRow amp =
-    Html.tr []
-        [ Html.td []
+    Table.tr []
+        [ Table.td []
             [ Html.a [ Route.Path.href (Route.Path.Amp_Accession_ { accession = amp.accession }) ]
                 [ Html.text amp.accession ]
             ]
-        , Html.td []
+        , Table.td []
             [ Html.a [ Route.Path.href (Route.Path.Family_Accession_ { accession = amp.family }) ]
                 [ Html.text amp.family ]
             ]
-        , Html.td [ class "sequence-cell" ]
+        , Table.td [ Table.cellAttr (class "text-monospace small") ]
             [ Html.text
                 (if String.length amp.sequence > 25 then
                     String.left 25 amp.sequence ++ "..."
@@ -411,10 +451,10 @@ viewAmpRow amp =
                     amp.sequence
                 )
             ]
-        , Html.td [] [ Html.text (String.fromInt amp.length) ]
-        , Html.td [] [ Html.text (formatFloat 1 amp.molecularWeight) ]
-        , Html.td [] [ Html.text (formatFloat 2 amp.isoelectricPoint) ]
-        , Html.td [] [ Html.text (formatFloat 2 amp.charge) ]
+        , Table.td [] [ Html.text (String.fromInt amp.length) ]
+        , Table.td [] [ Html.text (formatFloat 1 amp.molecularWeight) ]
+        , Table.td [] [ Html.text (formatFloat 2 amp.isoelectricPoint) ]
+        , Table.td [] [ Html.text (formatFloat 2 amp.charge) ]
         ]
 
 
@@ -434,39 +474,56 @@ viewPagination model info =
         Html.text ""
 
     else
-        Html.div [ class "pagination" ]
-            ([ if currentPage > 0 then
-                Html.button [ class "page-btn", onClick (GoToPage (currentPage - 1)) ] [ Html.text "Prev" ]
+        Html.nav [ class "mt-3" ]
+            [ Html.ul [ class "pagination justify-content-center" ]
+                ([ if currentPage > 0 then
+                    Html.li [ class "page-item" ]
+                        [ Html.a [ class "page-link", href "#", onClick (GoToPage (currentPage - 1)) ]
+                            [ Html.text "Prev" ]
+                        ]
 
-               else
-                Html.text ""
-             ]
-                ++ List.map
-                    (\pg ->
-                        Html.button
-                            [ class
-                                (if pg == currentPage then
-                                    "page-btn active"
+                   else
+                    Html.li [ class "page-item disabled" ]
+                        [ Html.span [ class "page-link" ] [ Html.text "Prev" ] ]
+                 ]
+                    ++ List.map
+                        (\pg ->
+                            Html.li
+                                [ class
+                                    (if pg == currentPage then
+                                        "page-item active"
 
-                                 else
-                                    "page-btn"
-                                )
-                            , onClick (GoToPage pg)
-                            ]
-                            [ Html.text (String.fromInt (pg + 1)) ]
-                    )
-                    visiblePages
-                ++ [ if currentPage < totalPages - 1 then
-                        Html.button [ class "page-btn", onClick (GoToPage (currentPage + 1)) ] [ Html.text "Next" ]
+                                     else
+                                        "page-item"
+                                    )
+                                ]
+                                [ Html.a
+                                    [ class "page-link"
+                                    , href "#"
+                                    , onClick (GoToPage pg)
+                                    ]
+                                    [ Html.text (String.fromInt (pg + 1)) ]
+                                ]
+                        )
+                        visiblePages
+                    ++ [ if currentPage < totalPages - 1 then
+                            Html.li [ class "page-item" ]
+                                [ Html.a [ class "page-link", href "#", onClick (GoToPage (currentPage + 1)) ]
+                                    [ Html.text "Next" ]
+                                ]
 
-                     else
-                        Html.text ""
-                   ]
-            )
+                         else
+                            Html.li [ class "page-item disabled" ]
+                                [ Html.span [ class "page-link" ] [ Html.text "Next" ] ]
+                       ]
+                )
+            ]
 
 
 
 -- HELPERS
+
+
 
 
 formatFloat : Int -> Float -> String

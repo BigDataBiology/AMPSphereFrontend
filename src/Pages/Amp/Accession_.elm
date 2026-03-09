@@ -6,11 +6,21 @@ import Api.AmpCoprediction exposing (CopredictionScore)
 import Api.AmpDistributions exposing (Distributions)
 import Api.AmpMetadata exposing (MetadataEntry, MetadataResponse)
 import Api.FamilyFeatures exposing (FamilyFeatures)
+import Bootstrap.Alert as Alert
+import Bootstrap.Badge as Badge
+import Bootstrap.Card as Card
+import Bootstrap.Card.Block as Block
+import Bootstrap.Grid as Grid
+import Bootstrap.Grid.Col as Col
+import Bootstrap.Spinner as Spinner
+import Bootstrap.Tab as Tab
+import Bootstrap.Table as Table
 import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Html exposing (Html)
-import Html.Attributes exposing (attribute, class, colspan, href)
+import Html.Attributes exposing (attribute, class, href)
 import Html.Events exposing (onClick)
+import Json.Decode
 import Http
 import Json.Encode as Encode
 import Layouts
@@ -36,14 +46,9 @@ page shared route =
 -- MODEL
 
 
-type Tab
-    = OverviewTab
-    | FeaturesTab
-
-
 type alias Model =
     { accession : String
-    , activeTab : Tab
+    , tabState : Tab.State
     , amp : Api.Data Amp
     , distributions : Api.Data Distributions
     , coprediction : Api.Data (List CopredictionScore)
@@ -61,7 +66,7 @@ init route _ =
             route.params.accession
     in
     ( { accession = accession
-      , activeTab = OverviewTab
+      , tabState = Tab.initialState
       , amp = Api.Loading
       , distributions = Api.Loading
       , coprediction = Api.Loading
@@ -94,7 +99,7 @@ type Msg
     | GotCoprediction (Result Http.Error (List CopredictionScore))
     | GotMetadata (Result Http.Error MetadataResponse)
     | GotFamilyFeatures (Result Http.Error FamilyFeatures)
-    | SwitchTab Tab
+    | TabMsg Tab.State
     | MetadataGoToPage Int
 
 
@@ -104,12 +109,10 @@ update route msg model =
         GotAmp (Ok amp) ->
             ( { model | amp = Api.Success amp }
             , if model.familyFeatures == Api.NotAsked then
-                Effect.batch
-                    [ Api.FamilyFeatures.get
-                        { accession = amp.family
-                        , onResponse = GotFamilyFeatures
-                        }
-                    ]
+                Api.FamilyFeatures.get
+                    { accession = amp.family
+                    , onResponse = GotFamilyFeatures
+                    }
 
               else
                 Effect.none
@@ -142,8 +145,8 @@ update route msg model =
         GotFamilyFeatures (Err err) ->
             ( { model | familyFeatures = Api.Failure err }, Effect.none )
 
-        SwitchTab tab ->
-            ( { model | activeTab = tab }, Effect.none )
+        TabMsg state ->
+            ( { model | tabState = state }, Effect.none )
 
         MetadataGoToPage pg ->
             ( { model | metadataPage = pg, metadata = Api.Loading }
@@ -169,46 +172,23 @@ view : Model -> View Msg
 view model =
     { title = model.accession
     , body =
-        [ Html.div [ class "page-amp-card" ]
-            [ Html.h1 [] [ Html.text model.accession ]
-            , viewTabs model.activeTab
-            , case model.activeTab of
-                OverviewTab ->
-                    viewOverview model
-
-                FeaturesTab ->
-                    viewFeatures model
-            ]
+        [ Html.h1 [ class "mb-3" ] [ Html.text model.accession ]
+        , Tab.config TabMsg
+            |> Tab.items
+                [ Tab.item
+                    { id = "overview"
+                    , link = Tab.link [] [ Html.text "Overview" ]
+                    , pane = Tab.pane [ class "pt-3" ] [ viewOverview model ]
+                    }
+                , Tab.item
+                    { id = "features"
+                    , link = Tab.link [] [ Html.text "Features" ]
+                    , pane = Tab.pane [ class "pt-3" ] [ viewFeatures model ]
+                    }
+                ]
+            |> Tab.view model.tabState
         ]
     }
-
-
-viewTabs : Tab -> Html Msg
-viewTabs activeTab =
-    Html.div [ class "tab-bar" ]
-        [ Html.button
-            [ class
-                (if activeTab == OverviewTab then
-                    "tab-btn active"
-
-                 else
-                    "tab-btn"
-                )
-            , onClick (SwitchTab OverviewTab)
-            ]
-            [ Html.text "Overview" ]
-        , Html.button
-            [ class
-                (if activeTab == FeaturesTab then
-                    "tab-btn active"
-
-                 else
-                    "tab-btn"
-                )
-            , onClick (SwitchTab FeaturesTab)
-            ]
-            [ Html.text "Features" ]
-        ]
 
 
 
@@ -217,62 +197,70 @@ viewTabs activeTab =
 
 viewOverview : Model -> Html Msg
 viewOverview model =
-    Html.div [ class "tab-content" ]
-        [ case model.amp of
-            Api.Loading ->
-                Html.div [ class "loading" ] [ Html.text "Loading AMP data..." ]
+    case model.amp of
+        Api.Loading ->
+            Html.div [ class "text-center py-4" ]
+                [ Spinner.spinner [ Spinner.grow ] []
+                , Html.p [ class "text-muted mt-2" ] [ Html.text "Loading AMP data..." ]
+                ]
 
-            Api.Failure _ ->
-                Html.div [ class "error" ] [ Html.text "Failed to load AMP data." ]
+        Api.Failure _ ->
+            Alert.simpleDanger [] [ Html.text "Failed to load AMP data." ]
 
-            Api.Success amp ->
-                Html.div []
-                    [ viewAmpInfo amp
-                    , viewQualityBadges amp
-                    , viewSequence amp.sequence
-                    , viewCoprediction model.coprediction
-                    , viewDistributionCharts model.distributions
-                    , viewMetadata model
-                    ]
+        Api.Success amp ->
+            Html.div []
+                [ viewAmpInfo amp
+                , viewQualityBadges amp
+                , viewSequence amp.sequence
+                , viewCoprediction model.coprediction
+                , viewDistributionCharts model.distributions
+                , viewMetadata model
+                ]
 
-            Api.NotAsked ->
-                Html.text ""
-        ]
+        Api.NotAsked ->
+            Html.text ""
 
 
 viewAmpInfo : Amp -> Html Msg
 viewAmpInfo amp =
-    Html.div [ class "amp-info" ]
-        [ Html.table [ class "data-table info-table" ]
-            [ Html.tbody []
-                [ infoRow "Family"
-                    [ Html.a [ Route.Path.href (Route.Path.Family_Accession_ { accession = amp.family }) ]
-                        [ Html.text amp.family ]
-                    ]
-                , infoRow "Length" [ Html.text (String.fromInt amp.length ++ " aa") ]
-                , infoRow "Molecular Weight" [ Html.text (formatFloat 2 amp.molecularWeight ++ " Da") ]
-                , infoRow "Isoelectric Point" [ Html.text (formatFloat 2 amp.isoelectricPoint) ]
-                , infoRow "Charge at pH 7" [ Html.text (formatFloat 2 amp.charge) ]
-                , infoRow "Genes"
-                    [ Html.text
-                        (case amp.numGenes of
-                            Just n ->
-                                String.fromInt n
+    Card.config [ Card.attrs [ class "mb-3" ] ]
+        |> Card.headerH5 [] [ Html.text "Properties" ]
+        |> Card.block []
+            [ Block.custom <|
+                Table.table
+                    { options = [ Table.bordered, Table.small ]
+                    , thead = Table.thead [] []
+                    , tbody =
+                        Table.tbody []
+                            [ infoRow "Family"
+                                [ Html.a [ Route.Path.href (Route.Path.Family_Accession_ { accession = amp.family }) ]
+                                    [ Html.text amp.family ]
+                                ]
+                            , infoRow "Length" [ Html.text (String.fromInt amp.length ++ " aa") ]
+                            , infoRow "Molecular Weight" [ Html.text (formatFloat 2 amp.molecularWeight ++ " Da") ]
+                            , infoRow "Isoelectric Point" [ Html.text (formatFloat 2 amp.isoelectricPoint) ]
+                            , infoRow "Charge at pH 7" [ Html.text (formatFloat 2 amp.charge) ]
+                            , infoRow "Genes"
+                                [ Html.text
+                                    (case amp.numGenes of
+                                        Just n ->
+                                            String.fromInt n
 
-                            Nothing ->
-                                "N/A"
-                        )
-                    ]
-                ]
+                                        Nothing ->
+                                            "N/A"
+                                    )
+                                ]
+                            ]
+                    }
             ]
-        ]
+        |> Card.view
 
 
-infoRow : String -> List (Html msg) -> Html msg
+infoRow : String -> List (Html msg) -> Table.Row msg
 infoRow label content =
-    Html.tr []
-        [ Html.td [ class "info-label" ] [ Html.text label ]
-        , Html.td [ class "info-value" ] content
+    Table.tr []
+        [ Table.th [ Table.cellAttr (class "w-25") ] [ Html.text label ]
+        , Table.td [] content
         ]
 
 
@@ -280,20 +268,13 @@ viewQualityBadges : Amp -> Html Msg
 viewQualityBadges amp =
     let
         badge label status =
-            Html.span
-                [ class
-                    ("quality-badge quality-"
-                        ++ (if status == "Passed" then
-                                "passed"
+            if status == "Passed" then
+                Badge.badgeSuccess [ class "mr-2 mb-1 p-2" ] [ Html.text (label ++ ": " ++ status) ]
 
-                            else
-                                "failed"
-                           )
-                    )
-                ]
-                [ Html.text (label ++ ": " ++ status) ]
+            else
+                Badge.badgeDanger [ class "mr-2 mb-1 p-2" ] [ Html.text (label ++ ": " ++ status) ]
     in
-    Html.div [ class "quality-badges" ]
+    Html.div [ class "mb-3" ]
         [ badge "Antifam" amp.antifam
         , badge "RNAcode" amp.rnaCode
         , badge "Metaproteomes" amp.metaproteomes
@@ -304,85 +285,99 @@ viewQualityBadges amp =
 
 viewSequence : String -> Html Msg
 viewSequence sequence =
-    Html.div [ class "sequence-display" ]
-        [ Html.h3 [] [ Html.text "Peptide Sequence" ]
-        , Html.div [ class "sequence-box" ]
-            (List.map
-                (\ch ->
-                    Html.span [ class ("aa aa-" ++ String.fromChar ch) ]
-                        [ Html.text (String.fromChar ch) ]
-                )
-                (String.toList sequence)
-            )
-        ]
+    Card.config [ Card.attrs [ class "mb-3" ] ]
+        |> Card.headerH5 [] [ Html.text "Peptide Sequence" ]
+        |> Card.block []
+            [ Block.custom <|
+                Html.div [ class "sequence-box p-3 bg-light text-monospace" ]
+                    (List.map
+                        (\ch ->
+                            Html.span [ class ("aa aa-" ++ String.fromChar ch) ]
+                                [ Html.text (String.fromChar ch) ]
+                        )
+                        (String.toList sequence)
+                    )
+            ]
+        |> Card.view
 
 
 viewCoprediction : Api.Data (List CopredictionScore) -> Html Msg
 viewCoprediction data =
-    Html.div [ class "coprediction-section" ]
-        [ Html.h3 [] [ Html.text "Co-prediction Scores" ]
-        , case data of
-            Api.Success scores ->
-                Html.table [ class "data-table" ]
-                    [ Html.thead []
-                        [ Html.tr []
-                            [ Html.th [] [ Html.text "Predictor" ]
-                            , Html.th [] [ Html.text "Score" ]
-                            ]
-                        ]
-                    , Html.tbody []
-                        (List.map
-                            (\score ->
-                                Html.tr []
-                                    [ Html.td [] [ Html.text score.predictor ]
-                                    , Html.td []
-                                        [ Html.div [ class "score-bar-container" ]
-                                            [ Html.div
-                                                [ class "score-bar"
-                                                , Html.Attributes.style "width" (String.fromFloat (score.value * 100) ++ "%")
-                                                ]
-                                                []
-                                            , Html.span [ class "score-value" ] [ Html.text (formatFloat 4 score.value) ]
-                                            ]
-                                        ]
+    Card.config [ Card.attrs [ class "mb-3" ] ]
+        |> Card.headerH5 [] [ Html.text "Co-prediction Scores" ]
+        |> Card.block []
+            [ Block.custom <|
+                case data of
+                    Api.Success scores ->
+                        Table.table
+                            { options = [ Table.striped, Table.small ]
+                            , thead =
+                                Table.simpleThead
+                                    [ Table.th [] [ Html.text "Predictor" ]
+                                    , Table.th [] [ Html.text "Score" ]
                                     ]
-                            )
-                            scores
-                        )
-                    ]
+                            , tbody =
+                                Table.tbody []
+                                    (List.map
+                                        (\score ->
+                                            Table.tr []
+                                                [ Table.td [] [ Html.text score.predictor ]
+                                                , Table.td []
+                                                    [ Html.div [ class "d-flex align-items-center" ]
+                                                        [ Html.div [ class "progress flex-grow-1 mr-2", Html.Attributes.style "height" "20px" ]
+                                                            [ Html.div
+                                                                [ class "progress-bar"
+                                                                , Html.Attributes.style "width" (String.fromFloat (score.value * 100) ++ "%")
+                                                                ]
+                                                                []
+                                                            ]
+                                                        , Html.span [ class "text-monospace small" ] [ Html.text (formatFloat 4 score.value) ]
+                                                        ]
+                                                    ]
+                                                ]
+                                        )
+                                        scores
+                                    )
+                            }
 
-            Api.Loading ->
-                Html.div [ class "loading" ] [ Html.text "Loading..." ]
+                    Api.Loading ->
+                        Html.div [ class "text-center py-3" ]
+                            [ Spinner.spinner [] [] ]
 
-            Api.Failure _ ->
-                Html.div [ class "error" ] [ Html.text "Failed to load co-prediction data." ]
+                    Api.Failure _ ->
+                        Alert.simpleDanger [] [ Html.text "Failed to load co-prediction data." ]
 
-            Api.NotAsked ->
-                Html.text ""
-        ]
+                    Api.NotAsked ->
+                        Html.text ""
+            ]
+        |> Card.view
 
 
 viewDistributionCharts : Api.Data Distributions -> Html Msg
 viewDistributionCharts data =
-    Html.div [ class "distributions-section" ]
-        [ Html.h3 [] [ Html.text "Distributions" ]
-        , case data of
-            Api.Success dist ->
-                Html.div [ class "charts-grid" ]
-                    [ viewGeoChart dist.geo
-                    , viewBarChart "Habitat" dist.habitat
-                    , viewBarChart "Microbial Source" dist.microbialSource
-                    ]
+    Card.config [ Card.attrs [ class "mb-3" ] ]
+        |> Card.headerH5 [] [ Html.text "Distributions" ]
+        |> Card.block []
+            [ Block.custom <|
+                case data of
+                    Api.Success dist ->
+                        Grid.row []
+                            [ Grid.col [ Col.md12 ] [ viewGeoChart dist.geo ]
+                            , Grid.col [ Col.md6 ] [ viewBarChart "Habitat" dist.habitat ]
+                            , Grid.col [ Col.md6 ] [ viewBarChart "Microbial Source" dist.microbialSource ]
+                            ]
 
-            Api.Loading ->
-                Html.div [ class "loading" ] [ Html.text "Loading charts..." ]
+                    Api.Loading ->
+                        Html.div [ class "text-center py-3" ]
+                            [ Spinner.spinner [] [] ]
 
-            Api.Failure _ ->
-                Html.div [ class "error" ] [ Html.text "Failed to load distribution data." ]
+                    Api.Failure _ ->
+                        Alert.simpleDanger [] [ Html.text "Failed to load distribution data." ]
 
-            Api.NotAsked ->
-                Html.text ""
-        ]
+                    Api.NotAsked ->
+                        Html.text ""
+            ]
+        |> Card.view
 
 
 viewGeoChart : Api.AmpDistributions.GeoData -> Html Msg
@@ -421,11 +416,9 @@ viewGeoChart geo =
                   )
                 ]
     in
-    Html.div [ class "chart-container" ]
-        [ Html.node "plotly-chart"
-            [ attribute "data-chart" (Encode.encode 0 chartConfig) ]
-            []
-        ]
+    Html.node "plotly-chart"
+        [ attribute "data-chart" (Encode.encode 0 chartConfig) ]
+        []
 
 
 viewBarChart : String -> Api.AmpDistributions.LabeledData -> Html Msg
@@ -452,65 +445,66 @@ viewBarChart title data =
                   )
                 ]
     in
-    Html.div [ class "chart-container" ]
-        [ Html.node "plotly-chart"
-            [ attribute "data-chart" (Encode.encode 0 chartConfig) ]
-            []
-        ]
+    Html.node "plotly-chart"
+        [ attribute "data-chart" (Encode.encode 0 chartConfig) ]
+        []
 
 
 viewMetadata : Model -> Html Msg
 viewMetadata model =
-    Html.div [ class "metadata-section" ]
-        [ Html.h3 [] [ Html.text "Associated smORF Genes" ]
-        , case model.metadata of
-            Api.Success meta ->
-                Html.div []
-                    [ Html.p [ class "result-count" ]
-                        [ Html.text (String.fromInt meta.info.totalItem ++ " genes") ]
-                    , Html.table [ class "data-table metadata-table" ]
-                        [ Html.thead []
-                            [ Html.tr []
-                                [ Html.th [] [ Html.text "GMSC Accession" ]
-                                , Html.th [] [ Html.text "Sample" ]
-                                , Html.th [] [ Html.text "Source" ]
-                                , Html.th [] [ Html.text "Habitat" ]
-                                , Html.th [] [ Html.text "Taxonomy" ]
-                                ]
+    Card.config [ Card.attrs [ class "mb-3" ] ]
+        |> Card.headerH5 [] [ Html.text "Associated smORF Genes" ]
+        |> Card.block []
+            [ Block.custom <|
+                case model.metadata of
+                    Api.Success meta ->
+                        Html.div []
+                            [ Html.p [ class "text-muted small" ]
+                                [ Html.text (String.fromInt meta.info.totalItem ++ " genes") ]
+                            , Table.table
+                                { options = [ Table.striped, Table.hover, Table.small, Table.responsive ]
+                                , thead =
+                                    Table.simpleThead
+                                        [ Table.th [] [ Html.text "GMSC Accession" ]
+                                        , Table.th [] [ Html.text "Sample" ]
+                                        , Table.th [] [ Html.text "Source" ]
+                                        , Table.th [] [ Html.text "Habitat" ]
+                                        , Table.th [] [ Html.text "Taxonomy" ]
+                                        ]
+                                , tbody =
+                                    Table.tbody []
+                                        (List.map viewMetadataRow meta.data)
+                                }
+                            , viewMetadataPagination model meta.info
                             ]
-                        , Html.tbody []
-                            (List.map viewMetadataRow meta.data)
-                        ]
-                    , viewMetadataPagination model meta.info
-                    ]
 
-            Api.Loading ->
-                Html.div [ class "loading" ] [ Html.text "Loading metadata..." ]
+                    Api.Loading ->
+                        Html.div [ class "text-center py-3" ]
+                            [ Spinner.spinner [] [] ]
 
-            Api.Failure _ ->
-                Html.div [ class "error" ] [ Html.text "Failed to load metadata." ]
+                    Api.Failure _ ->
+                        Alert.simpleDanger [] [ Html.text "Failed to load metadata." ]
 
-            Api.NotAsked ->
-                Html.text ""
-        ]
-
-
-viewMetadataRow : MetadataEntry -> Html Msg
-viewMetadataRow entry =
-    Html.tr []
-        [ Html.td [] [ Html.text entry.gmscAccession ]
-        , Html.td [] [ Html.text entry.sample ]
-        , Html.td []
-            [ Html.text
-                (if entry.isMetagenomic then
-                    "Metagenomic"
-
-                 else
-                    "Genomic"
-                )
+                    Api.NotAsked ->
+                        Html.text ""
             ]
-        , Html.td [] [ Html.text entry.generalEnvoName ]
-        , Html.td [] [ Html.text entry.microbialSourceS ]
+        |> Card.view
+
+
+viewMetadataRow : MetadataEntry -> Table.Row Msg
+viewMetadataRow entry =
+    Table.tr []
+        [ Table.td [ Table.cellAttr (class "text-monospace small") ] [ Html.text entry.gmscAccession ]
+        , Table.td [] [ Html.text entry.sample ]
+        , Table.td []
+            [ if entry.isMetagenomic then
+                Badge.badgeInfo [] [ Html.text "Metagenomic" ]
+
+              else
+                Badge.badgeSecondary [] [ Html.text "Genomic" ]
+            ]
+        , Table.td [] [ Html.text entry.generalEnvoName ]
+        , Table.td [ Table.cellAttr (class "small") ] [ Html.text entry.microbialSourceS ]
         ]
 
 
@@ -530,37 +524,50 @@ viewMetadataPagination model info =
         Html.text ""
 
     else
-        Html.div [ class "pagination" ]
-            ([ if currentPage > 0 then
-                Html.button [ class "page-btn", onClick (MetadataGoToPage (currentPage - 1)) ]
-                    [ Html.text "Prev" ]
+        Html.nav [ class "mt-2" ]
+            [ Html.ul [ class "pagination pagination-sm justify-content-center" ]
+                ([ if currentPage > 0 then
+                    Html.li [ class "page-item" ]
+                        [ Html.a [ class "page-link", href "#", onClickPreventDefault (MetadataGoToPage (currentPage - 1)) ]
+                            [ Html.text "Prev" ]
+                        ]
 
-               else
-                Html.text ""
-             ]
-                ++ List.map
-                    (\pg ->
-                        Html.button
-                            [ class
-                                (if pg == currentPage then
-                                    "page-btn active"
+                   else
+                    Html.li [ class "page-item disabled" ]
+                        [ Html.span [ class "page-link" ] [ Html.text "Prev" ] ]
+                 ]
+                    ++ List.map
+                        (\pg ->
+                            Html.li
+                                [ class
+                                    (if pg == currentPage then
+                                        "page-item active"
 
-                                 else
-                                    "page-btn"
-                                )
-                            , onClick (MetadataGoToPage pg)
-                            ]
-                            [ Html.text (String.fromInt (pg + 1)) ]
-                    )
-                    visiblePages
-                ++ [ if currentPage < totalPages - 1 then
-                        Html.button [ class "page-btn", onClick (MetadataGoToPage (currentPage + 1)) ]
-                            [ Html.text "Next" ]
+                                     else
+                                        "page-item"
+                                    )
+                                ]
+                                [ Html.a
+                                    [ class "page-link"
+                                    , href "#"
+                                    , onClickPreventDefault (MetadataGoToPage pg)
+                                    ]
+                                    [ Html.text (String.fromInt (pg + 1)) ]
+                                ]
+                        )
+                        visiblePages
+                    ++ [ if currentPage < totalPages - 1 then
+                            Html.li [ class "page-item" ]
+                                [ Html.a [ class "page-link", href "#", onClickPreventDefault (MetadataGoToPage (currentPage + 1)) ]
+                                    [ Html.text "Next" ]
+                                ]
 
-                     else
-                        Html.text ""
-                   ]
-            )
+                         else
+                            Html.li [ class "page-item disabled" ]
+                                [ Html.span [ class "page-link" ] [ Html.text "Next" ] ]
+                       ]
+                )
+            ]
 
 
 
@@ -569,26 +576,22 @@ viewMetadataPagination model info =
 
 viewFeatures : Model -> Html Msg
 viewFeatures model =
-    Html.div [ class "tab-content" ]
-        [ case model.amp of
-            Api.Success amp ->
-                Html.div []
-                    [ viewHelicalWheel amp.sequence
-                    , viewSecondaryStructureChart amp
-                    , viewViolinPlots model amp
-                    ]
+    case model.amp of
+        Api.Success amp ->
+            Html.div []
+                [ viewHelicalWheel amp.sequence
+                , viewSecondaryStructureChart amp
+                , viewViolinPlots model amp
+                ]
 
-            _ ->
-                Html.div [ class "loading" ] [ Html.text "Loading..." ]
-        ]
+        _ ->
+            Html.div [ class "text-center py-4" ]
+                [ Spinner.spinner [ Spinner.grow ] [] ]
 
 
 viewHelicalWheel : String -> Html Msg
 viewHelicalWheel sequence =
     let
-        n =
-            String.length sequence
-
         angleStep =
             100.0
 
@@ -615,48 +618,53 @@ viewHelicalWheel sequence =
                         }
                     )
     in
-    Html.div [ class "helical-wheel-section" ]
-        [ Html.h3 [] [ Html.text "Helical Wheel Projection" ]
-        , Html.node "svg"
-            [ attribute "viewBox" "0 0 320 320"
-            , attribute "width" "320"
-            , attribute "height" "320"
-            , class "helical-wheel"
-            ]
-            (Html.node "circle"
-                [ attribute "cx" (String.fromFloat centerX)
-                , attribute "cy" (String.fromFloat centerY)
-                , attribute "r" (String.fromFloat radius)
-                , attribute "fill" "none"
-                , attribute "stroke" "#ccc"
-                , attribute "stroke-dasharray" "4,4"
-                ]
-                []
-                :: List.concatMap
-                    (\r ->
-                        [ Html.node "circle"
-                            [ attribute "cx" (String.fromFloat r.x)
-                            , attribute "cy" (String.fromFloat r.y)
-                            , attribute "r" "14"
-                            , attribute "fill" (aaColor r.ch)
-                            , attribute "stroke" "#333"
-                            , attribute "stroke-width" "1"
+    Card.config [ Card.attrs [ class "mb-3" ] ]
+        |> Card.headerH5 [] [ Html.text "Helical Wheel Projection" ]
+        |> Card.block []
+            [ Block.custom <|
+                Html.div [ class "text-center" ]
+                    [ Html.node "svg"
+                        [ attribute "viewBox" "0 0 320 320"
+                        , attribute "width" "320"
+                        , attribute "height" "320"
+                        , class "helical-wheel"
+                        ]
+                        (Html.node "circle"
+                            [ attribute "cx" (String.fromFloat centerX)
+                            , attribute "cy" (String.fromFloat centerY)
+                            , attribute "r" (String.fromFloat radius)
+                            , attribute "fill" "none"
+                            , attribute "stroke" "#ccc"
+                            , attribute "stroke-dasharray" "4,4"
                             ]
                             []
-                        , Html.node "text"
-                            [ attribute "x" (String.fromFloat r.x)
-                            , attribute "y" (String.fromFloat (r.y + 4))
-                            , attribute "text-anchor" "middle"
-                            , attribute "font-size" "12"
-                            , attribute "font-weight" "bold"
-                            , attribute "fill" "#000"
-                            ]
-                            [ Html.text (String.fromChar r.ch) ]
-                        ]
-                    )
-                    residues
-            )
-        ]
+                            :: List.concatMap
+                                (\r ->
+                                    [ Html.node "circle"
+                                        [ attribute "cx" (String.fromFloat r.x)
+                                        , attribute "cy" (String.fromFloat r.y)
+                                        , attribute "r" "14"
+                                        , attribute "fill" (aaColor r.ch)
+                                        , attribute "stroke" "#333"
+                                        , attribute "stroke-width" "1"
+                                        ]
+                                        []
+                                    , Html.node "text"
+                                        [ attribute "x" (String.fromFloat r.x)
+                                        , attribute "y" (String.fromFloat (r.y + 4))
+                                        , attribute "text-anchor" "middle"
+                                        , attribute "font-size" "12"
+                                        , attribute "font-weight" "bold"
+                                        , attribute "fill" "#000"
+                                        ]
+                                        [ Html.text (String.fromChar r.ch) ]
+                                    ]
+                                )
+                                residues
+                        )
+                    ]
+            ]
+        |> Card.view
 
 
 aaColor : Char -> String
@@ -715,52 +723,60 @@ viewSecondaryStructureChart amp =
                   )
                 ]
     in
-    Html.div [ class "secondary-structure-section" ]
-        [ Html.h3 [] [ Html.text "Secondary Structure" ]
-        , Html.div [ class "chart-container" ]
-            [ Html.node "plotly-chart"
-                [ attribute "data-chart" (Encode.encode 0 chartConfig) ]
-                []
+    Card.config [ Card.attrs [ class "mb-3" ] ]
+        |> Card.headerH5 [] [ Html.text "Secondary Structure" ]
+        |> Card.block []
+            [ Block.custom <|
+                Html.node "plotly-chart"
+                    [ attribute "data-chart" (Encode.encode 0 chartConfig) ]
+                    []
             ]
-        ]
+        |> Card.view
 
 
 viewViolinPlots : Model -> Amp -> Html Msg
 viewViolinPlots model amp =
-    Html.div [ class "violin-plots-section" ]
-        [ Html.h3 [] [ Html.text "Biochemical Properties (in Family Context)" ]
-        , case model.familyFeatures of
-            Api.Success features ->
-                let
-                    featureValues =
-                        Dict.values features
+    Card.config [ Card.attrs [ class "mb-3" ] ]
+        |> Card.headerH5 [] [ Html.text "Biochemical Properties (in Family Context)" ]
+        |> Card.block []
+            [ Block.custom <|
+                case model.familyFeatures of
+                    Api.Success features ->
+                        let
+                            featureValues =
+                                Dict.values features
 
-                    properties =
-                        [ ( "Molecular Weight", .mw, amp.molecularWeight )
-                        , ( "Isoelectric Point", .isoelectricPoint, amp.isoelectricPoint )
-                        , ( "Charge at pH 7", .chargeAtPH7, amp.charge )
-                        , ( "Aromaticity", .aromaticity, amp.aromaticity )
-                        , ( "Instability Index", .instabilityIndex, amp.instabilityIndex )
-                        , ( "GRAVY", .gravy, amp.gravy )
-                        ]
-                in
-                Html.div [ class "charts-grid" ]
-                    (List.map
-                        (\( name, accessor, currentVal ) ->
-                            viewViolinPlot name (List.map accessor featureValues) currentVal
-                        )
-                        properties
-                    )
+                            properties =
+                                [ ( "Molecular Weight", .mw, amp.molecularWeight )
+                                , ( "Isoelectric Point", .isoelectricPoint, amp.isoelectricPoint )
+                                , ( "Charge at pH 7", .chargeAtPH7, amp.charge )
+                                , ( "Aromaticity", .aromaticity, amp.aromaticity )
+                                , ( "Instability Index", .instabilityIndex, amp.instabilityIndex )
+                                , ( "GRAVY", .gravy, amp.gravy )
+                                ]
+                        in
+                        Grid.row []
+                            (List.map
+                                (\( name, accessor, currentVal ) ->
+                                    Grid.col [ Col.md6, Col.attrs [ class "mb-3" ] ]
+                                        [ viewViolinPlot name (List.map accessor featureValues) currentVal ]
+                                )
+                                properties
+                            )
 
-            Api.Loading ->
-                Html.div [ class "loading" ] [ Html.text "Loading family features..." ]
+                    Api.Loading ->
+                        Html.div [ class "text-center py-3" ]
+                            [ Spinner.spinner [] []
+                            , Html.p [ class "text-muted mt-2 small" ] [ Html.text "Loading family features..." ]
+                            ]
 
-            Api.Failure _ ->
-                Html.div [ class "error" ] [ Html.text "Failed to load family features." ]
+                    Api.Failure _ ->
+                        Alert.simpleDanger [] [ Html.text "Failed to load family features." ]
 
-            Api.NotAsked ->
-                Html.text ""
-        ]
+                    Api.NotAsked ->
+                        Html.text ""
+            ]
+        |> Card.view
 
 
 viewViolinPlot : String -> List Float -> Float -> Html Msg
@@ -802,15 +818,18 @@ viewViolinPlot title familyValues currentValue =
                   )
                 ]
     in
-    Html.div [ class "chart-container" ]
-        [ Html.node "plotly-chart"
-            [ attribute "data-chart" (Encode.encode 0 chartConfig) ]
-            []
-        ]
+    Html.node "plotly-chart"
+        [ attribute "data-chart" (Encode.encode 0 chartConfig) ]
+        []
 
 
 
 -- HELPERS
+
+
+onClickPreventDefault : msg -> Html.Attribute msg
+onClickPreventDefault msg =
+    Html.Events.preventDefaultOn "click" (Json.Decode.succeed ( msg, True ))
 
 
 formatFloat : Int -> Float -> String

@@ -1,9 +1,13 @@
 module Layouts.Default exposing (Model, Msg, Props, layout)
 
+import Bootstrap.Button as Button
+import Bootstrap.Form.Input as Input
+import Bootstrap.Grid as Grid
+import Bootstrap.Navbar as Navbar
 import Effect exposing (Effect)
 import Html exposing (Html)
-import Html.Attributes exposing (class, href, placeholder, type_, value)
-import Html.Events exposing (onInput, onSubmit)
+import Html.Attributes exposing (class, href)
+import Html.Events exposing (onSubmit)
 import Layout exposing (Layout)
 import Route exposing (Route)
 import Route.Path
@@ -31,13 +35,18 @@ layout props shared route =
 
 
 type alias Model =
-    {}
+    { navbarState : Navbar.State
+    }
 
 
 init : () -> ( Model, Effect Msg )
 init _ =
-    ( {}
-    , Effect.none
+    let
+        ( navState, navCmd ) =
+            Navbar.initialState NavbarMsg
+    in
+    ( { navbarState = navState }
+    , Effect.sendCmd navCmd
     )
 
 
@@ -46,13 +55,19 @@ init _ =
 
 
 type Msg
-    = SearchQueryChanged String
+    = NavbarMsg Navbar.State
+    | SearchQueryChanged String
     | SearchSubmitted
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
+        NavbarMsg state ->
+            ( { model | navbarState = state }
+            , Effect.none
+            )
+
         SearchQueryChanged query ->
             ( model
             , Effect.sendSharedMsg (Shared.Msg.GlobalSearchQueryChanged query)
@@ -66,7 +81,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Navbar.subscriptions model.navbarState NavbarMsg
 
 
 
@@ -81,71 +96,54 @@ view :
 view shared route { toContentMsg, model, content } =
     { title = content.title ++ " | AMPSphere"
     , body =
-        [ viewHeader shared route toContentMsg
-        , Html.main_ [ class "main-content" ]
+        [ viewNavbar shared model toContentMsg
+        , Grid.container [ class "main-content mt-4 mb-5" ]
             content.body
         , viewFooter
         ]
     }
 
 
-viewHeader : Shared.Model -> Route () -> (Msg -> contentMsg) -> Html contentMsg
-viewHeader shared route toContentMsg =
-    Html.header [ class "site-header" ]
-        [ Html.div [ class "header-inner" ]
-            [ Html.a [ href "/", class "logo" ]
-                [ Html.text "AMPSphere" ]
-            , Html.nav [ class "main-nav" ]
-                [ navLink route Route.Path.Home_ "Home"
-                , navLink route Route.Path.BrowseData "Browse Data"
-                , navLink route Route.Path.Downloads "Downloads"
-                , navLink route Route.Path.About "About"
-                , navLink route Route.Path.Contact "Contact"
-                ]
-            , Html.form
-                [ class "header-search"
-                , onSubmit (toContentMsg SearchSubmitted)
-                ]
-                [ Html.input
-                    [ type_ "text"
-                    , placeholder "Search AMP, family, or text..."
-                    , value shared.globalSearchQuery
-                    , onInput (SearchQueryChanged >> toContentMsg)
-                    ]
-                    []
-                , Html.button [ type_ "submit", class "search-btn" ]
-                    [ Html.text "Search" ]
-                ]
+viewNavbar : Shared.Model -> Model -> (Msg -> contentMsg) -> Html contentMsg
+viewNavbar shared model toContentMsg =
+    Navbar.config (NavbarMsg >> toContentMsg)
+        |> Navbar.withAnimation
+        |> Navbar.dark
+        |> Navbar.attrs [ class "navbar-ampsphere" ]
+        |> Navbar.brand [ href "/" ] [ Html.text "AMPSphere" ]
+        |> Navbar.items
+            [ Navbar.itemLink [ href "/" ] [ Html.text "Home" ]
+            , Navbar.itemLink [ href "/browse-data" ] [ Html.text "Browse Data" ]
+            , Navbar.itemLink [ href "/downloads" ] [ Html.text "Downloads" ]
+            , Navbar.itemLink [ href "/about" ] [ Html.text "About" ]
+            , Navbar.itemLink [ href "/contact" ] [ Html.text "Contact" ]
             ]
-        ]
-
-
-navLink : Route () -> Route.Path.Path -> String -> Html msg
-navLink route path label =
-    let
-        isActive =
-            route.path == path
-    in
-    Html.a
-        [ Route.Path.href path
-        , class
-            (if isActive then
-                "nav-link active"
-
-             else
-                "nav-link"
-            )
-        ]
-        [ Html.text label ]
+        |> Navbar.customItems
+            [ Navbar.customItem <|
+                Html.form [ class "form-inline ml-auto", onSubmit (toContentMsg SearchSubmitted) ]
+                    [ Input.text
+                        [ Input.placeholder "Search AMP, family, or text..."
+                        , Input.value shared.globalSearchQuery
+                        , Input.onInput (\s -> toContentMsg (SearchQueryChanged s))
+                        , Input.attrs [ class "mr-2", Html.Attributes.style "width" "220px" ]
+                        ]
+                    , Button.button
+                        [ Button.outlineLight
+                        , Button.attrs [ Html.Attributes.type_ "submit" ]
+                        ]
+                        [ Html.text "Search" ]
+                    ]
+            ]
+        |> Navbar.view model.navbarState
 
 
 viewFooter : Html msg
 viewFooter =
     Html.footer [ class "site-footer" ]
-        [ Html.div [ class "footer-inner" ]
-            [ Html.p []
+        [ Grid.container []
+            [ Html.p [ class "mb-1" ]
                 [ Html.text "AMPSphere: a comprehensive catalog of antimicrobial peptides" ]
-            , Html.p []
+            , Html.p [ class "mb-0" ]
                 [ Html.a [ href "https://big-data-biology.org" ]
                     [ Html.text "Big Data Biology Lab" ]
                 , Html.text " | "

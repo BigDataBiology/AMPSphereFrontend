@@ -3,6 +3,9 @@ module Pages.SequenceSearch exposing (Model, Msg, page)
 import Api
 import Api.SearchHmmer
 import Api.SearchMmseqs
+import Bootstrap.Alert as Alert
+import Bootstrap.Spinner as Spinner
+import Bootstrap.Table as Table
 import Dict
 import Effect exposing (Effect)
 import Html exposing (Html)
@@ -157,24 +160,22 @@ view : Model -> View Msg
 view model =
     { title = "Sequence Search"
     , body =
-        [ Html.div [ class "page-sequence-search" ]
-            [ Html.h1 []
-                [ Html.text
-                    (case model.method of
-                        MMseqs ->
-                            "MMseqs2 Search Results"
+        [ Html.h1 [ class "mb-3" ]
+            [ Html.text
+                (case model.method of
+                    MMseqs ->
+                        "MMseqs2 Search Results"
 
-                        HMMER ->
-                            "HMMER Search Results"
-                    )
-                ]
-            , case model.method of
-                MMseqs ->
-                    viewMmseqsResults model
-
-                HMMER ->
-                    viewHmmerResults model
+                    HMMER ->
+                        "HMMER Search Results"
+                )
             ]
+        , case model.method of
+            MMseqs ->
+                viewMmseqsResults model
+
+            HMMER ->
+                viewHmmerResults model
         ]
     }
 
@@ -183,48 +184,52 @@ viewMmseqsResults : Model -> Html Msg
 viewMmseqsResults model =
     case model.mmseqsResults of
         Api.NotAsked ->
-            Html.p [] [ Html.text "No search query provided." ]
+            Alert.simpleInfo [] [ Html.text "No search query provided." ]
 
         Api.Loading ->
-            Html.div [ class "loading" ] [ Html.text "Running MMseqs2 search... This may take a moment." ]
+            Html.div [ class "text-center py-4" ]
+                [ Spinner.spinner [ Spinner.grow ] []
+                , Html.p [ class "text-muted mt-2" ] [ Html.text "Running MMseqs2 search... This may take a moment." ]
+                ]
 
         Api.Failure _ ->
-            Html.div [ class "error" ] [ Html.text "Search failed. Please check your sequence and try again." ]
+            Alert.simpleDanger [] [ Html.text "Search failed. Please check your sequence and try again." ]
 
         Api.Success hits ->
             if List.isEmpty hits then
-                Html.p [] [ Html.text "No hits found." ]
+                Alert.simpleWarning [] [ Html.text "No hits found." ]
 
             else
                 Html.div []
-                    [ Html.p [ class "result-count" ]
+                    [ Html.p [ class "text-muted mb-3" ]
                         [ Html.text (String.fromInt (List.length hits) ++ " hits found") ]
-                    , Html.table [ class "data-table" ]
-                        [ Html.thead []
-                            [ Html.tr []
-                                [ Html.th [] [ Html.text "" ]
-                                , Html.th [] [ Html.text "Target" ]
-                                , Html.th [] [ Html.text "Identity" ]
-                                , Html.th [] [ Html.text "Aln. Length" ]
-                                , Html.th [] [ Html.text "E-value" ]
-                                , Html.th [] [ Html.text "Bit Score" ]
+                    , Table.table
+                        { options = [ Table.striped, Table.hover, Table.responsive ]
+                        , thead =
+                            Table.simpleThead
+                                [ Table.th [] [ Html.text "" ]
+                                , Table.th [] [ Html.text "Target" ]
+                                , Table.th [] [ Html.text "Identity" ]
+                                , Table.th [] [ Html.text "Aln. Length" ]
+                                , Table.th [] [ Html.text "E-value" ]
+                                , Table.th [] [ Html.text "Bit Score" ]
                                 ]
-                            ]
-                        , Html.tbody []
-                            (List.indexedMap (viewMmseqsRow model.expandedRows) hits)
-                        ]
+                        , tbody =
+                            Table.tbody []
+                                (List.concatMap identity (List.indexedMap (viewMmseqsRow model.expandedRows) hits))
+                        }
                     ]
 
 
-viewMmseqsRow : List Int -> Int -> Api.SearchMmseqs.Hit -> Html Msg
+viewMmseqsRow : List Int -> Int -> Api.SearchMmseqs.Hit -> List (Table.Row Msg)
 viewMmseqsRow expandedRows idx hit =
     let
         isExpanded =
             List.member idx expandedRows
 
         mainRow =
-            Html.tr [ class "clickable-row", onClick (ToggleRow idx) ]
-                [ Html.td [ class "expand-toggle" ]
+            Table.tr [ Table.rowAttr (class "cursor-pointer"), Table.rowAttr (onClick (ToggleRow idx)) ]
+                [ Table.td []
                     [ Html.text
                         (if isExpanded then
                             "-"
@@ -233,27 +238,27 @@ viewMmseqsRow expandedRows idx hit =
                             "+"
                         )
                     ]
-                , Html.td []
+                , Table.td []
                     [ Html.a [ Route.Path.href (Route.Path.Amp_Accession_ { accession = hit.targetId }) ]
                         [ Html.text hit.targetId ]
                     ]
-                , Html.td [] [ Html.text (formatPercent hit.seqIdentity) ]
-                , Html.td [] [ Html.text (String.fromInt hit.alnLength) ]
-                , Html.td [] [ Html.text (formatEValue hit.eValue) ]
-                , Html.td [] [ Html.text (String.fromFloat hit.bitScore) ]
+                , Table.td [] [ Html.text (formatPercent hit.seqIdentity) ]
+                , Table.td [] [ Html.text (String.fromInt hit.alnLength) ]
+                , Table.td [] [ Html.text (formatEValue hit.eValue) ]
+                , Table.td [] [ Html.text (String.fromFloat hit.bitScore) ]
                 ]
 
         alignmentRow =
             if isExpanded then
-                [ Html.tr [ class "alignment-row" ]
-                    [ Html.td [ colspan 6 ]
-                        [ Html.div [ class "alignment" ]
-                            [ Html.div [ class "alignment-line" ]
-                                [ Html.span [ class "alignment-label" ] [ Html.text "Query:  " ]
+                [ Table.tr []
+                    [ Table.td [ Table.cellAttr (colspan 6) ]
+                        [ Html.div [ class "p-3 bg-light" ]
+                            [ Html.div []
+                                [ Html.strong [] [ Html.text "Query:  " ]
                                 , Html.code [] [ Html.text hit.querySequenceAligned ]
                                 ]
-                            , Html.div [ class "alignment-line" ]
-                                [ Html.span [ class "alignment-label" ] [ Html.text "Target: " ]
+                            , Html.div []
+                                [ Html.strong [] [ Html.text "Target: " ]
                                 , Html.code [] [ Html.text hit.targetSequenceAligned ]
                                 ]
                             ]
@@ -264,58 +269,62 @@ viewMmseqsRow expandedRows idx hit =
             else
                 []
     in
-    Html.node "tbody" [] (mainRow :: alignmentRow)
+    mainRow :: alignmentRow
 
 
 viewHmmerResults : Model -> Html Msg
 viewHmmerResults model =
     case model.hmmerResults of
         Api.NotAsked ->
-            Html.p [] [ Html.text "No search query provided." ]
+            Alert.simpleInfo [] [ Html.text "No search query provided." ]
 
         Api.Loading ->
-            Html.div [ class "loading" ] [ Html.text "Running HMMER search... This may take a moment." ]
+            Html.div [ class "text-center py-4" ]
+                [ Spinner.spinner [ Spinner.grow ] []
+                , Html.p [ class "text-muted mt-2" ] [ Html.text "Running HMMER search... This may take a moment." ]
+                ]
 
         Api.Failure _ ->
-            Html.div [ class "error" ] [ Html.text "Search failed. Please check your sequence and try again." ]
+            Alert.simpleDanger [] [ Html.text "Search failed. Please check your sequence and try again." ]
 
         Api.Success hits ->
             if List.isEmpty hits then
-                Html.p [] [ Html.text "No hits found." ]
+                Alert.simpleWarning [] [ Html.text "No hits found." ]
 
             else
                 Html.div []
-                    [ Html.p [ class "result-count" ]
+                    [ Html.p [ class "text-muted mb-3" ]
                         [ Html.text (String.fromInt (List.length hits) ++ " hits found") ]
-                    , Html.table [ class "data-table" ]
-                        [ Html.thead []
-                            [ Html.tr []
-                                [ Html.th [] [ Html.text "Family" ]
-                                , Html.th [] [ Html.text "Accession" ]
-                                , Html.th [] [ Html.text "E-value" ]
-                                , Html.th [] [ Html.text "Score" ]
-                                , Html.th [] [ Html.text "Bias" ]
-                                , Html.th [] [ Html.text "Description" ]
+                    , Table.table
+                        { options = [ Table.striped, Table.hover, Table.responsive ]
+                        , thead =
+                            Table.simpleThead
+                                [ Table.th [] [ Html.text "Family" ]
+                                , Table.th [] [ Html.text "Accession" ]
+                                , Table.th [] [ Html.text "E-value" ]
+                                , Table.th [] [ Html.text "Score" ]
+                                , Table.th [] [ Html.text "Bias" ]
+                                , Table.th [] [ Html.text "Description" ]
                                 ]
-                            ]
-                        , Html.tbody []
-                            (List.map viewHmmerRow hits)
-                        ]
+                        , tbody =
+                            Table.tbody []
+                                (List.map viewHmmerRow hits)
+                        }
                     ]
 
 
-viewHmmerRow : Api.SearchHmmer.Hit -> Html Msg
+viewHmmerRow : Api.SearchHmmer.Hit -> Table.Row Msg
 viewHmmerRow hit =
-    Html.tr []
-        [ Html.td []
+    Table.tr []
+        [ Table.td []
             [ Html.a [ Route.Path.href (Route.Path.Family_Accession_ { accession = hit.targetName }) ]
                 [ Html.text hit.targetName ]
             ]
-        , Html.td [] [ Html.text hit.accession ]
-        , Html.td [] [ Html.text (formatEValue hit.eValue) ]
-        , Html.td [] [ Html.text (String.fromFloat hit.score) ]
-        , Html.td [] [ Html.text (String.fromFloat hit.bias) ]
-        , Html.td [] [ Html.text hit.description ]
+        , Table.td [] [ Html.text hit.accession ]
+        , Table.td [] [ Html.text (formatEValue hit.eValue) ]
+        , Table.td [] [ Html.text (String.fromFloat hit.score) ]
+        , Table.td [] [ Html.text (String.fromFloat hit.bias) ]
+        , Table.td [] [ Html.text hit.description ]
         ]
 
 
