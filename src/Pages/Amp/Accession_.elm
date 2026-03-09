@@ -6,6 +6,7 @@ import Api.AmpCoprediction exposing (CopredictionScore)
 import Api.AmpDistributions exposing (Distributions)
 import Api.AmpMetadata exposing (MetadataEntry, MetadataResponse)
 import Api.FamilyFeatures exposing (FamilyFeatures)
+import Components.SequenceLegend
 import Bootstrap.Alert as Alert
 import Bootstrap.Badge as Badge
 import Bootstrap.Card as Card
@@ -289,14 +290,17 @@ viewSequence sequence =
         |> Card.headerH5 [] [ Html.text "Peptide Sequence" ]
         |> Card.block []
             [ Block.custom <|
-                Html.div [ class "sequence-box p-3 bg-light text-monospace" ]
-                    (List.map
-                        (\ch ->
-                            Html.span [ class ("aa aa-" ++ String.fromChar ch) ]
-                                [ Html.text (String.fromChar ch) ]
+                Html.div []
+                    [ Html.div [ class "sequence-box p-3 bg-light text-monospace" ]
+                        (List.map
+                            (\ch ->
+                                Html.span [ class ("aa aa-" ++ String.fromChar ch) ]
+                                    [ Html.text (String.fromChar ch) ]
+                            )
+                            (String.toList sequence)
                         )
-                        (String.toList sequence)
-                    )
+                    , Components.SequenceLegend.view
+                    ]
             ]
         |> Card.view
 

@@ -7,6 +7,7 @@ import Api.Family exposing (Family)
 import Api.FamilyDownloads exposing (FamilyDownloads)
 import Api.FamilyFeatures exposing (AmpFeatures, FamilyFeatures)
 import Components.SeqLogo
+import Components.SequenceLegend
 import Bootstrap.Alert as Alert
 import Bootstrap.Card as Card
 import Bootstrap.Card.Block as Block
@@ -312,14 +313,17 @@ viewConsensusSequence sequence =
         |> Card.headerH5 [] [ Html.text "Consensus Sequence" ]
         |> Card.block []
             [ Block.custom <|
-                Html.div [ class "sequence-box p-3 bg-light text-monospace" ]
-                    (List.map
-                        (\ch ->
-                            Html.span [ class ("aa aa-" ++ String.fromChar ch) ]
-                                [ Html.text (String.fromChar ch) ]
+                Html.div []
+                    [ Html.div [ class "sequence-box p-3 bg-light text-monospace" ]
+                        (List.map
+                            (\ch ->
+                                Html.span [ class ("aa aa-" ++ String.fromChar ch) ]
+                                    [ Html.text (String.fromChar ch) ]
+                            )
+                            (String.toList sequence)
                         )
-                        (String.toList sequence)
-                    )
+                    , Components.SequenceLegend.view
+                    ]
             ]
         |> Card.view
 
