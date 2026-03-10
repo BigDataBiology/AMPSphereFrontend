@@ -439,30 +439,30 @@ viewRangeSlider label range decimals minVal maxVal toMsgMin toMsgMax =
     in
     Form.group []
         [ Form.label [] [ Html.text label ]
-        , Html.div [ class "d-flex align-items-center" ]
-            [ Html.span [ class "small text-muted mr-2" ] [ Html.text (displayVal currentMin) ]
-            , Html.div [ class "dual-range flex-grow-1" ]
-                [ Html.div [ class "dual-range-track" ] []
-                , Html.input
-                    [ attribute "type" "range"
-                    , attribute "min" rangeMin
-                    , attribute "max" rangeMax
-                    , attribute "step" stepStr
-                    , value (String.fromFloat currentMin)
-                    , onInput toMsgMin
-                    ]
-                    []
-                , Html.input
-                    [ attribute "type" "range"
-                    , attribute "min" rangeMin
-                    , attribute "max" rangeMax
-                    , attribute "step" stepStr
-                    , value (String.fromFloat currentMax)
-                    , onInput toMsgMax
-                    ]
-                    []
+        , Html.div [ class "dual-range" ]
+            [ Html.div [ class "dual-range-track" ] []
+            , Html.input
+                [ attribute "type" "range"
+                , attribute "min" rangeMin
+                , attribute "max" rangeMax
+                , attribute "step" stepStr
+                , value (String.fromFloat currentMin)
+                , onInput toMsgMin
                 ]
-            , Html.span [ class "small text-muted ml-2" ] [ Html.text (displayVal currentMax) ]
+                []
+            , Html.input
+                [ attribute "type" "range"
+                , attribute "min" rangeMin
+                , attribute "max" rangeMax
+                , attribute "step" stepStr
+                , value (String.fromFloat currentMax)
+                , onInput toMsgMax
+                ]
+                []
+            ]
+        , Html.div [ class "d-flex justify-content-between" ]
+            [ Html.span [ class "small text-muted" ] [ Html.text (displayVal currentMin) ]
+            , Html.span [ class "small text-muted" ] [ Html.text (displayVal currentMax) ]
             ]
         ]
 
