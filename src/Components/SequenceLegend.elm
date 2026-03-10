@@ -1,7 +1,7 @@
 module Components.SequenceLegend exposing (view)
 
 import Html exposing (Html)
-import Html.Attributes exposing (class, style)
+import Html.Attributes exposing (class, style, title)
 
 
 type alias Group =
@@ -29,8 +29,49 @@ view =
         (List.map viewGroup groups)
 
 
+residueName : String -> String
+residueName code =
+    case code of
+        "A" -> "Alanine"
+        "C" -> "Cysteine"
+        "D" -> "Aspartate"
+        "E" -> "Glutamate"
+        "F" -> "Phenylalanine"
+        "G" -> "Glycine"
+        "H" -> "Histidine"
+        "I" -> "Isoleucine"
+        "K" -> "Lysine"
+        "L" -> "Leucine"
+        "M" -> "Methionine"
+        "N" -> "Asparagine"
+        "P" -> "Proline"
+        "Q" -> "Glutamine"
+        "R" -> "Arginine"
+        "S" -> "Serine"
+        "T" -> "Threonine"
+        "V" -> "Valine"
+        "W" -> "Tryptophan"
+        "Y" -> "Tyrosine"
+        _ -> code
+
+
+viewResidue : String -> String -> Html msg
+viewResidue color code =
+    Html.span
+        [ style "color" color
+        , style "font-weight" "600"
+        , style "cursor" "default"
+        , title (code ++ " – " ++ residueName code)
+        ]
+        [ Html.text code ]
+
+
 viewGroup : Group -> Html msg
 viewGroup group =
+    let
+        letters =
+            List.filter ((/=) "") (String.split " " group.residues)
+    in
     Html.span [ class "d-inline-flex align-items-center small" ]
         [ Html.span
             [ style "display" "inline-block"
@@ -41,8 +82,8 @@ viewGroup group =
             , style "margin-right" "4px"
             ]
             []
-        , Html.span [ style "color" group.color, style "font-weight" "600" ]
-            [ Html.text group.residues ]
+        , Html.span [ style "display" "inline-flex", style "gap" "2px" ]
+            (List.intersperse (Html.text " ") (List.map (viewResidue group.color) letters))
         , Html.span [ class "text-muted ml-1" ]
             [ Html.text ("(" ++ group.label ++ ")") ]
         ]
