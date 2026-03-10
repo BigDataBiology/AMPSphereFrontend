@@ -375,6 +375,16 @@ viewDistributionCharts dist =
 viewGeoChart : Api.AmpDistributions.GeoData -> Html Msg
 viewGeoChart geo =
     let
+        maxSize =
+            geo.size |> List.maximum |> Maybe.withDefault 1.0
+
+        sizeRef =
+            if maxSize > 0 then
+                2.0 * maxSize / (40.0 ^ 2)
+
+            else
+                1.0
+
         chartConfig =
             Encode.object
                 [ ( "data"
@@ -386,6 +396,9 @@ viewGeoChart geo =
                             , ( "marker"
                               , Encode.object
                                     [ ( "size", Encode.list Encode.float geo.size )
+                                    , ( "sizemode", Encode.string "area" )
+                                    , ( "sizeref", Encode.float sizeRef )
+                                    , ( "sizemin", Encode.float 4.0 )
                                     , ( "color", Encode.list Encode.string geo.colors )
                                     ]
                               )
