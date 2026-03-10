@@ -18,7 +18,7 @@ import Dict
 import Effect exposing (Effect)
 import Set exposing (Set)
 import Html exposing (Html)
-import Html.Attributes exposing (attribute, class, href, selected, value)
+import Html.Attributes exposing (attribute, class, href, selected, style, value)
 import Html.Events exposing (onClick, onInput)
 import Json.Decode
 import Http
@@ -567,15 +567,8 @@ ampCell key amp =
                 ]
 
         "sequence" ->
-            Table.td [ Table.cellAttr (class "text-monospace small") ]
-                [ Html.text
-                    (if String.length amp.sequence > 25 then
-                        String.left 25 amp.sequence ++ "..."
-
-                     else
-                        amp.sequence
-                    )
-                ]
+            Table.td [ Table.cellAttr (class "text-monospace small"), Table.cellAttr (style "word-break" "break-all") ]
+                [ Html.text amp.sequence ]
 
         "length" ->
             Table.td [] [ Html.text (String.fromInt amp.length) ]
