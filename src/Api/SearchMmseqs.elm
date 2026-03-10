@@ -3,6 +3,7 @@ module Api.SearchMmseqs exposing (Hit, SearchResults, get)
 import Effect exposing (Effect)
 import Http
 import Json.Decode as Decode exposing (Decoder)
+import Url.Builder
 
 
 type alias Hit =
@@ -61,7 +62,7 @@ get :
     -> Effect msg
 get options =
     Effect.apiGet
-        { endpoint = "/search/mmseqs?query=" ++ options.query
+        { endpoint = Url.Builder.absolute [ "search", "mmseqs" ] [ Url.Builder.string "query" options.query ]
         , decoder = decoder
         , onResponse = options.onResponse
         }
