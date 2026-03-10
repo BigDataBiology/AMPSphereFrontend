@@ -20,7 +20,7 @@ import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Html exposing (Html)
 import Html.Attributes exposing (attribute, class, href)
-import Html.Events exposing (onClick)
+import Html.Events
 import Json.Decode
 import Http
 import Json.Encode as Encode
@@ -47,16 +47,10 @@ page shared route =
 -- MODEL
 
 
-type ActiveTab
-    = OverviewTab
-    | FeaturesTab
-    | DownloadsTab
-
 
 type alias Model =
     { accession : String
     , tabState : Tab.State
-    , activeTab : ActiveTab
     , family : Api.Data Family
     , features : Api.Data FamilyFeatures
     , downloads : Api.Data FamilyDownloads
@@ -75,7 +69,6 @@ init route _ =
     in
     ( { accession = accession
       , tabState = Tab.initialState
-      , activeTab = OverviewTab
       , family = Api.Loading
       , features = Api.NotAsked
       , downloads = Api.NotAsked
@@ -119,8 +112,6 @@ type Msg
     | GotDownloads (Result Http.Error FamilyDownloads)
     | GotAmpsList (Result Http.Error AmpListResponse)
     | TabMsg Tab.State
-    | SwitchToFeatures
-    | SwitchToDownloads
     | GotAlignment (Result Http.Error String)
     | AmpsGoToPage Int
 
@@ -166,31 +157,40 @@ update msg model =
             ( { model | ampsList = Api.Failure err }, Effect.none )
 
         TabMsg state ->
-            ( { model | tabState = state }, Effect.none )
+            let
+                needsFeatures =
+                    state == Tab.customInitialState "features" && model.features == Api.NotAsked
 
-        SwitchToFeatures ->
-            if model.features == Api.NotAsked then
-                ( { model | activeTab = FeaturesTab, features = Api.Loading }
-                , Api.FamilyFeatures.get
-                    { accession = model.accession
-                    , onResponse = GotFeatures
-                    }
-                )
+                needsDownloads =
+                    state == Tab.customInitialState "downloads" && model.downloads == Api.NotAsked
 
-            else
-                ( { model | activeTab = FeaturesTab }, Effect.none )
+                effect =
+                    if needsFeatures then
+                        Api.FamilyFeatures.get { accession = model.accession, onResponse = GotFeatures }
 
-        SwitchToDownloads ->
-            if model.downloads == Api.NotAsked then
-                ( { model | activeTab = DownloadsTab, downloads = Api.Loading }
-                , Api.FamilyDownloads.get
-                    { accession = model.accession
-                    , onResponse = GotDownloads
-                    }
-                )
+                    else if needsDownloads then
+                        Api.FamilyDownloads.get { accession = model.accession, onResponse = GotDownloads }
 
-            else
-                ( { model | activeTab = DownloadsTab }, Effect.none )
+                    else
+                        Effect.none
+            in
+            ( { model
+                | tabState = state
+                , features =
+                    if needsFeatures then
+                        Api.Loading
+
+                    else
+                        model.features
+                , downloads =
+                    if needsDownloads then
+                        Api.Loading
+
+                    else
+                        model.downloads
+              }
+            , effect
+            )
 
         AmpsGoToPage pg ->
             ( { model | ampsPage = pg, ampsList = Api.Loading }
@@ -239,12 +239,12 @@ view model =
                     }
                 , Tab.item
                     { id = "features"
-                    , link = Tab.link [ onClick SwitchToFeatures ] [ Html.text "Features" ]
+                    , link = Tab.link [] [ Html.text "Features" ]
                     , pane = Tab.pane [ class "pt-3" ] [ viewFeatures model ]
                     }
                 , Tab.item
                     { id = "downloads"
-                    , link = Tab.link [ onClick SwitchToDownloads ] [ Html.text "Downloads" ]
+                    , link = Tab.link [] [ Html.text "Downloads" ]
                     , pane = Tab.pane [ class "pt-3" ] [ viewDownloads model ]
                     }
                 ]
