@@ -9,7 +9,7 @@ import Bootstrap.Table as Table
 import Dict
 import Effect exposing (Effect)
 import Html exposing (Html)
-import Html.Attributes exposing (class, colspan, href)
+import Html.Attributes exposing (class, colspan, href, style)
 import Html.Events exposing (onClick)
 import Http
 import Layouts
@@ -255,11 +255,11 @@ viewMmseqsRow expandedRows idx hit =
                         [ Html.div [ class "p-3 bg-light" ]
                             [ Html.div []
                                 [ Html.strong [] [ Html.text "Query:  " ]
-                                , Html.code [] [ Html.text hit.querySequenceAligned ]
+                                , Html.code [] (coloredAlignment hit.querySequenceAligned hit.matchPattern)
                                 ]
                             , Html.div []
                                 [ Html.strong [] [ Html.text "Target: " ]
-                                , Html.code [] [ Html.text hit.targetSequenceAligned ]
+                                , Html.code [] (coloredAlignment hit.targetSequenceAligned hit.matchPattern)
                                 ]
                             ]
                         ]
@@ -326,6 +326,28 @@ viewHmmerRow hit =
         , Table.td [] [ Html.text (String.fromFloat hit.bias) ]
         , Table.td [] [ Html.text hit.description ]
         ]
+
+
+coloredAlignment : String -> String -> List (Html msg)
+coloredAlignment sequence matchPattern =
+    List.map2
+        (\residue match ->
+            let
+                color =
+                    case match of
+                        '|' ->
+                            "#2e7d32"
+
+                        '.' ->
+                            "#e65100"
+
+                        _ ->
+                            "#c62828"
+            in
+            Html.span [ style "color" color ] [ Html.text (String.fromChar residue) ]
+        )
+        (String.toList sequence)
+        (String.toList matchPattern)
 
 
 formatPercent : Float -> String
