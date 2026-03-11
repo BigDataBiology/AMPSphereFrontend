@@ -47,9 +47,44 @@ hitDecoder =
         |> decodeAndMap (Decode.field "domain_end_position_target" Decode.int)
         |> decodeAndMap (Decode.field "E_value" Decode.float)
         |> decodeAndMap (Decode.field "bit_score" Decode.float)
-        |> decodeAndMap (Decode.field "alignment_strings" (Decode.index 0 Decode.string))
-        |> decodeAndMap (Decode.field "alignment_strings" (Decode.index 2 Decode.string))
-        |> decodeAndMap (Decode.field "alignment_strings" (Decode.index 1 Decode.string))
+        |> decodeAndMap (strippedAlnField 0)
+        |> decodeAndMap (strippedAlnField 2)
+        |> decodeAndMap (strippedAlnField 1)
+
+
+{-| Decode alignment_strings[idx] with the position prefix stripped.
+Some MMseqs2 results include a leading "N " position prefix (e.g. "1 GRVIGK...")
+in all three alignment strings. We find the prefix length from string[0]
+(first non-alpha character count) and drop the same number of chars from
+string[idx] so that query, target, and match pattern always align correctly.
+-}
+strippedAlnField : Int -> Decoder String
+strippedAlnField idx =
+    Decode.field "alignment_strings"
+        (Decode.map2
+            (\queryStr targetStr ->
+                let
+                    prefixLen =
+                        String.toList queryStr
+                            |> List.foldl
+                                (\c ( found, n ) ->
+                                    if found then
+                                        ( True, n )
+
+                                    else if Char.isAlpha c || c == '-' then
+                                        ( True, n )
+
+                                    else
+                                        ( False, n + 1 )
+                                )
+                                ( False, 0 )
+                            |> Tuple.second
+                in
+                String.dropLeft prefixLen targetStr
+            )
+            (Decode.index 0 Decode.string)
+            (Decode.index idx Decode.string)
+        )
 
 
 decodeAndMap : Decoder a -> Decoder (a -> b) -> Decoder b
