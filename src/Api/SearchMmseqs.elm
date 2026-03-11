@@ -18,8 +18,8 @@ type alias Hit =
     , targetEnd : Int
     , eValue : Float
     , bitScore : Float
-    , querySequenceAligned : String
-    , targetSequenceAligned : String
+    , queryAligned : String
+    , targetAligned : String
     , matchPattern : String
     }
 
@@ -47,8 +47,8 @@ hitDecoder =
         |> decodeAndMap (Decode.field "domain_end_position_target" Decode.int)
         |> decodeAndMap (Decode.field "E_value" Decode.float)
         |> decodeAndMap (Decode.field "bit_score" Decode.float)
-        |> decodeAndMap (Decode.field "seq_query" Decode.string)
-        |> decodeAndMap (Decode.field "seq_target" Decode.string)
+        |> decodeAndMap (Decode.field "alignment_strings" (Decode.index 0 Decode.string))
+        |> decodeAndMap (Decode.field "alignment_strings" (Decode.index 2 Decode.string))
         |> decodeAndMap (Decode.field "alignment_strings" (Decode.index 1 Decode.string))
 
 

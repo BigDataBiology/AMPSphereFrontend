@@ -255,11 +255,11 @@ viewMmseqsRow expandedRows idx hit =
                         [ Html.div [ class "p-3 bg-light" ]
                             [ Html.div []
                                 [ Html.strong [] [ Html.text "Query:  " ]
-                                , Html.code [] (coloredAlignment hit.querySequenceAligned hit.matchPattern)
+                                , Html.code [] (coloredAlignment hit.queryAligned hit.matchPattern)
                                 ]
                             , Html.div []
                                 [ Html.strong [] [ Html.text "Target: " ]
-                                , Html.code [] (coloredAlignment hit.targetSequenceAligned hit.matchPattern)
+                                , Html.code [] (coloredAlignment hit.targetAligned hit.matchPattern)
                                 ]
                             ]
                         ]
