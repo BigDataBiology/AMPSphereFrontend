@@ -29,11 +29,11 @@ hitDecoder : Decoder Hit
 hitDecoder =
     Decode.map6 Hit
         (Decode.field "target_name" Decode.string)
-        (Decode.field "accession" Decode.string)
-        (Decode.field "e_value" Decode.float)
+        (Decode.field "target_accession" Decode.string)
+        (Decode.field "E_value" Decode.float)
         (Decode.field "score" Decode.float)
         (Decode.field "bias" Decode.float)
-        (Decode.field "description" Decode.string)
+        (Decode.field "description_of_target" Decode.string)
 
 
 get :
