@@ -7,7 +7,8 @@ import Url.Builder
 
 
 type alias Hit =
-    { targetId : String
+    { queryId : String
+    , targetId : String
     , seqIdentity : Float
     , alnLength : Int
     , numMismatches : Int
@@ -36,6 +37,7 @@ decoder =
 hitDecoder : Decoder Hit
 hitDecoder =
     Decode.succeed Hit
+        |> decodeAndMap (Decode.field "query_identifier" Decode.string)
         |> decodeAndMap (Decode.field "target_identifier" Decode.string)
         |> decodeAndMap (Decode.field "sequence_identity" Decode.float)
         |> decodeAndMap (Decode.field "alignment_length" Decode.int)

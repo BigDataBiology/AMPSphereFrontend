@@ -207,7 +207,8 @@ viewMmseqsResults model =
                         { options = [ Table.striped, Table.hover, Table.responsive ]
                         , thead =
                             Table.simpleThead
-                                [ Table.th [] [ Html.text "" ]
+                                [ Table.th [] [ Html.text "Query" ]
+                                , Table.th [] [ Html.text "" ]
                                 , Table.th [] [ Html.text "Target" ]
                                 , Table.th [] [ Html.text "Identity" ]
                                 , Table.th [] [ Html.text "Aln. Length" ]
@@ -229,7 +230,8 @@ viewMmseqsRow expandedRows idx hit =
 
         mainRow =
             Table.tr [ Table.rowAttr (class "cursor-pointer"), Table.rowAttr (onClick (ToggleRow idx)) ]
-                [ Table.td []
+                [ Table.td [] [ Html.text hit.queryId ]
+                , Table.td []
                     [ Html.text
                         (if isExpanded then
                             "-"
@@ -251,7 +253,7 @@ viewMmseqsRow expandedRows idx hit =
         alignmentRow =
             if isExpanded then
                 [ Table.tr []
-                    [ Table.td [ Table.cellAttr (colspan 6) ]
+                    [ Table.td [ Table.cellAttr (colspan 7) ]
                         [ Html.div [ class "p-3 bg-light" ]
                             [ Html.div []
                                 [ Html.strong [] [ Html.text "Query:  " ]
