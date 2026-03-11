@@ -17,8 +17,9 @@ import Bootstrap.Text
 import Dict
 import Effect exposing (Effect)
 import Html exposing (Html)
-import Html.Attributes exposing (class)
-import Html.Events exposing (onClick, onSubmit)
+import Html.Attributes exposing (class, href)
+import Html.Events exposing (onClick, onSubmit, preventDefaultOn)
+import Json.Decode as Decode
 import Http
 import Layouts
 import Page exposing (Page)
@@ -74,6 +75,7 @@ type Msg
     | SequenceQueryChanged String
     | SearchMethodChanged SearchMethod
     | SequenceSearchSubmitted
+    | SetExampleQuery
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -96,6 +98,11 @@ update msg model =
 
         SearchMethodChanged method ->
             ( { model | searchMethod = method }
+            , Effect.none
+            )
+
+        SetExampleQuery ->
+            ( { model | sequenceQuery = ">Query1\nKRVKSFFKGYMRAIEINAALMYGYRPK\n>Query2\nGRVIGKQGRIAKAIRVVMRAAAVRVDEKVLVEID" }
             , Effect.none
             )
 
@@ -234,6 +241,14 @@ viewSequenceSearch model =
                             , Textarea.value model.sequenceQuery
                             , Textarea.onInput SequenceQueryChanged
                             , Textarea.attrs [ Html.Attributes.placeholder "Enter amino acid sequence(s) in FASTA format..." ]
+                            ]
+                        , Html.small [ class "text-muted" ]
+                            [ Html.text "or "
+                            , Html.a
+                                [ href "#"
+                                , preventDefaultOn "click" (Decode.succeed ( SetExampleQuery, True ))
+                                ]
+                                [ Html.text "use example sequences" ]
                             ]
                         ]
                     , Button.button
