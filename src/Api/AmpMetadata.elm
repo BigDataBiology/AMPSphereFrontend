@@ -59,7 +59,7 @@ entryDecoder =
         |> decodeAndMap (Decode.field "AMP" Decode.string)
         |> decodeAndMap (Decode.field "GMSC_accession" Decode.string)
         |> decodeAndMap (Decode.field "sample" Decode.string)
-        |> decodeAndMap (Decode.field "specI" Decode.string)
+        |> decodeAndMap (optionalString "specI")
         |> decodeAndMap (Decode.field "is_metagenomic" Decode.bool)
         |> decodeAndMap (optionalString "geographic_location")
         |> decodeAndMap (optionalString "general_envo_name")
