@@ -93,7 +93,10 @@ owns its own DOM, controls, and rendering.
   hydrophobic-face arc, and SVG export. The diagram is a port of the MIT-licensed
   d3 helical wheel by Tina Wang and Shyam Saladi
   ([clemlab/helicalwheel](https://github.com/clemlab/helicalwheel),
-  <https://clemlab.github.io/helicalwheel/>), credited in the UI.
+  <https://clemlab.github.io/helicalwheel/>), credited in the UI. The hydrophobic
+  moment arrow is computed from the sequence using the Eisenberg consensus
+  hydrophobicity scale: it points toward the hydrophobic face and its length
+  scales with the mean moment `<μH>` (shown on hover).
 
 ## Pages
 

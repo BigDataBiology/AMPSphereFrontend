@@ -73,6 +73,15 @@ const SCHEME_OPTIONS = [
     { label: 'HeliQuest', value: 'heliquest' },
 ]
 
+// Eisenberg et al. (1984) normalized consensus hydrophobicity scale. Used to
+// compute the hydrophobic moment vector from the sequence.
+const EISENBERG = {
+    A: 0.62, R: -2.53, N: -0.78, D: -0.90, C: 0.29,
+    Q: -0.85, E: -0.74, G: 0.48, H: -0.40, I: 1.38,
+    L: 1.06, K: -1.50, M: 0.64, F: 1.19, P: 0.12,
+    S: -0.18, T: -0.05, W: 0.81, Y: 0.26, V: 1.08,
+}
+
 // Layout constants, matching the original project.
 const WIDTH = 700
 const HEIGHT = 700
@@ -91,6 +100,25 @@ function gcd(a, b) {
 
 function lcm(a, b) {
     return (a * b) / gcd(a, b)
+}
+
+// Hydrophobic moment vector, summing each residue's Eisenberg hydrophobicity
+// projected onto its position angle around the wheel. The resulting vector
+// points toward the hydrophobic face; its magnitude (per residue) is <muH>.
+function hydrophobicMoment(sequence, angle) {
+    let mx = 0
+    let my = 0
+    let n = 0
+    for (let i = 0; i < sequence.length; i++) {
+        const h = EISENBERG[sequence[i]]
+        if (h == null) continue
+        const theta = (i * angle) * Math.PI / 180
+        mx += h * Math.cos(theta)
+        my += h * Math.sin(theta)
+        n++
+    }
+    const magnitude = Math.sqrt(mx * mx + my * my)
+    return { mx, my, magnitude, mean: n > 0 ? magnitude / n : 0 }
 }
 
 function svgEl(name, attrs) {
@@ -355,14 +383,25 @@ class HelicalWheel extends HTMLElement {
             }))
         }
 
-        // Hydrophobic moment arrow (illustrative, as in the original).
+        // Hydrophobic moment arrow, computed from the sequence (Eisenberg scale).
+        // Points toward the hydrophobic face; length scales with <muH>.
         if (this._hMoment) {
-            group.appendChild(svgEl('line', {
-                x1: 0, y1: 0, x2: 50, y2: 50,
-                stroke: '#bbb', 'stroke-width': 3,
-                'marker-end': 'url(#hw-arrowhead)',
-                transform: 'rotate(100)',
-            }))
+            const moment = hydrophobicMoment(sequence, angle)
+            if (moment.magnitude > 1e-6) {
+                const len = Math.min(FIELD_RADIUS * 0.95, Math.max(25, moment.mean * 260))
+                const ux = moment.mx / moment.magnitude
+                const uy = moment.my / moment.magnitude
+                const line = svgEl('line', {
+                    x1: 0, y1: 0,
+                    x2: (ux * len).toFixed(2), y2: (uy * len).toFixed(2),
+                    stroke: '#bbb', 'stroke-width': 3,
+                    'marker-end': 'url(#hw-arrowhead)',
+                })
+                const title = svgEl('title')
+                title.textContent = `Mean hydrophobic moment <μH> = ${moment.mean.toFixed(3)}`
+                line.appendChild(title)
+                group.appendChild(line)
+            }
         }
 
         // Residue circles + labels (residue letter inside, position number outside).
