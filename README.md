@@ -96,7 +96,9 @@ owns its own DOM, controls, and rendering.
   <https://clemlab.github.io/helicalwheel/>), credited in the UI. The hydrophobic
   moment arrow is computed from the sequence using the Eisenberg consensus
   hydrophobicity scale: it points toward the hydrophobic face and its length
-  scales with the mean moment `<μH>` (shown on hover).
+  scales with the mean moment `<μH>` (shown on hover). The hydrophobic-face arc
+  is centered on that same moment direction, so both annotations track the
+  sequence consistently (neither is drawn when the moment is ~zero).
 
 ## Pages
 

@@ -358,21 +358,31 @@ class HelicalWheel extends HTMLElement {
             }))
         }
 
-        // Hydrophobic face arc.
-        if (this._hFace) {
+        // Both the hydrophobic face and moment derive from the same moment vector.
+        const moment = (this._hFace || this._hMoment)
+            ? hydrophobicMoment(sequence, angle)
+            : null
+        const hasMoment = moment != null && moment.magnitude > 1e-6
+        // Direction of the moment vector expressed as a d3-style angle (0 at top,
+        // clockwise positive), since the face arc is drawn in that convention.
+        const momentAngle = hasMoment ? Math.atan2(moment.mx, -moment.my) : 0
+
+        // Hydrophobic face arc: a 40°-wide arc centered on the moment direction,
+        // marking the residues on the hydrophobic side of the helix.
+        if (this._hFace && hasMoment) {
             const arcR = FIELD_RADIUS * 1.3
-            const startAngle = Math.PI / 2 - 2 * Math.PI / 9
-            const endAngle = Math.PI / 2 - 4 * Math.PI / 9
+            const halfSpan = Math.PI / 9 // 20° each side -> 40° total
+            const startAngle = momentAngle - halfSpan
+            const endAngle = momentAngle + halfSpan
             const steps = 24
             let d = ''
             for (let s = 0; s <= steps; s++) {
                 const t = startAngle + (endAngle - startAngle) * (s / steps)
-                // d3.arc angle convention: 0 at top, clockwise positive.
                 const px = Math.sin(t) * arcR
                 const py = -Math.cos(t) * arcR
                 d += (s === 0 ? 'M' : 'L') + px.toFixed(2) + ',' + py.toFixed(2)
             }
-            group.appendChild(svgEl('path', {
+            const arc = svgEl('path', {
                 d,
                 fill: 'none',
                 stroke: '#bbb',
@@ -380,28 +390,29 @@ class HelicalWheel extends HTMLElement {
                 'stroke-dasharray': '4,8',
                 'marker-start': 'url(#hw-circlehead)',
                 'marker-end': 'url(#hw-circlehead)',
-            }))
+            })
+            const arcTitle = svgEl('title')
+            arcTitle.textContent = 'Hydrophobic face'
+            arc.appendChild(arcTitle)
+            group.appendChild(arc)
         }
 
         // Hydrophobic moment arrow, computed from the sequence (Eisenberg scale).
         // Points toward the hydrophobic face; length scales with <muH>.
-        if (this._hMoment) {
-            const moment = hydrophobicMoment(sequence, angle)
-            if (moment.magnitude > 1e-6) {
-                const len = Math.min(FIELD_RADIUS * 0.95, Math.max(25, moment.mean * 260))
-                const ux = moment.mx / moment.magnitude
-                const uy = moment.my / moment.magnitude
-                const line = svgEl('line', {
-                    x1: 0, y1: 0,
-                    x2: (ux * len).toFixed(2), y2: (uy * len).toFixed(2),
-                    stroke: '#bbb', 'stroke-width': 3,
-                    'marker-end': 'url(#hw-arrowhead)',
-                })
-                const title = svgEl('title')
-                title.textContent = `Mean hydrophobic moment <μH> = ${moment.mean.toFixed(3)}`
-                line.appendChild(title)
-                group.appendChild(line)
-            }
+        if (this._hMoment && hasMoment) {
+            const len = Math.min(FIELD_RADIUS * 0.95, Math.max(25, moment.mean * 260))
+            const ux = moment.mx / moment.magnitude
+            const uy = moment.my / moment.magnitude
+            const line = svgEl('line', {
+                x1: 0, y1: 0,
+                x2: (ux * len).toFixed(2), y2: (uy * len).toFixed(2),
+                stroke: '#bbb', 'stroke-width': 3,
+                'marker-end': 'url(#hw-arrowhead)',
+            })
+            const title = svgEl('title')
+            title.textContent = `Mean hydrophobic moment <μH> = ${moment.mean.toFixed(3)}`
+            line.appendChild(title)
+            group.appendChild(line)
         }
 
         // Residue circles + labels (residue letter inside, position number outside).
