@@ -608,106 +608,15 @@ viewFeatures model =
 
 viewHelicalWheel : String -> Html Msg
 viewHelicalWheel sequence =
-    let
-        angleStep =
-            100.0
-
-        radius =
-            120.0
-
-        centerX =
-            160.0
-
-        centerY =
-            160.0
-
-        residues =
-            String.toList sequence
-                |> List.indexedMap
-                    (\i ch ->
-                        let
-                            angle =
-                                degrees (toFloat i * angleStep)
-                        in
-                        { ch = ch
-                        , x = centerX + radius * cos angle
-                        , y = centerY + radius * sin angle
-                        }
-                    )
-    in
     Card.config [ Card.attrs [ class "mb-3" ] ]
         |> Card.headerH5 [] [ Html.text "Helical Wheel Projection" ]
         |> Card.block []
             [ Block.custom <|
-                Html.div [ class "text-center" ]
-                    [ Html.node "svg"
-                        [ attribute "viewBox" "0 0 320 320"
-                        , attribute "width" "320"
-                        , attribute "height" "320"
-                        , class "helical-wheel"
-                        ]
-                        (Html.node "circle"
-                            [ attribute "cx" (String.fromFloat centerX)
-                            , attribute "cy" (String.fromFloat centerY)
-                            , attribute "r" (String.fromFloat radius)
-                            , attribute "fill" "none"
-                            , attribute "stroke" "#ccc"
-                            , attribute "stroke-dasharray" "4,4"
-                            ]
-                            []
-                            :: List.concatMap
-                                (\r ->
-                                    [ Html.node "circle"
-                                        [ attribute "cx" (String.fromFloat r.x)
-                                        , attribute "cy" (String.fromFloat r.y)
-                                        , attribute "r" "14"
-                                        , attribute "fill" (aaColor r.ch)
-                                        , attribute "stroke" "#333"
-                                        , attribute "stroke-width" "1"
-                                        ]
-                                        []
-                                    , Html.node "text"
-                                        [ attribute "x" (String.fromFloat r.x)
-                                        , attribute "y" (String.fromFloat (r.y + 4))
-                                        , attribute "text-anchor" "middle"
-                                        , attribute "font-size" "12"
-                                        , attribute "font-weight" "bold"
-                                        , attribute "fill" "#000"
-                                        ]
-                                        [ Html.text (String.fromChar r.ch) ]
-                                    ]
-                                )
-                                residues
-                        )
-                    ]
+                Html.node "helical-wheel"
+                    [ attribute "data-sequence" sequence ]
+                    []
             ]
         |> Card.view
-
-
-aaColor : Char -> String
-aaColor ch =
-    case ch of
-        'K' -> "#1465AC"
-        'R' -> "#1465AC"
-        'H' -> "#1465AC"
-        'D' -> "#DC143C"
-        'E' -> "#DC143C"
-        'A' -> "#F0E68C"
-        'V' -> "#F0E68C"
-        'I' -> "#F0E68C"
-        'L' -> "#F0E68C"
-        'M' -> "#F0E68C"
-        'F' -> "#FF8C00"
-        'Y' -> "#FF8C00"
-        'W' -> "#FF8C00"
-        'S' -> "#32CD32"
-        'T' -> "#32CD32"
-        'N' -> "#32CD32"
-        'Q' -> "#32CD32"
-        'G' -> "#808080"
-        'P' -> "#808080"
-        'C' -> "#FFD700"
-        _ -> "#CCCCCC"
 
 
 viewSecondaryStructureChart : Amp -> Html Msg

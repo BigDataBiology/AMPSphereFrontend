@@ -27,7 +27,7 @@ Api.Amp.get { accession = "AMP10.000_000", onResponse = GotAmp }
 
 **Layout** (`Layouts.Default`) provides a Bootstrap Navbar with global search. Search routing: `AMP*` → `/amp/{id}`, `SPHERE*` → `/family/{id}`, else → `/text-search?query=`. The layout communicates with shared state via `Effect.sendSharedMsg`.
 
-**UI** uses `rundis/elm-bootstrap` 5.2.0 (Bootstrap 4.3.1 CSS via CDN). Plotly charts use a `<plotly-chart>` web component (`src/web-components/plotly-chart.js`). Helical wheel diagrams are pure Elm SVG. Custom CSS is minimal (~80 lines in `static/styles.css`).
+**UI** uses `rundis/elm-bootstrap` 5.2.0 (Bootstrap 4.3.1 CSS via CDN). Plotly charts use a `<plotly-chart>` web component (`src/web-components/plotly-chart.js`). The helical wheel is a self-contained `<helical-wheel data-sequence="...">` web component (`src/web-components/helical-wheel.js`) — a vanilla-JS port of the MIT-licensed d3 helical wheel by Tina Wang & Shyam Saladi (https://clemlab.github.io/helicalwheel/), with angle/color-scheme/hydrophobic-moment/hydrophobic-face controls and SVG export. Web components are registered in `src/interop.js` (`onReady`). Custom CSS is minimal (~120 lines in `static/styles.css`).
 
 **Pagination links** must use `onClickPreventDefault` (via `Html.Events.preventDefaultOn "click"`) on `<a href="#">` elements — otherwise `Browser.application` intercepts the click and fires unwanted `pushUrl "#"`.
 

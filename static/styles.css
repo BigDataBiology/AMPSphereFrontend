@@ -65,7 +65,53 @@ plotly-chart {
 
 .helical-wheel {
     display: block;
+    width: 100%;
+    max-width: 520px;
+    height: auto;
     margin: 0 auto;
+}
+
+.hw-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.hw-controls {
+    flex: 0 0 240px;
+    max-width: 280px;
+}
+
+.hw-figure {
+    flex: 1 1 320px;
+    min-width: 280px;
+}
+
+.hw-field {
+    margin-bottom: 1rem;
+}
+
+.hw-label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.hw-radios {
+    display: flex;
+    gap: 1rem;
+}
+
+.hw-radio {
+    font-weight: 400;
+    margin-bottom: 0;
+}
+
+.hw-credit {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: #6c757d;
 }
 
 /* Clickable rows */

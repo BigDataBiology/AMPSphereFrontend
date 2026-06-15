@@ -70,9 +70,30 @@ src/
     NotFound_.elm               # 404
   web-components/
     plotly-chart.js             # <plotly-chart> custom element wrapping Plotly.js
+    helical-wheel.js            # <helical-wheel> custom element (helical wheel diagram)
 static/
   styles.css                    # Global stylesheet
 ```
+
+## Web Components
+
+Interactive visualizations that are awkward to express in Elm are implemented as
+custom elements and registered in `src/interop.js` (`onReady`). Elm renders the
+element with `Html.node` and passes inputs via `data-*` attributes; the component
+owns its own DOM, controls, and rendering.
+
+- **`<plotly-chart data-chart="…">`** — wraps [Plotly.js](https://plot.ly/javascript/)
+  (loaded from CDN) to draw the statistical charts. `data-chart` is a JSON blob with
+  `data` / `layout` / `config`.
+
+- **`<helical-wheel data-sequence="…">`** — renders a helical wheel projection of a
+  peptide. Self-contained vanilla JS (no extra dependency) with controls for the
+  angle of separation (α-helix / π-helix / 3-10), amino-acid color scheme (Cinema,
+  Shapely, Lesk, Clustal, MAEditor, HeliQuest), hydrophobic-moment arrow,
+  hydrophobic-face arc, and SVG export. The diagram is a port of the MIT-licensed
+  d3 helical wheel by Tina Wang and Shyam Saladi
+  ([clemlab/helicalwheel](https://github.com/clemlab/helicalwheel),
+  <https://clemlab.github.io/helicalwheel/>), credited in the UI.
 
 ## Pages
 
