@@ -126,6 +126,7 @@ viewNavbar shared model toContentMsg =
             , Navbar.itemLink [ href "/downloads" ] [ Html.text "Downloads" ]
             , Navbar.itemLink [ href "/api" ] [ Html.text "API" ]
             , Navbar.itemLink [ href "/about" ] [ Html.text "About" ]
+            , Navbar.itemLink [ href "https://www.big-data-biology.org/software/macrel" ] [ Html.text "Macrel" ]
             ]
         |> Navbar.customItems
             [ Navbar.customItem <|
