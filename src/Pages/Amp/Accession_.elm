@@ -211,10 +211,14 @@ viewOverview model =
         Api.Success amp ->
             Html.div []
                 [ viewAmpInfo amp
-                , viewQualityBadges amp
                 , viewSequence amp.sequence
-                , viewCoprediction model.coprediction
-                , viewDistributionCharts model.distributions
+                , Grid.row []
+                    [ Grid.col [ Col.md4 ]
+                        [ viewCoprediction model.coprediction
+                        , viewQualityBadges amp
+                        ]
+                    , Grid.col [ Col.md8 ] [ viewDistributionCharts model.distributions ]
+                    ]
                 , viewMetadata model
                 ]
 
@@ -270,18 +274,36 @@ viewQualityBadges amp =
     let
         badge label status =
             if status == "Passed" then
-                Badge.badgeSuccess [ class "mr-2 mb-1 p-2" ] [ Html.text (label ++ ": " ++ status) ]
+                Badge.badgeSuccess [ class "d-block mb-1 p-2 text-left" ] [ Html.text (label ++ ": " ++ status) ]
 
             else
-                Badge.badgeDanger [ class "mr-2 mb-1 p-2" ] [ Html.text (label ++ ": " ++ status) ]
+                Badge.badgeDanger [ class "d-block mb-1 p-2 text-left" ] [ Html.text (label ++ ": " ++ status) ]
+
+        evidenceBadge label status =
+            if status == "Passed" then
+                Badge.badgeSuccess [ class "d-block mb-1 p-2 text-left" ] [ Html.text (label ++ ": " ++ status) ]
+
+            else
+                Html.span
+                    [ class "badge d-block mb-1 p-2 text-left"
+                    , Html.Attributes.style "background-color" "#f5c6cb"
+                    , Html.Attributes.style "color" "#721c24"
+                    ]
+                    [ Html.text (label ++ ": No match") ]
     in
-    Html.div [ class "mb-3" ]
-        [ badge "Antifam" amp.antifam
-        , badge "RNAcode" amp.rnaCode
-        , badge "Metaproteomes" amp.metaproteomes
-        , badge "Metatranscriptomes" amp.metatranscriptomes
-        , badge "Coordinates" amp.coordinates
-        ]
+    Card.config [ Card.attrs [ class "mb-3" ] ]
+        |> Card.headerH5 [] [ Html.text "Quality Control" ]
+        |> Card.block []
+            [ Block.custom <|
+                Html.div []
+                    [ badge "Antifam" amp.antifam
+                    , badge "RNAcode" amp.rnaCode
+                    , evidenceBadge "Metaproteomes" amp.metaproteomes
+                    , evidenceBadge "Metatranscriptomes" amp.metatranscriptomes
+                    , badge "Coordinates" amp.coordinates
+                    ]
+            ]
+        |> Card.view
 
 
 viewSequence : String -> Html Msg
