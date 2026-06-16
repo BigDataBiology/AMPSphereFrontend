@@ -271,7 +271,7 @@ formatNumber n =
         grouped =
             groupBy3 reversed []
     in
-    String.join "," (List.map String.fromList (List.reverse (List.map List.reverse grouped)))
+    String.join "," (List.map (List.reverse >> String.fromList) grouped)
 
 
 groupBy3 : List Char -> List (List Char) -> List (List Char)
