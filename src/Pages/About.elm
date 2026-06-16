@@ -69,6 +69,7 @@ view model =
                 [ Html.h1 [ class "mb-4" ] [ Html.text "About AMPSphere" ]
                 , overviewAndFeaturesCard
                 , qualityTestsCard
+                , privacyCard
                 , citationCard
                 , contactCard
                 ]
@@ -233,6 +234,24 @@ qualityTestsRight =
             [ link "https://doi.org/10.1016/j.cell.2024.05.013" "Santos-Júnior CD, Torres MDT, Duan Y, et al. (2024) Discovery of antimicrobial peptides in the global microbiome with machine learning. Cell 187:3761–3778." ]
         ]
     ]
+
+
+privacyCard : Html Msg
+privacyCard =
+    aboutCard "Privacy"
+        [ Html.p []
+            [ Html.text "This website uses Google Analytics to collect anonymous, aggregated usage statistics (such as which pages are visited) that help us understand how AMPSphere is used and improve it. No personally identifying information is collected for our own purposes." ]
+        , Html.p []
+            [ Html.text "Searches submitted through the "
+            , link "/sequence-search" "sequence-search tools"
+            , Html.text " and the text search are processed on a cloud server hosted in Australia, which means the sequences and queries you enter are transmitted to and processed on that server."
+            ]
+        , Html.p [ class "mb-0" ]
+            [ Html.text "If you would rather not send your sequences to our server, you can "
+            , link "/downloads" "download the complete database"
+            , Html.text " and perform all searches locally on your own machine."
+            ]
+        ]
 
 
 citationCard : Html Msg
