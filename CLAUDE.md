@@ -28,6 +28,7 @@ Api.Amp.get { accession = "AMP10.000_000", onResponse = GotAmp }
 **Shared view/format helpers** (don't re-copy these per page):
 - `src/Util/Format.elm` — `float`, `thousands`, `percent`, `eValue`, `truncate` (all number/string formatting).
 - `src/Util/Html.elm` — `onClickPreventDefault`, `spinner`, `errorAlert`.
+- `src/Util/Export.elm` — `tsv` (tab-separated; sanitizes tabs/newlines in fields) + `downloadTsv` (via `elm/file`); powers the "Download TSV" buttons on the Browse Data / Text Search / Sequence Search result tables.
 - `src/Components/Pagination.elm` — `view` / `small` (compact) pagination controls.
 
 **Layout** (`Layouts.Default`) provides a Bootstrap Navbar with global search. Search routing: `AMP*` → `/amp/{id}`, `SPHERE*` → `/family/{id}`, else → `/text-search?query=`. The layout communicates with shared state via `Effect.sendSharedMsg`.

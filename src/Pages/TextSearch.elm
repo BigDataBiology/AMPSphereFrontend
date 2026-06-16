@@ -8,17 +8,20 @@ import Bootstrap.Button as Button
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Table as Table
+import Bootstrap.Button as Button
 import Components.Pagination as Pagination
 import Dict
 import Effect exposing (Effect)
 import Html exposing (Html)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
 import Http
 import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
 import Route.Path
 import Shared
+import Util.Export as Export
 import Util.Format as Format
 import Util.Html as UH
 import View exposing (View)
@@ -88,6 +91,7 @@ init route _ =
 type Msg
     = GotResults (Result Http.Error SearchResults)
     | GoToPage Int
+    | DownloadResults (List SearchResult)
 
 
 update : Route () -> Msg -> Model -> ( Model, Effect Msg )
@@ -123,6 +127,28 @@ update route msg model =
                     }
                 ]
             )
+
+        DownloadResults results ->
+            ( model
+            , Effect.sendCmd (Export.downloadTsv "ampsphere-text-search.tsv" (resultsTsv results))
+            )
+
+
+resultsTsv : List SearchResult -> String
+resultsTsv results =
+    Export.tsv
+        [ "accession", "family", "sequence", "num_genes", "quality" ]
+        (List.map
+            (\r ->
+                [ r.accession
+                , r.family
+                , r.sequence
+                , String.fromInt r.numGenes
+                , r.quality
+                ]
+            )
+            results
+        )
 
 
 subscriptions : Model -> Sub Msg
@@ -175,8 +201,16 @@ viewResults model =
 
             else
                 Html.div []
-                    [ Html.p [ class "text-muted mb-3" ]
-                        [ Html.text (String.fromInt results.totalCount ++ " results found") ]
+                    [ Html.div [ class "d-flex justify-content-between align-items-center mb-3" ]
+                        [ Html.p [ class "text-muted mb-0" ]
+                            [ Html.text (String.fromInt results.totalCount ++ " results found") ]
+                        , Button.button
+                            [ Button.outlineSecondary
+                            , Button.small
+                            , Button.attrs [ onClick (DownloadResults results.results) ]
+                            ]
+                            [ Html.text "Download page (TSV)" ]
+                        ]
                     , Table.table
                         { options = [ Table.striped, Table.hover, Table.responsive ]
                         , thead =

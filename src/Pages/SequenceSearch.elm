@@ -4,6 +4,7 @@ import Api
 import Api.SearchHmmer
 import Api.SearchMmseqs
 import Bootstrap.Alert as Alert
+import Bootstrap.Button as Button
 import Bootstrap.Table as Table
 import Dict
 import Effect exposing (Effect)
@@ -16,6 +17,7 @@ import Page exposing (Page)
 import Route exposing (Route)
 import Route.Path
 import Shared
+import Util.Export as Export
 import Util.Format as Format
 import Util.Html as UH
 import View exposing (View)
@@ -109,6 +111,8 @@ type Msg
     = GotMmseqsResults (Result Http.Error Api.SearchMmseqs.SearchResults)
     | GotHmmerResults (Result Http.Error Api.SearchHmmer.SearchResults)
     | ToggleRow Int
+    | DownloadMmseqs (List Api.SearchMmseqs.Hit)
+    | DownloadHmmer (List Api.SearchHmmer.Hit)
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -146,6 +150,61 @@ update msg model =
             ( { model | expandedRows = expanded }
             , Effect.none
             )
+
+        DownloadMmseqs hits ->
+            ( model
+            , Effect.sendCmd (Export.downloadTsv "ampsphere-mmseqs-results.tsv" (mmseqsTsv hits))
+            )
+
+        DownloadHmmer hits ->
+            ( model
+            , Effect.sendCmd (Export.downloadTsv "ampsphere-hmmer-results.tsv" (hmmerTsv hits))
+            )
+
+
+mmseqsTsv : List Api.SearchMmseqs.Hit -> String
+mmseqsTsv hits =
+    Export.tsv
+        [ "query", "target", "seq_identity", "aln_length", "mismatches", "gap_openings", "query_start", "query_end", "target_start", "target_end", "e_value", "bit_score", "query_aligned", "target_aligned", "match_pattern" ]
+        (List.map
+            (\h ->
+                [ h.queryId
+                , h.targetId
+                , String.fromFloat h.seqIdentity
+                , String.fromInt h.alnLength
+                , String.fromInt h.numMismatches
+                , String.fromInt h.numGapOpenings
+                , String.fromInt h.queryStart
+                , String.fromInt h.queryEnd
+                , String.fromInt h.targetStart
+                , String.fromInt h.targetEnd
+                , String.fromFloat h.eValue
+                , String.fromFloat h.bitScore
+                , h.queryAligned
+                , h.targetAligned
+                , h.matchPattern
+                ]
+            )
+            hits
+        )
+
+
+hmmerTsv : List Api.SearchHmmer.Hit -> String
+hmmerTsv hits =
+    Export.tsv
+        [ "family", "accession", "e_value", "score", "bias", "description" ]
+        (List.map
+            (\h ->
+                [ h.targetName
+                , h.accession
+                , String.fromFloat h.eValue
+                , String.fromFloat h.score
+                , String.fromFloat h.bias
+                , h.description
+                ]
+            )
+            hits
+        )
 
 
 subscriptions : Model -> Sub Msg
@@ -199,8 +258,7 @@ viewMmseqsResults model =
 
             else
                 Html.div []
-                    [ Html.p [ class "text-muted mb-3" ]
-                        [ Html.text (String.fromInt (List.length hits) ++ " hits found") ]
+                    [ viewResultsHeader (List.length hits) (DownloadMmseqs hits)
                     , Table.table
                         { options = [ Table.striped, Table.hover, Table.responsive ]
                         , thead =
@@ -290,8 +348,7 @@ viewHmmerResults model =
 
             else
                 Html.div []
-                    [ Html.p [ class "text-muted mb-3" ]
-                        [ Html.text (String.fromInt (List.length hits) ++ " hits found") ]
+                    [ viewResultsHeader (List.length hits) (DownloadHmmer hits)
                     , Table.table
                         { options = [ Table.striped, Table.hover, Table.responsive ]
                         , thead =
@@ -322,6 +379,20 @@ viewHmmerRow hit =
         , Table.td [] [ Html.text (String.fromFloat hit.score) ]
         , Table.td [] [ Html.text (String.fromFloat hit.bias) ]
         , Table.td [] [ Html.text hit.description ]
+        ]
+
+
+viewResultsHeader : Int -> Msg -> Html Msg
+viewResultsHeader count downloadMsg =
+    Html.div [ class "d-flex justify-content-between align-items-center mb-3" ]
+        [ Html.p [ class "text-muted mb-0" ]
+            [ Html.text (String.fromInt count ++ " hits found") ]
+        , Button.button
+            [ Button.outlineSecondary
+            , Button.small
+            , Button.attrs [ onClick downloadMsg ]
+            ]
+            [ Html.text "Download TSV" ]
         ]
 
 

@@ -26,6 +26,7 @@ import Page exposing (Page)
 import Route exposing (Route)
 import Route.Path
 import Shared
+import Util.Export as Export
 import Util.Format as Format
 import Util.Html as UH
 import View exposing (View)
@@ -65,7 +66,26 @@ type alias Model =
     , filterChargeMax : String
     , showAdvancedFilters : Bool
     , visibleColumns : Set String
+    , downloadStatus : DownloadStatus
     }
+
+
+{-| Whether a "Download TSV" bulk fetch is currently in flight. The export hits
+the API again (with the active filters and a large page size) so it can include
+every matching AMP, not just the visible page.
+-}
+type DownloadStatus
+    = DownloadIdle
+    | DownloadPreparing
+
+
+{-| Upper bound on rows pulled in a single CSV export. Without filters the
+catalog is hundreds of thousands of AMPs, so we cap the request rather than
+attempt to stream the whole database into the browser.
+-}
+maxExport : Int
+maxExport =
+    5000
 
 
 init : Route () -> () -> ( Model, Effect Msg )
@@ -101,6 +121,7 @@ init route _ =
             , filterChargeMax = ""
             , showAdvancedFilters = False
             , visibleColumns = Set.fromList [ "accession", "family", "sequence", "length" ]
+            , downloadStatus = DownloadIdle
             }
     in
     ( model
@@ -161,6 +182,8 @@ type Msg
     | GoToPage Int
     | ToggleAdvancedFilters
     | ToggleColumn String
+    | DownloadResults Int
+    | GotDownloadData (Result Http.Error AmpListResponse)
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -265,6 +288,49 @@ update msg model =
               }
             , Effect.none
             )
+
+        DownloadResults totalItem ->
+            let
+                filters =
+                    modelToFilters model 0
+            in
+            ( { model | downloadStatus = DownloadPreparing }
+            , Api.AmpList.get
+                { filters = { filters | pageSize = min totalItem maxExport }
+                , onResponse = GotDownloadData
+                }
+            )
+
+        GotDownloadData (Ok response) ->
+            ( { model | downloadStatus = DownloadIdle }
+            , Effect.sendCmd (Export.downloadTsv "ampsphere-browse-data.tsv" (ampsTsv response.data))
+            )
+
+        GotDownloadData (Err _) ->
+            ( { model | downloadStatus = DownloadIdle }, Effect.none )
+
+
+ampsTsv : List AmpSummary -> String
+ampsTsv amps =
+    Export.tsv
+        [ "accession", "family", "sequence", "length", "molecular_weight", "isoelectric_point", "charge", "antifam", "rnacode", "coordinates", "num_genes" ]
+        (List.map
+            (\a ->
+                [ a.accession
+                , a.family
+                , a.sequence
+                , String.fromInt a.length
+                , String.fromFloat a.molecularWeight
+                , String.fromFloat a.isoelectricPoint
+                , String.fromFloat a.charge
+                , a.antifam
+                , a.rnaCode
+                , a.coordinates
+                , a.numGenes |> Maybe.map String.fromInt |> Maybe.withDefault ""
+                ]
+            )
+            amps
+        )
 
 
 fetchAmps : Model -> Int -> Effect Msg
@@ -455,6 +521,39 @@ allColumns =
     ]
 
 
+viewDownloadButton : DownloadStatus -> Int -> Html Msg
+viewDownloadButton status totalItem =
+    let
+        preparing =
+            status == DownloadPreparing
+
+        note =
+            if totalItem > maxExport then
+                Html.span [ class "text-muted small mt-1" ]
+                    [ Html.text ("first " ++ String.fromInt maxExport ++ " of " ++ String.fromInt totalItem) ]
+
+            else
+                Html.text ""
+    in
+    Html.div [ class "text-right" ]
+        [ Button.button
+            [ Button.outlineSecondary
+            , Button.small
+            , Button.disabled (preparing || totalItem == 0)
+            , Button.attrs [ onClick (DownloadResults totalItem) ]
+            ]
+            [ Html.text
+                (if preparing then
+                    "Preparing…"
+
+                 else
+                    "Download TSV"
+                )
+            ]
+        , Html.div [] [ note ]
+        ]
+
+
 viewColumnToggles : Set String -> Html Msg
 viewColumnToggles visibleColumns =
     Html.div [ class "mb-3 d-flex flex-wrap align-items-center" ]
@@ -493,6 +592,7 @@ viewMainContent model =
                 [ Html.div [ class "d-flex justify-content-between align-items-start mb-3" ]
                     [ Html.p [ class "text-muted mb-0" ]
                         [ Html.text (String.fromInt response.info.totalItem ++ " AMPs found") ]
+                    , viewDownloadButton model.downloadStatus response.info.totalItem
                     ]
                 , viewColumnToggles model.visibleColumns
                 , Table.table
