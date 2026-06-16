@@ -1,0 +1,5 @@
+[build]
+  functions = "functions/"
+  publish = "dist/"
+  command = "export ELM_HOME=\"$NETLIFY_BUILD_BASE/cache/elm\" && npx elm-land build"
+
