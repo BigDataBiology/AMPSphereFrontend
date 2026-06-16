@@ -1,8 +1,10 @@
 module Api.AmpMetadata exposing (MetadataEntry, MetadataResponse, PageInfo, get)
 
+import Api.Endpoint as Endpoint
 import Effect exposing (Effect)
 import Http
 import Json.Decode as Decode exposing (Decoder)
+import Url.Builder
 
 
 type alias PageInfo =
@@ -96,12 +98,10 @@ get :
 get options =
     Effect.apiGet
         { endpoint =
-            "/amps/"
-                ++ options.accession
-                ++ "/metadata?page="
-                ++ String.fromInt options.page
-                ++ "&page_size="
-                ++ String.fromInt options.pageSize
+            Endpoint.url [ "amps", options.accession, "metadata" ]
+                [ Url.Builder.int "page" options.page
+                , Url.Builder.int "page_size" options.pageSize
+                ]
         , decoder = decoder
         , onResponse = options.onResponse
         }

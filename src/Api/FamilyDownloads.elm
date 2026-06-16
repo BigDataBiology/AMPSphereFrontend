@@ -1,5 +1,6 @@
 module Api.FamilyDownloads exposing (FamilyDownloads, get)
 
+import Api.Endpoint as Endpoint
 import Effect exposing (Effect)
 import Http
 import Json.Decode as Decode exposing (Decoder)
@@ -27,7 +28,7 @@ decoder =
 get : { accession : String, onResponse : Result Http.Error FamilyDownloads -> msg } -> Effect msg
 get options =
     Effect.apiGet
-        { endpoint = "/families/" ++ options.accession ++ "/downloads"
+        { endpoint = Endpoint.url [ "families", options.accession, "downloads" ] []
         , decoder = decoder
         , onResponse = options.onResponse
         }

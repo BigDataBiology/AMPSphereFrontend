@@ -1,5 +1,6 @@
 module Api.AvailableOptions exposing (AvailableOptions, Range, get)
 
+import Api.Endpoint as Endpoint
 import Effect exposing (Effect)
 import Http
 import Json.Decode as Decode exposing (Decoder)
@@ -44,7 +45,7 @@ rangeDecoder =
 get : { onResponse : Result Http.Error AvailableOptions -> msg } -> Effect msg
 get options =
     Effect.apiGet
-        { endpoint = "/all_available_options"
+        { endpoint = Endpoint.url [ "all_available_options" ] []
         , decoder = decoder
         , onResponse = options.onResponse
         }

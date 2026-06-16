@@ -1,5 +1,6 @@
 module Api.Statistics exposing (Statistics, get)
 
+import Api.Endpoint as Endpoint
 import Effect exposing (Effect)
 import Http
 import Json.Decode as Decode exposing (Decoder)
@@ -29,7 +30,7 @@ decoder =
 get : { onResponse : Result Http.Error Statistics -> msg } -> Effect msg
 get options =
     Effect.apiGet
-        { endpoint = "/statistics"
+        { endpoint = Endpoint.url [ "statistics" ] []
         , decoder = decoder
         , onResponse = options.onResponse
         }

@@ -1,5 +1,6 @@
 module Api.AmpList exposing (AmpSummary, AmpListResponse, Filters, PageInfo, get)
 
+import Api.Endpoint as Endpoint
 import Effect exposing (Effect)
 import Http
 import Json.Decode as Decode exposing (Decoder)
@@ -121,7 +122,7 @@ get options =
             requiredParams ++ optionalParams
     in
     Effect.apiGet
-        { endpoint = "/amps" ++ Url.Builder.toQuery allParams
+        { endpoint = Endpoint.url [ "amps" ] allParams
         , decoder = decoder
         , onResponse = options.onResponse
         }

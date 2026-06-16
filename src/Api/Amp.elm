@@ -1,5 +1,6 @@
 module Api.Amp exposing (Amp, SecondaryStructure, get)
 
+import Api.Endpoint as Endpoint
 import Effect exposing (Effect)
 import Http
 import Json.Decode as Decode exposing (Decoder)
@@ -71,7 +72,7 @@ decodeAndMap =
 get : { accession : String, onResponse : Result Http.Error Amp -> msg } -> Effect msg
 get options =
     Effect.apiGet
-        { endpoint = "/amps/" ++ options.accession
+        { endpoint = Endpoint.url [ "amps", options.accession ] []
         , decoder = decoder
         , onResponse = options.onResponse
         }

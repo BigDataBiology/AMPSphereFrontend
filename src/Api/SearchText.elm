@@ -1,5 +1,6 @@
 module Api.SearchText exposing (SearchResult, SearchResults, get)
 
+import Api.Endpoint as Endpoint
 import Effect exposing (Effect)
 import Http
 import Json.Decode as Decode exposing (Decoder)
@@ -48,7 +49,7 @@ get :
 get options =
     Effect.apiGet
         { endpoint =
-            Url.Builder.absolute [ "search", "text" ]
+            Endpoint.url [ "search", "text" ]
                 [ Url.Builder.string "query" options.query
                 , Url.Builder.int "page" options.page
                 , Url.Builder.int "page_size" options.pageSize

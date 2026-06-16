@@ -1,5 +1,6 @@
 module Api.AmpDistributions exposing (Distributions, GeoData, LabeledData, distributionsDecoder, get)
 
+import Api.Endpoint as Endpoint
 import Effect exposing (Effect)
 import Http
 import Json.Decode as Decode exposing (Decoder)
@@ -53,7 +54,7 @@ labeledDecoder =
 get : { accession : String, onResponse : Result Http.Error Distributions -> msg } -> Effect msg
 get options =
     Effect.apiGet
-        { endpoint = "/amps/" ++ options.accession ++ "/distributions"
+        { endpoint = Endpoint.url [ "amps", options.accession, "distributions" ] []
         , decoder = distributionsDecoder
         , onResponse = options.onResponse
         }

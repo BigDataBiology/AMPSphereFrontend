@@ -1,5 +1,6 @@
 module Api.SearchHmmer exposing (Hit, SearchResults, get)
 
+import Api.Endpoint as Endpoint
 import Effect exposing (Effect)
 import Http
 import Json.Decode as Decode exposing (Decoder)
@@ -43,7 +44,7 @@ get :
     -> Effect msg
 get options =
     Effect.apiGet
-        { endpoint = Url.Builder.absolute [ "search", "hmmer" ] [ Url.Builder.string "query" options.query ]
+        { endpoint = Endpoint.url [ "search", "hmmer" ] [ Url.Builder.string "query" options.query ]
         , decoder = decoder
         , onResponse = options.onResponse
         }

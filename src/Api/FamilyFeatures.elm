@@ -1,5 +1,6 @@
 module Api.FamilyFeatures exposing (AmpFeatures, FamilyFeatures, get)
 
+import Api.Endpoint as Endpoint
 import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Http
@@ -41,7 +42,7 @@ decoder =
 get : { accession : String, onResponse : Result Http.Error FamilyFeatures -> msg } -> Effect msg
 get options =
     Effect.apiGet
-        { endpoint = "/families/" ++ options.accession ++ "/features"
+        { endpoint = Endpoint.url [ "families", options.accession, "features" ] []
         , decoder = decoder
         , onResponse = options.onResponse
         }
