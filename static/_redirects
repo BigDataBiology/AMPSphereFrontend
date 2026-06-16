@@ -1,1 +1,13 @@
+# Legacy URL redirects (old Vue site used query-param routes; new app uses path params)
+/amp           accession=:acc   /amp/:acc        301!
+/family        accession=:acc   /family/:acc     301!
+/browse_data                    /browse-data     301
+/sample                         /browse-data     301
+/text_search                    /text-search     301
+/sequence_search  queries=:q    /sequence-search?query=:q   301
+/sequence_search                /sequence-search 301
+/home                           /                301
+/contact                        /about           301
+
+# SPA fallback (must stay last)
 /* /index.html 200
