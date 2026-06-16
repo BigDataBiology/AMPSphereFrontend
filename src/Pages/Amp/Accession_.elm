@@ -74,7 +74,7 @@ init route _ =
       , metadata = Api.Loading
       , familyFeatures = Api.NotAsked
       , metadataPage = 0
-      , metadataPageSize = 10
+      , metadataPageSize = 50
       }
     , Effect.batch
         [ Api.Amp.get { accession = accession, onResponse = GotAmp }
@@ -83,7 +83,7 @@ init route _ =
         , Api.AmpMetadata.get
             { accession = accession
             , page = 0
-            , pageSize = 10
+            , pageSize = 50
             , onResponse = GotMetadata
             }
         ]
