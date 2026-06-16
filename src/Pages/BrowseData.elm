@@ -76,7 +76,15 @@ every matching AMP, not just the visible page.
 -}
 type DownloadStatus
     = DownloadIdle
-    | DownloadPreparing
+    | DownloadPreparing DownloadFormat
+
+
+{-| Which file format a bulk export should produce. TSV is the full table;
+FASTA is just the accession + sequence of every matching AMP.
+-}
+type DownloadFormat
+    = DownloadTsv
+    | DownloadFasta
 
 
 {-| Upper bound on rows pulled in a single CSV export. Without filters the
@@ -198,8 +206,8 @@ type Msg
     | GoToPage Int
     | ToggleAdvancedFilters
     | ToggleColumn String
-    | DownloadResults Int
-    | GotDownloadData (Result Http.Error AmpListResponse)
+    | DownloadResults DownloadFormat Int
+    | GotDownloadData DownloadFormat (Result Http.Error AmpListResponse)
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -305,24 +313,33 @@ update msg model =
             , Effect.none
             )
 
-        DownloadResults totalItem ->
+        DownloadResults format totalItem ->
             let
                 filters =
                     modelToFilters model 0
             in
-            ( { model | downloadStatus = DownloadPreparing }
+            ( { model | downloadStatus = DownloadPreparing format }
             , Api.AmpList.get
                 { filters = { filters | pageSize = min totalItem maxExport }
-                , onResponse = GotDownloadData
+                , onResponse = GotDownloadData format
                 }
             )
 
-        GotDownloadData (Ok response) ->
+        GotDownloadData format (Ok response) ->
+            let
+                download =
+                    case format of
+                        DownloadTsv ->
+                            Export.downloadTsv "ampsphere-browse-data.tsv" (ampsTsv response.data)
+
+                        DownloadFasta ->
+                            Export.downloadFasta "ampsphere-browse-data.fasta" (ampsFasta response.data)
+            in
             ( { model | downloadStatus = DownloadIdle }
-            , Effect.sendCmd (Export.downloadTsv "ampsphere-browse-data.tsv" (ampsTsv response.data))
+            , Effect.sendCmd download
             )
 
-        GotDownloadData (Err _) ->
+        GotDownloadData _ (Err _) ->
             ( { model | downloadStatus = DownloadIdle }, Effect.none )
 
 
@@ -347,6 +364,11 @@ ampsTsv amps =
             )
             amps
         )
+
+
+ampsFasta : List AmpSummary -> String
+ampsFasta amps =
+    Export.fasta (List.map (\a -> ( a.accession, a.sequence )) amps)
 
 
 fetchAmps : Model -> Int -> Effect Msg
@@ -585,7 +607,7 @@ viewDownloadButton : DownloadStatus -> Int -> Html Msg
 viewDownloadButton status totalItem =
     let
         preparing =
-            status == DownloadPreparing
+            status /= DownloadIdle
 
         note =
             if totalItem > maxExport then
@@ -594,22 +616,26 @@ viewDownloadButton status totalItem =
 
             else
                 Html.text ""
+
+        formatButton format label =
+            Button.button
+                [ Button.outlineSecondary
+                , Button.small
+                , Button.disabled (preparing || totalItem == 0)
+                , Button.attrs [ class "ml-2", onClick (DownloadResults format totalItem) ]
+                ]
+                [ Html.text
+                    (if status == DownloadPreparing format then
+                        "Preparing…"
+
+                     else
+                        label
+                    )
+                ]
     in
     Html.div [ class "text-right" ]
-        [ Button.button
-            [ Button.outlineSecondary
-            , Button.small
-            , Button.disabled (preparing || totalItem == 0)
-            , Button.attrs [ onClick (DownloadResults totalItem) ]
-            ]
-            [ Html.text
-                (if preparing then
-                    "Preparing…"
-
-                 else
-                    "Download TSV"
-                )
-            ]
+        [ formatButton DownloadTsv "Download TSV"
+        , formatButton DownloadFasta "Download FASTA"
         , Html.div [] [ note ]
         ]
 
