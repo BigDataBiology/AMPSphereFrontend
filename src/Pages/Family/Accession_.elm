@@ -6,8 +6,6 @@ import Api.AmpList exposing (AmpListResponse, AmpSummary)
 import Api.Family exposing (Family)
 import Api.FamilyDownloads exposing (FamilyDownloads)
 import Api.FamilyFeatures exposing (AmpFeatures, FamilyFeatures)
-import Components.SeqLogo
-import Components.SequenceLegend
 import Bootstrap.Alert as Alert
 import Bootstrap.Card as Card
 import Bootstrap.Card.Block as Block
@@ -16,12 +14,13 @@ import Bootstrap.Grid.Col as Col
 import Bootstrap.Spinner as Spinner
 import Bootstrap.Tab as Tab
 import Bootstrap.Table as Table
+import Components.Pagination as Pagination
+import Components.SeqLogo
+import Components.SequenceLegend
 import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Html exposing (Html)
 import Html.Attributes exposing (attribute, class, href)
-import Html.Events
-import Json.Decode
 import Http
 import Json.Encode as Encode
 import Layouts
@@ -29,6 +28,8 @@ import Page exposing (Page)
 import Route exposing (Route)
 import Route.Path
 import Shared
+import Util.Format as Format
+import Util.Html as UH
 import View exposing (View)
 
 
@@ -259,8 +260,11 @@ view model =
 
 viewOverview : Model -> Html Msg
 viewOverview model =
-    case model.family of
-        Api.Success fam ->
+    Api.view
+        { loading = UH.spinner "Loading family data..."
+        , failure = \_ -> UH.errorAlert "Failed to load family data."
+        }
+        (\fam ->
             Html.div []
                 [ viewFamilyInfo fam
                 , viewConsensusSequence fam
@@ -268,18 +272,8 @@ viewOverview model =
                 , viewDistributionCharts fam.distributions
                 , viewAssociatedAmps model
                 ]
-
-        Api.Loading ->
-            Html.div [ class "text-center py-4" ]
-                [ Spinner.spinner [ Spinner.grow ] []
-                , Html.p [ class "text-muted mt-2" ] [ Html.text "Loading family data..." ]
-                ]
-
-        Api.Failure _ ->
-            Alert.simpleDanger [] [ Html.text "Failed to load family data." ]
-
-        Api.NotAsked ->
-            Html.text ""
+        )
+        model.family
 
 
 viewFamilyInfo : Family -> Html Msg
@@ -343,17 +337,8 @@ viewConsensusSequence fam =
 
 viewSeqLogo : Api.Data String -> Html Msg
 viewSeqLogo alignmentData =
-    case alignmentData of
-        Api.Success text ->
-            Card.config [ Card.attrs [ class "mb-3" ] ]
-                |> Card.headerH5 [] [ Html.text "Sequence Logo" ]
-                |> Card.block []
-                    [ Block.custom <|
-                        Components.SeqLogo.view text
-                    ]
-                |> Card.view
-
-        Api.Loading ->
+    Api.view
+        { loading =
             Card.config [ Card.attrs [ class "mb-3" ] ]
                 |> Card.headerH5 [] [ Html.text "Sequence Logo" ]
                 |> Card.block []
@@ -362,12 +347,18 @@ viewSeqLogo alignmentData =
                             [ Spinner.spinner [] [] ]
                     ]
                 |> Card.view
-
-        Api.Failure _ ->
-            Html.text ""
-
-        Api.NotAsked ->
-            Html.text ""
+        , failure = \_ -> Html.text ""
+        }
+        (\text ->
+            Card.config [ Card.attrs [ class "mb-3" ] ]
+                |> Card.headerH5 [] [ Html.text "Sequence Logo" ]
+                |> Card.block []
+                    [ Block.custom <|
+                        Components.SeqLogo.view text
+                    ]
+                |> Card.view
+        )
+        alignmentData
 
 
 viewDistributionCharts : Distributions -> Html Msg
@@ -474,8 +465,13 @@ viewAssociatedAmps model =
         |> Card.headerH5 [] [ Html.text "Associated AMPs" ]
         |> Card.block []
             [ Block.custom <|
-                case model.ampsList of
-                    Api.Success response ->
+                Api.view
+                    { loading =
+                        Html.div [ class "text-center py-3" ]
+                            [ Spinner.spinner [] [] ]
+                    , failure = \_ -> UH.errorAlert "Failed to load AMPs."
+                    }
+                    (\response ->
                         Html.div []
                             [ Html.p [ class "text-muted small" ]
                                 [ Html.text (String.fromInt response.info.totalItem ++ " AMPs") ]
@@ -495,16 +491,8 @@ viewAssociatedAmps model =
                                 }
                             , viewAmpsPagination model response.info
                             ]
-
-                    Api.Loading ->
-                        Html.div [ class "text-center py-3" ]
-                            [ Spinner.spinner [] [] ]
-
-                    Api.Failure _ ->
-                        Alert.simpleDanger [] [ Html.text "Failed to load AMPs." ]
-
-                    Api.NotAsked ->
-                        Html.text ""
+                    )
+                    model.ampsList
             ]
         |> Card.view
 
@@ -526,71 +514,18 @@ viewAmpRow amp =
                 )
             ]
         , Table.td [] [ Html.text (String.fromInt amp.length) ]
-        , Table.td [] [ Html.text (formatFloat 1 amp.molecularWeight) ]
-        , Table.td [] [ Html.text (formatFloat 2 amp.isoelectricPoint) ]
+        , Table.td [] [ Html.text (Format.float 1 amp.molecularWeight) ]
+        , Table.td [] [ Html.text (Format.float 2 amp.isoelectricPoint) ]
         ]
 
 
 viewAmpsPagination : Model -> Api.AmpList.PageInfo -> Html Msg
 viewAmpsPagination model info =
-    let
-        totalPages =
-            info.totalPage
-
-        currentPage =
-            model.ampsPage
-
-        visiblePages =
-            List.range (max 0 (currentPage - 3)) (min (totalPages - 1) (currentPage + 3))
-    in
-    if totalPages <= 1 then
-        Html.text ""
-
-    else
-        Html.nav [ class "mt-2" ]
-            [ Html.ul [ class "pagination pagination-sm justify-content-center" ]
-                ([ if currentPage > 0 then
-                    Html.li [ class "page-item" ]
-                        [ Html.a [ class "page-link", href "#", onClickPreventDefault (AmpsGoToPage (currentPage - 1)) ]
-                            [ Html.text "Prev" ]
-                        ]
-
-                   else
-                    Html.li [ class "page-item disabled" ]
-                        [ Html.span [ class "page-link" ] [ Html.text "Prev" ] ]
-                 ]
-                    ++ List.map
-                        (\pg ->
-                            Html.li
-                                [ class
-                                    (if pg == currentPage then
-                                        "page-item active"
-
-                                     else
-                                        "page-item"
-                                    )
-                                ]
-                                [ Html.a
-                                    [ class "page-link"
-                                    , href "#"
-                                    , onClickPreventDefault (AmpsGoToPage pg)
-                                    ]
-                                    [ Html.text (String.fromInt (pg + 1)) ]
-                                ]
-                        )
-                        visiblePages
-                    ++ [ if currentPage < totalPages - 1 then
-                            Html.li [ class "page-item" ]
-                                [ Html.a [ class "page-link", href "#", onClickPreventDefault (AmpsGoToPage (currentPage + 1)) ]
-                                    [ Html.text "Next" ]
-                                ]
-
-                         else
-                            Html.li [ class "page-item disabled" ]
-                                [ Html.span [ class "page-link" ] [ Html.text "Next" ] ]
-                       ]
-                )
-            ]
+    Pagination.small
+        { current = model.ampsPage
+        , total = info.totalPage
+        , toMsg = AmpsGoToPage
+        }
 
 
 
@@ -599,8 +534,11 @@ viewAmpsPagination model info =
 
 viewFeatures : Model -> Html Msg
 viewFeatures model =
-    case model.features of
-        Api.Success features ->
+    Api.view
+        { loading = UH.spinner "Loading features..."
+        , failure = \_ -> UH.errorAlert "Failed to load features."
+        }
+        (\features ->
             let
                 featureValues =
                     Dict.values features
@@ -622,18 +560,8 @@ viewFeatures model =
                     )
                     properties
                 )
-
-        Api.Loading ->
-            Html.div [ class "text-center py-4" ]
-                [ Spinner.spinner [ Spinner.grow ] []
-                , Html.p [ class "text-muted mt-2" ] [ Html.text "Loading features..." ]
-                ]
-
-        Api.Failure _ ->
-            Alert.simpleDanger [] [ Html.text "Failed to load features." ]
-
-        Api.NotAsked ->
-            Html.text ""
+        )
+        model.features
 
 
 viewBoxPlot : String -> List Float -> Html Msg
@@ -676,8 +604,11 @@ viewBoxPlot title values =
 
 viewDownloads : Model -> Html Msg
 viewDownloads model =
-    case model.downloads of
-        Api.Success dl ->
+    Api.view
+        { loading = UH.spinner "Loading downloads..."
+        , failure = \_ -> UH.errorAlert "Failed to load downloads."
+        }
+        (\dl ->
             Table.table
                 { options = [ Table.striped, Table.hover, Table.bordered ]
                 , thead =
@@ -694,18 +625,8 @@ viewDownloads model =
                         , dlRow dl.treeNwk "Phylogenetic Tree (Newick)" ".nwk"
                         ]
                 }
-
-        Api.Loading ->
-            Html.div [ class "text-center py-4" ]
-                [ Spinner.spinner [ Spinner.grow ] []
-                , Html.p [ class "text-muted mt-2" ] [ Html.text "Loading downloads..." ]
-                ]
-
-        Api.Failure _ ->
-            Alert.simpleDanger [] [ Html.text "Failed to load downloads." ]
-
-        Api.NotAsked ->
-            Html.text ""
+        )
+        model.downloads
 
 
 dlRow : String -> String -> String -> Table.Row msg
@@ -716,23 +637,3 @@ dlRow url description ext =
         , Table.td [] [ Html.text description ]
         ]
 
-
-
--- HELPERS
-
-
-onClickPreventDefault : msg -> Html.Attribute msg
-onClickPreventDefault msg =
-    Html.Events.preventDefaultOn "click" (Json.Decode.succeed ( msg, True ))
-
-
-formatFloat : Int -> Float -> String
-formatFloat decimals val =
-    let
-        factor =
-            toFloat (10 ^ decimals)
-
-        rounded =
-            toFloat (round (val * factor)) / factor
-    in
-    String.fromFloat rounded

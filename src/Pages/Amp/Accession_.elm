@@ -6,8 +6,6 @@ import Api.AmpCoprediction exposing (CopredictionScore)
 import Api.AmpDistributions exposing (Distributions)
 import Api.AmpMetadata exposing (MetadataEntry, MetadataResponse)
 import Api.FamilyFeatures exposing (FamilyFeatures)
-import Components.SequenceLegend
-import Bootstrap.Alert as Alert
 import Bootstrap.Badge as Badge
 import Bootstrap.Card as Card
 import Bootstrap.Card.Block as Block
@@ -16,12 +14,12 @@ import Bootstrap.Grid.Col as Col
 import Bootstrap.Spinner as Spinner
 import Bootstrap.Tab as Tab
 import Bootstrap.Table as Table
+import Components.Pagination as Pagination
+import Components.SequenceLegend
 import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Html exposing (Html)
-import Html.Attributes exposing (attribute, class, href)
-import Html.Events exposing (onClick)
-import Json.Decode
+import Html.Attributes exposing (attribute, class)
 import Http
 import Json.Encode as Encode
 import Layouts
@@ -29,6 +27,8 @@ import Page exposing (Page)
 import Route exposing (Route)
 import Route.Path
 import Shared
+import Util.Format as Format
+import Util.Html as UH
 import View exposing (View)
 
 
@@ -198,17 +198,11 @@ view model =
 
 viewOverview : Model -> Html Msg
 viewOverview model =
-    case model.amp of
-        Api.Loading ->
-            Html.div [ class "text-center py-4" ]
-                [ Spinner.spinner [ Spinner.grow ] []
-                , Html.p [ class "text-muted mt-2" ] [ Html.text "Loading AMP data..." ]
-                ]
-
-        Api.Failure _ ->
-            Alert.simpleDanger [] [ Html.text "Failed to load AMP data." ]
-
-        Api.Success amp ->
+    Api.view
+        { loading = UH.spinner "Loading AMP data..."
+        , failure = \_ -> UH.errorAlert "Failed to load AMP data."
+        }
+        (\amp ->
             Html.div []
                 [ viewSequence amp.sequence
                 , viewAmpInfo amp
@@ -221,9 +215,8 @@ viewOverview model =
                     ]
                 , viewMetadata model
                 ]
-
-        Api.NotAsked ->
-            Html.text ""
+        )
+        model.amp
 
 
 viewAmpInfo : Amp -> Html Msg
@@ -242,9 +235,9 @@ viewAmpInfo amp =
                                     [ Html.text amp.family ]
                                 ]
                             , infoRow "Length" [ Html.text (String.fromInt amp.length ++ " aa") ]
-                            , infoRow "Molecular Weight" [ Html.text (formatFloat 2 amp.molecularWeight ++ " Da") ]
-                            , infoRow "Isoelectric Point" [ Html.text (formatFloat 2 amp.isoelectricPoint) ]
-                            , infoRow "Charge at pH 7" [ Html.text (formatFloat 2 amp.charge) ]
+                            , infoRow "Molecular Weight" [ Html.text (Format.float 2 amp.molecularWeight ++ " Da") ]
+                            , infoRow "Isoelectric Point" [ Html.text (Format.float 2 amp.isoelectricPoint) ]
+                            , infoRow "Charge at pH 7" [ Html.text (Format.float 2 amp.charge) ]
                             , infoRow "Genes"
                                 [ Html.text
                                     (case amp.numGenes of
@@ -336,8 +329,13 @@ viewCoprediction data =
         |> Card.headerH5 [] [ Html.text "Co-prediction Scores" ]
         |> Card.block []
             [ Block.custom <|
-                case data of
-                    Api.Success scores ->
+                Api.view
+                    { loading =
+                        Html.div [ class "text-center py-3" ]
+                            [ Spinner.spinner [] [] ]
+                    , failure = \_ -> UH.errorAlert "Failed to load co-prediction data."
+                    }
+                    (\scores ->
                         Table.table
                             { options = [ Table.striped, Table.small ]
                             , thead =
@@ -360,7 +358,7 @@ viewCoprediction data =
                                                                 ]
                                                                 []
                                                             ]
-                                                        , Html.span [ class "text-monospace small" ] [ Html.text (formatFloat 4 score.value) ]
+                                                        , Html.span [ class "text-monospace small" ] [ Html.text (Format.float 4 score.value) ]
                                                         ]
                                                     ]
                                                 ]
@@ -368,16 +366,8 @@ viewCoprediction data =
                                         scores
                                     )
                             }
-
-                    Api.Loading ->
-                        Html.div [ class "text-center py-3" ]
-                            [ Spinner.spinner [] [] ]
-
-                    Api.Failure _ ->
-                        Alert.simpleDanger [] [ Html.text "Failed to load co-prediction data." ]
-
-                    Api.NotAsked ->
-                        Html.text ""
+                    )
+                    data
             ]
         |> Card.view
 
@@ -388,23 +378,20 @@ viewDistributionCharts data =
         |> Card.headerH5 [] [ Html.text "Distributions" ]
         |> Card.block []
             [ Block.custom <|
-                case data of
-                    Api.Success dist ->
+                Api.view
+                    { loading =
+                        Html.div [ class "text-center py-3" ]
+                            [ Spinner.spinner [] [] ]
+                    , failure = \_ -> UH.errorAlert "Failed to load distribution data."
+                    }
+                    (\dist ->
                         Grid.row []
                             [ Grid.col [ Col.md12 ] [ viewGeoChart dist.geo ]
                             , Grid.col [ Col.md6 ] [ viewBarChart "Habitat" dist.habitat ]
                             , Grid.col [ Col.md6 ] [ viewBarChart "Microbial Source" dist.microbialSource ]
                             ]
-
-                    Api.Loading ->
-                        Html.div [ class "text-center py-3" ]
-                            [ Spinner.spinner [] [] ]
-
-                    Api.Failure _ ->
-                        Alert.simpleDanger [] [ Html.text "Failed to load distribution data." ]
-
-                    Api.NotAsked ->
-                        Html.text ""
+                    )
+                    data
             ]
         |> Card.view
 
@@ -498,8 +485,13 @@ viewMetadata model =
         |> Card.headerH5 [] [ Html.text "Associated smORF Genes" ]
         |> Card.block []
             [ Block.custom <|
-                case model.metadata of
-                    Api.Success meta ->
+                Api.view
+                    { loading =
+                        Html.div [ class "text-center py-3" ]
+                            [ Spinner.spinner [] [] ]
+                    , failure = \_ -> UH.errorAlert "Failed to load metadata."
+                    }
+                    (\meta ->
                         Html.div []
                             [ Html.p [ class "text-muted small" ]
                                 [ Html.text (String.fromInt meta.info.totalItem ++ " genes") ]
@@ -519,16 +511,8 @@ viewMetadata model =
                                 }
                             , viewMetadataPagination model meta.info
                             ]
-
-                    Api.Loading ->
-                        Html.div [ class "text-center py-3" ]
-                            [ Spinner.spinner [] [] ]
-
-                    Api.Failure _ ->
-                        Alert.simpleDanger [] [ Html.text "Failed to load metadata." ]
-
-                    Api.NotAsked ->
-                        Html.text ""
+                    )
+                    model.metadata
             ]
         |> Card.view
 
@@ -552,64 +536,11 @@ viewMetadataRow entry =
 
 viewMetadataPagination : Model -> Api.AmpMetadata.PageInfo -> Html Msg
 viewMetadataPagination model info =
-    let
-        totalPages =
-            info.totalPage
-
-        currentPage =
-            model.metadataPage
-
-        visiblePages =
-            List.range (max 0 (currentPage - 3)) (min (totalPages - 1) (currentPage + 3))
-    in
-    if totalPages <= 1 then
-        Html.text ""
-
-    else
-        Html.nav [ class "mt-2" ]
-            [ Html.ul [ class "pagination pagination-sm justify-content-center" ]
-                ([ if currentPage > 0 then
-                    Html.li [ class "page-item" ]
-                        [ Html.a [ class "page-link", href "#", onClickPreventDefault (MetadataGoToPage (currentPage - 1)) ]
-                            [ Html.text "Prev" ]
-                        ]
-
-                   else
-                    Html.li [ class "page-item disabled" ]
-                        [ Html.span [ class "page-link" ] [ Html.text "Prev" ] ]
-                 ]
-                    ++ List.map
-                        (\pg ->
-                            Html.li
-                                [ class
-                                    (if pg == currentPage then
-                                        "page-item active"
-
-                                     else
-                                        "page-item"
-                                    )
-                                ]
-                                [ Html.a
-                                    [ class "page-link"
-                                    , href "#"
-                                    , onClickPreventDefault (MetadataGoToPage pg)
-                                    ]
-                                    [ Html.text (String.fromInt (pg + 1)) ]
-                                ]
-                        )
-                        visiblePages
-                    ++ [ if currentPage < totalPages - 1 then
-                            Html.li [ class "page-item" ]
-                                [ Html.a [ class "page-link", href "#", onClickPreventDefault (MetadataGoToPage (currentPage + 1)) ]
-                                    [ Html.text "Next" ]
-                                ]
-
-                         else
-                            Html.li [ class "page-item disabled" ]
-                                [ Html.span [ class "page-link" ] [ Html.text "Next" ] ]
-                       ]
-                )
-            ]
+    Pagination.small
+        { current = model.metadataPage
+        , total = info.totalPage
+        , toMsg = MetadataGoToPage
+        }
 
 
 
@@ -691,8 +622,15 @@ viewViolinPlots model amp =
         |> Card.headerH5 [] [ Html.text "Biochemical Properties (in Family Context)" ]
         |> Card.block []
             [ Block.custom <|
-                case model.familyFeatures of
-                    Api.Success features ->
+                Api.view
+                    { loading =
+                        Html.div [ class "text-center py-3" ]
+                            [ Spinner.spinner [] []
+                            , Html.p [ class "text-muted mt-2 small" ] [ Html.text "Loading family features..." ]
+                            ]
+                    , failure = \_ -> UH.errorAlert "Failed to load family features."
+                    }
+                    (\features ->
                         let
                             featureValues =
                                 Dict.values features
@@ -714,18 +652,8 @@ viewViolinPlots model amp =
                                 )
                                 properties
                             )
-
-                    Api.Loading ->
-                        Html.div [ class "text-center py-3" ]
-                            [ Spinner.spinner [] []
-                            , Html.p [ class "text-muted mt-2 small" ] [ Html.text "Loading family features..." ]
-                            ]
-
-                    Api.Failure _ ->
-                        Alert.simpleDanger [] [ Html.text "Failed to load family features." ]
-
-                    Api.NotAsked ->
-                        Html.text ""
+                    )
+                    model.familyFeatures
             ]
         |> Card.view
 
@@ -773,23 +701,3 @@ viewViolinPlot title familyValues currentValue =
         [ attribute "data-chart" (Encode.encode 0 chartConfig) ]
         []
 
-
-
--- HELPERS
-
-
-onClickPreventDefault : msg -> Html.Attribute msg
-onClickPreventDefault msg =
-    Html.Events.preventDefaultOn "click" (Json.Decode.succeed ( msg, True ))
-
-
-formatFloat : Int -> Float -> String
-formatFloat decimals val =
-    let
-        factor =
-            toFloat (10 ^ decimals)
-
-        rounded =
-            toFloat (round (val * factor)) / factor
-    in
-    String.fromFloat rounded

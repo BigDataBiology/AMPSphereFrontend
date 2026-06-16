@@ -3,7 +3,6 @@ module Pages.BrowseData exposing (Model, Msg, page)
 import Api
 import Api.AmpList exposing (AmpListResponse, AmpSummary)
 import Api.AvailableOptions exposing (AvailableOptions, Range)
-import Bootstrap.Alert as Alert
 import Bootstrap.Button as Button
 import Bootstrap.Card as Card
 import Bootstrap.Card.Block as Block
@@ -14,19 +13,21 @@ import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Spinner as Spinner
 import Bootstrap.Table as Table
+import Components.Pagination as Pagination
 import Dict
 import Effect exposing (Effect)
 import Set exposing (Set)
 import Html exposing (Html)
 import Html.Attributes exposing (attribute, class, href, selected, style, value)
 import Html.Events exposing (onClick, onInput)
-import Json.Decode
 import Http
 import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
 import Route.Path
 import Shared
+import Util.Format as Format
+import Util.Html as UH
 import View exposing (View)
 
 
@@ -304,8 +305,15 @@ viewSidebar model =
         |> Card.headerH5 [] [ Html.text "Filters" ]
         |> Card.block []
             [ Block.custom <|
-                case model.options of
-                    Api.Success opts ->
+                Api.view
+                    { loading =
+                        Html.div [ class "text-center py-3" ]
+                            [ Spinner.spinner [] []
+                            , Html.p [ class "text-muted mt-2 small" ] [ Html.text "Loading filters..." ]
+                            ]
+                    , failure = \_ -> UH.errorAlert "Failed to load filter options."
+                    }
+                    (\opts ->
                         Html.div []
                             [ viewSelectFilter "Habitat" (List.map (\h -> ( h, h )) opts.habitat) SetHabitat (Maybe.withDefault "" model.filterHabitat)
                             , viewSelectFilter "Quality" (List.map (\q -> ( q, q )) opts.quality) SetQuality (Maybe.withDefault "" model.filterQuality)
@@ -346,18 +354,8 @@ viewSidebar model =
                                 [ Button.primary, Button.block, Button.attrs [ onClick ApplyFilters ] ]
                                 [ Html.text "Apply Filters" ]
                             ]
-
-                    Api.Loading ->
-                        Html.div [ class "text-center py-3" ]
-                            [ Spinner.spinner [] []
-                            , Html.p [ class "text-muted mt-2 small" ] [ Html.text "Loading filters..." ]
-                            ]
-
-                    Api.Failure _ ->
-                        Alert.simpleDanger [] [ Html.text "Failed to load filter options." ]
-
-                    Api.NotAsked ->
-                        Html.text ""
+                    )
+                    model.options
             ]
         |> Card.view
 
@@ -403,7 +401,7 @@ viewRangeSlider label range decimals minVal maxVal toMsgMin toMsgMax =
                 String.fromInt (round v)
 
             else
-                formatFloat decimals v
+                Format.float decimals v
 
         rangeMin =
             String.fromFloat range.min
@@ -481,8 +479,11 @@ viewColumnToggles visibleColumns =
 
 viewMainContent : Model -> Html Msg
 viewMainContent model =
-    case model.ampsList of
-        Api.Success response ->
+    Api.view
+        { loading = UH.spinner "Loading data..."
+        , failure = \_ -> UH.errorAlert "Failed to load data."
+        }
+        (\response ->
             let
                 active =
                     allColumns
@@ -505,18 +506,8 @@ viewMainContent model =
                     }
                 , viewPagination model response.info
                 ]
-
-        Api.Loading ->
-            Html.div [ class "text-center py-4" ]
-                [ Spinner.spinner [ Spinner.grow ] []
-                , Html.p [ class "text-muted mt-2" ] [ Html.text "Loading data..." ]
-                ]
-
-        Api.Failure _ ->
-            Alert.simpleDanger [] [ Html.text "Failed to load data." ]
-
-        Api.NotAsked ->
-            Html.text ""
+        )
+        model.ampsList
 
 
 viewAmpRow : List ( String, String ) -> AmpSummary -> Table.Row Msg
@@ -548,13 +539,13 @@ ampCell key amp =
             Table.td [] [ Html.text (String.fromInt amp.length) ]
 
         "mw" ->
-            Table.td [] [ Html.text (formatFloat 1 amp.molecularWeight) ]
+            Table.td [] [ Html.text (Format.float 1 amp.molecularWeight) ]
 
         "pi" ->
-            Table.td [] [ Html.text (formatFloat 2 amp.isoelectricPoint) ]
+            Table.td [] [ Html.text (Format.float 2 amp.isoelectricPoint) ]
 
         "charge" ->
-            Table.td [] [ Html.text (formatFloat 2 amp.charge) ]
+            Table.td [] [ Html.text (Format.float 2 amp.charge) ]
 
         "antifam" ->
             Table.td [] [ Html.text amp.antifam ]
@@ -580,82 +571,8 @@ ampCell key amp =
 
 viewPagination : Model -> Api.AmpList.PageInfo -> Html Msg
 viewPagination model info =
-    let
-        totalPages =
-            info.totalPage
-
-        currentPage =
-            model.currentPage
-
-        visiblePages =
-            List.range (max 0 (currentPage - 3)) (min (totalPages - 1) (currentPage + 3))
-    in
-    if totalPages <= 1 then
-        Html.text ""
-
-    else
-        Html.nav [ class "mt-3" ]
-            [ Html.ul [ class "pagination justify-content-center" ]
-                ([ if currentPage > 0 then
-                    Html.li [ class "page-item" ]
-                        [ Html.a [ class "page-link", href "#", onClickPreventDefault (GoToPage (currentPage - 1)) ]
-                            [ Html.text "Prev" ]
-                        ]
-
-                   else
-                    Html.li [ class "page-item disabled" ]
-                        [ Html.span [ class "page-link" ] [ Html.text "Prev" ] ]
-                 ]
-                    ++ List.map
-                        (\pg ->
-                            Html.li
-                                [ class
-                                    (if pg == currentPage then
-                                        "page-item active"
-
-                                     else
-                                        "page-item"
-                                    )
-                                ]
-                                [ Html.a
-                                    [ class "page-link"
-                                    , href "#"
-                                    , onClickPreventDefault (GoToPage pg)
-                                    ]
-                                    [ Html.text (String.fromInt (pg + 1)) ]
-                                ]
-                        )
-                        visiblePages
-                    ++ [ if currentPage < totalPages - 1 then
-                            Html.li [ class "page-item" ]
-                                [ Html.a [ class "page-link", href "#", onClickPreventDefault (GoToPage (currentPage + 1)) ]
-                                    [ Html.text "Next" ]
-                                ]
-
-                         else
-                            Html.li [ class "page-item disabled" ]
-                                [ Html.span [ class "page-link" ] [ Html.text "Next" ] ]
-                       ]
-                )
-            ]
-
-
-
--- HELPERS
-
-
-onClickPreventDefault : msg -> Html.Attribute msg
-onClickPreventDefault msg =
-    Html.Events.preventDefaultOn "click" (Json.Decode.succeed ( msg, True ))
-
-
-formatFloat : Int -> Float -> String
-formatFloat decimals val =
-    let
-        factor =
-            toFloat (10 ^ decimals)
-
-        rounded =
-            toFloat (round (val * factor)) / factor
-    in
-    String.fromFloat rounded
+    Pagination.view
+        { current = model.currentPage
+        , total = info.totalPage
+        , toMsg = GoToPage
+        }

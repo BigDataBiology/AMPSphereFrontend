@@ -4,7 +4,6 @@ import Api
 import Api.SearchHmmer
 import Api.SearchMmseqs
 import Bootstrap.Alert as Alert
-import Bootstrap.Spinner as Spinner
 import Bootstrap.Table as Table
 import Dict
 import Effect exposing (Effect)
@@ -17,6 +16,8 @@ import Page exposing (Page)
 import Route exposing (Route)
 import Route.Path
 import Shared
+import Util.Format as Format
+import Util.Html as UH
 import View exposing (View)
 
 
@@ -187,13 +188,10 @@ viewMmseqsResults model =
             Alert.simpleInfo [] [ Html.text "No search query provided." ]
 
         Api.Loading ->
-            Html.div [ class "text-center py-4" ]
-                [ Spinner.spinner [ Spinner.grow ] []
-                , Html.p [ class "text-muted mt-2" ] [ Html.text "Running MMseqs2 search... This may take a moment." ]
-                ]
+            UH.spinner "Running MMseqs2 search... This may take a moment."
 
         Api.Failure _ ->
-            Alert.simpleDanger [] [ Html.text "Search failed. Please check your sequence and try again." ]
+            UH.errorAlert "Search failed. Please check your sequence and try again."
 
         Api.Success hits ->
             if List.isEmpty hits then
@@ -244,9 +242,9 @@ viewMmseqsRow expandedRows idx hit =
                     [ Html.a [ Route.Path.href (Route.Path.Amp_Accession_ { accession = hit.targetId }) ]
                         [ Html.text hit.targetId ]
                     ]
-                , Table.td [] [ Html.text (formatPercent hit.seqIdentity) ]
+                , Table.td [] [ Html.text (Format.percent hit.seqIdentity) ]
                 , Table.td [] [ Html.text (String.fromInt hit.alnLength) ]
-                , Table.td [] [ Html.text (formatEValue hit.eValue) ]
+                , Table.td [] [ Html.text (Format.eValue hit.eValue) ]
                 , Table.td [] [ Html.text (String.fromFloat hit.bitScore) ]
                 ]
 
@@ -281,13 +279,10 @@ viewHmmerResults model =
             Alert.simpleInfo [] [ Html.text "No search query provided." ]
 
         Api.Loading ->
-            Html.div [ class "text-center py-4" ]
-                [ Spinner.spinner [ Spinner.grow ] []
-                , Html.p [ class "text-muted mt-2" ] [ Html.text "Running HMMER search... This may take a moment." ]
-                ]
+            UH.spinner "Running HMMER search... This may take a moment."
 
         Api.Failure _ ->
-            Alert.simpleDanger [] [ Html.text "Search failed. Please check your sequence and try again." ]
+            UH.errorAlert "Search failed. Please check your sequence and try again."
 
         Api.Success hits ->
             if List.isEmpty hits then
@@ -323,7 +318,7 @@ viewHmmerRow hit =
                 [ Html.text hit.targetName ]
             ]
         , Table.td [] [ Html.text hit.accession ]
-        , Table.td [] [ Html.text (formatEValue hit.eValue) ]
+        , Table.td [] [ Html.text (Format.eValue hit.eValue) ]
         , Table.td [] [ Html.text (String.fromFloat hit.score) ]
         , Table.td [] [ Html.text (String.fromFloat hit.bias) ]
         , Table.td [] [ Html.text hit.description ]
@@ -350,24 +345,3 @@ coloredAlignment sequence matchPattern =
         )
         (String.toList sequence)
         (String.toList matchPattern)
-
-
-formatPercent : Float -> String
-formatPercent val =
-    String.fromFloat (toFloat (round (val * 1000)) / 10) ++ "%"
-
-
-formatEValue : Float -> String
-formatEValue val =
-    if val < 0.001 then
-        let
-            exp =
-                logBase 10 val |> floor
-
-            mantissa =
-                val / (10 ^ toFloat exp)
-        in
-        String.fromFloat (toFloat (round (mantissa * 10)) / 10) ++ "e" ++ String.fromInt exp
-
-    else
-        String.fromFloat (toFloat (round (val * 1000)) / 1000)

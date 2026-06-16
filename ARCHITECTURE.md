@@ -39,7 +39,7 @@ variable; it is read in `src/interop.js` and passed to Elm as a flag.
 src/
   interop.js              JS entry: builds Elm flags, registers web components
   Effect.elm              Custom Effect type (apiGet, routing, shared msgs)
-  Api.elm                 RemoteData type: NotAsked | Loading | Success | Failure
+  Api.elm                 RemoteData type (NotAsked | Loading | Success | Failure) + `view` helper
   Shared.elm              App-wide state (init/update/subscriptions)
   Shared/Model.elm        { apiBaseUrl, globalSearchQuery }
   Shared/Msg.elm          Global search events
@@ -62,7 +62,10 @@ src/
     About.elm             /about
     Api.elm               /api
     NotFound_.elm         404
-  Components/             Reusable view fragments (SeqLogo, SequenceLegend)
+  Components/             Reusable view fragments (SeqLogo, SequenceLegend, Pagination)
+  Util/                   Shared helpers
+    Format.elm            Number/string formatting (float, thousands, percent, eValue, truncate)
+    Html.elm              onClickPreventDefault, spinner, errorAlert
   web-components/         Custom elements (plotly-chart, helical-wheel, copy-button)
 static/
   styles.css              App-specific CSS
@@ -111,9 +114,20 @@ type Data value
     | Failure Http.Error
 ```
 
-Pages set fields to `Loading` in `init`, fire the `Effect`, and `case` on the
-result in their `view`. (Today each page hand-writes the four-branch ladder;
-factoring this out is tracked in `improvements.md`.)
+Pages set fields to `Loading` in `init`, fire the `Effect`, and render the
+result with `Api.view` instead of hand-writing the four-branch ladder:
+
+```elm
+Api.view
+    { loading = Util.Html.spinner "Loading…"
+    , failure = \_ -> Util.Html.errorAlert "Failed to load."
+    }
+    (\value -> …)
+    model.data
+```
+
+`NotAsked` renders nothing; the `loading`/`failure` views are supplied per call
+so each card can keep its own spinner style or message.
 
 ### API modules
 
@@ -154,13 +168,19 @@ active tab is tracked separately in the page model with explicit switch
 messages; switching a tab can trigger the data fetch for that tab's content
 (e.g. family features are only requested once needed).
 
-### Pagination links — the footgun
+### Pagination
 
-Pagination uses `<a href="#">`. With `Browser.application`, a plain click on
-such a link is intercepted by the router and pushes `#` onto history. **Always**
-attach clicks with `onClickPreventDefault` (a thin wrapper over
-`Html.Events.preventDefaultOn "click"`), not `onClick`. This helper is currently
-copy-pasted across pages; consolidating it is tracked in `improvements.md`.
+Pagination is centralized in `Components.Pagination` (`view` and a compact
+`small` variant). Pages pass `{ current, total, toMsg }` with **0-indexed**
+pages (the user-facing label is `page + 1`); a page whose own state is 1-indexed
+(TextSearch) converts at the call site. Use this instead of hand-rolling controls.
+
+The footgun it encapsulates: pagination uses `<a href="#">`, and with
+`Browser.application` a plain click on such a link is intercepted by the router
+and pushes `#` onto history. The component attaches clicks with
+`Util.Html.onClickPreventDefault` (a thin wrapper over
+`Html.Events.preventDefaultOn "click"`), not `onClick`. Use that same helper for
+any other action links.
 
 ### Web components for non-Elm visuals
 
@@ -195,8 +215,6 @@ These are documented here so they aren't mistaken for intended patterns:
 - **URL construction is mixed**: some `Api/*` modules use `Url.Builder`, others
   concatenate strings (which skips percent-encoding). `Api/Endpoint.elm` exists
   to centralize this but is underused.
-- **Pagination is duplicated** across BrowseData, AMP metadata, TextSearch, and
-  Family, with differing 0- vs 1-indexed conventions.
 - **Browse Data** does not reflect its filters/page in the URL (not
   bookmarkable), unlike TextSearch.
 - **`/all_available_options`** returns ~29,500 microbial-source strings; with the

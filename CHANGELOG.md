@@ -16,8 +16,17 @@ release, changes accumulate under **Unreleased**.
 ### Added
 - `improvements.md` — a triaged survey of potential improvements.
 - `CHANGELOG.md` and `ARCHITECTURE.md`.
+- Shared modules to remove cross-page duplication: `Util.Format`
+  (`float`/`thousands`/`percent`/`eValue`/`truncate`), `Util.Html`
+  (`onClickPreventDefault`/`spinner`/`errorAlert`), `Components.Pagination`
+  (`view`/`small`), and an `Api.view` helper that collapses the
+  `NotAsked/Loading/Failure/Success` ladder.
 
 ### Changed
+- Centralized formatters, the `onClickPreventDefault` helper, the RemoteData
+  view ladder, and pagination into the shared modules above; all six pages now
+  use them. Pagination is standardized on a single 0-indexed convention,
+  removing the 0- vs 1-indexed mismatch between pages.
 - README: corrected stale documentation — removed the non-existent `/contact`
   page, documented the `/api` page and the `<copy-button>` web component.
 - Browse Data: replaced the 14-positional-argument `buildFilters` with a

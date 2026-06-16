@@ -23,13 +23,18 @@ Elm Land v0.20.1 SPA with file-based routing. Backend is a read-only REST API at
 Api.Amp.get { accession = "AMP10.000_000", onResponse = GotAmp }
 ```
 
-**Remote data** uses `Api.Data`: `NotAsked | Loading | Success a | Failure Http.Error`. Pages set `Loading` in init, then pattern-match in the view.
+**Remote data** uses `Api.Data`: `NotAsked | Loading | Success a | Failure Http.Error`. Pages set `Loading` in init, then render with `Api.view` (in `src/Api.elm`), which collapses the ladder into one call — supply `loading`/`failure` views (typically `Util.Html.spinner` / `Util.Html.errorAlert`) and a success function; `NotAsked` renders nothing.
+
+**Shared view/format helpers** (don't re-copy these per page):
+- `src/Util/Format.elm` — `float`, `thousands`, `percent`, `eValue`, `truncate` (all number/string formatting).
+- `src/Util/Html.elm` — `onClickPreventDefault`, `spinner`, `errorAlert`.
+- `src/Components/Pagination.elm` — `view` / `small` (compact) pagination controls.
 
 **Layout** (`Layouts.Default`) provides a Bootstrap Navbar with global search. Search routing: `AMP*` → `/amp/{id}`, `SPHERE*` → `/family/{id}`, else → `/text-search?query=`. The layout communicates with shared state via `Effect.sendSharedMsg`.
 
 **UI** uses `rundis/elm-bootstrap` 5.2.0 (Bootstrap 4.3.1 CSS via CDN). Plotly charts use a `<plotly-chart>` web component (`src/web-components/plotly-chart.js`). The helical wheel is a self-contained `<helical-wheel data-sequence="...">` web component (`src/web-components/helical-wheel.js`) — a vanilla-JS port of the MIT-licensed d3 helical wheel by Tina Wang & Shyam Saladi (https://clemlab.github.io/helicalwheel/), with angle/color-scheme/hydrophobic-moment/hydrophobic-face controls and SVG export. The hydrophobic-moment arrow is computed from the sequence (Eisenberg consensus scale): direction = hydrophobic face, length ∝ mean moment `<μH>`. The hydrophobic-face arc is centered on that same moment direction (both omitted when the moment is ~0). Web components are registered in `src/interop.js` (`onReady`). Custom CSS is minimal (~120 lines in `static/styles.css`).
 
-**Pagination links** must use `onClickPreventDefault` (via `Html.Events.preventDefaultOn "click"`) on `<a href="#">` elements — otherwise `Browser.application` intercepts the click and fires unwanted `pushUrl "#"`.
+**Pagination** is centralized in `Components.Pagination` (0-indexed pages; the user-facing label is `page + 1`). Callers pass `{ current, total, toMsg }`; pages whose state is 1-indexed (e.g. TextSearch) adapt at the boundary. Internally it uses `Util.Html.onClickPreventDefault` on `<a href="#">` links — required because `Browser.application` otherwise intercepts the click and fires an unwanted `pushUrl "#"`. Use that helper for any other action links too.
 
 **Tabs with lazy loading** (Amp, Family pages): `Tab.State` is opaque so active tab is tracked separately in the model with explicit switch messages that trigger data fetching.
 

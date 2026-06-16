@@ -2,7 +2,6 @@ module Pages.Home_ exposing (Model, Msg, page)
 
 import Api
 import Api.Statistics exposing (Statistics)
-import Bootstrap.Alert as Alert
 import Bootstrap.Button as Button
 import Bootstrap.Card as Card
 import Bootstrap.Card.Block as Block
@@ -26,6 +25,8 @@ import Page exposing (Page)
 import Route exposing (Route)
 import Route.Path
 import Shared
+import Util.Format as Format
+import Util.Html as UH
 import View exposing (View)
 
 
@@ -167,33 +168,30 @@ viewStatistics data =
         |> Card.headerH5 [] [ Html.text "Database Statistics" ]
         |> Card.block []
             [ Block.custom <|
-                case data of
-                    Api.NotAsked ->
-                        Html.text ""
-
-                    Api.Loading ->
+                Api.view
+                    { loading =
                         Html.div [ class "text-center py-3" ]
                             [ Spinner.spinner [ Spinner.color spinnerColor ] []
                             , Html.p [ class "text-muted mt-2" ] [ Html.text "Loading statistics..." ]
                             ]
-
-                    Api.Failure _ ->
-                        Alert.simpleDanger [] [ Html.text "Failed to load statistics." ]
-
-                    Api.Success stats ->
+                    , failure = \_ -> UH.errorAlert "Failed to load statistics."
+                    }
+                    (\stats ->
                         Table.table
                             { options = [ Table.hover ]
                             , thead = Table.thead [] []
                             , tbody =
                                 Table.tbody []
-                                    [ statRow "Antimicrobial peptides" (formatNumber stats.numAmps)
-                                    , statRow "AMP families" (formatNumber stats.numFamilies)
-                                    , statRow "Metagenomes / genomes" (formatNumber stats.numGenomes)
-                                    , statRow "smORF genes" (formatNumber stats.numGenes)
-                                    , statRow "Habitats" (formatNumber stats.numHabitats)
-                                    , statRow "Metagenomes" (formatNumber stats.numMetagenomes)
+                                    [ statRow "Antimicrobial peptides" (Format.thousands stats.numAmps)
+                                    , statRow "AMP families" (Format.thousands stats.numFamilies)
+                                    , statRow "Metagenomes / genomes" (Format.thousands stats.numGenomes)
+                                    , statRow "smORF genes" (Format.thousands stats.numGenes)
+                                    , statRow "Habitats" (Format.thousands stats.numHabitats)
+                                    , statRow "Metagenomes" (Format.thousands stats.numMetagenomes)
                                     ]
                             }
+                    )
+                    data
             ]
         |> Card.view
 
@@ -260,25 +258,3 @@ viewSequenceSearch model =
 spinnerColor : Bootstrap.Text.Color
 spinnerColor =
     Bootstrap.Text.primary
-
-
-formatNumber : Int -> String
-formatNumber n =
-    let
-        reversed =
-            List.reverse (String.toList (String.fromInt n))
-
-        grouped =
-            groupBy3 reversed []
-    in
-    String.join "," (List.map (List.reverse >> String.fromList) grouped)
-
-
-groupBy3 : List Char -> List (List Char) -> List (List Char)
-groupBy3 chars acc =
-    case chars of
-        [] ->
-            acc
-
-        _ ->
-            groupBy3 (List.drop 3 chars) (List.take 3 chars :: acc)

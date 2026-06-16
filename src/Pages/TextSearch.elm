@@ -7,20 +7,20 @@ import Bootstrap.Badge as Badge
 import Bootstrap.Button as Button
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
-import Bootstrap.Spinner as Spinner
 import Bootstrap.Table as Table
+import Components.Pagination as Pagination
 import Dict
 import Effect exposing (Effect)
 import Html exposing (Html)
-import Html.Attributes exposing (class, href)
-import Html.Events exposing (onClick)
-import Json.Decode
+import Html.Attributes exposing (class)
 import Http
 import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
 import Route.Path
 import Shared
+import Util.Format as Format
+import Util.Html as UH
 import View exposing (View)
 
 
@@ -164,13 +164,10 @@ viewResults model =
             Alert.simpleInfo [] [ Html.text "Enter a search query using the header search bar." ]
 
         Api.Loading ->
-            Html.div [ class "text-center py-4" ]
-                [ Spinner.spinner [ Spinner.grow ] []
-                , Html.p [ class "text-muted mt-2" ] [ Html.text "Searching..." ]
-                ]
+            UH.spinner "Searching..."
 
         Api.Failure _ ->
-            Alert.simpleDanger [] [ Html.text "Search failed. Please try again." ]
+            UH.errorAlert "Search failed. Please try again."
 
         Api.Success results ->
             if List.isEmpty results.results then
@@ -210,7 +207,7 @@ viewResultRow result =
                 [ Html.text result.family ]
             ]
         , Table.td [ Table.cellAttr (class "text-monospace small") ]
-            [ Html.text (truncateSequence 30 result.sequence) ]
+            [ Html.text (Format.truncate 30 result.sequence) ]
         , Table.td [] [ Html.text (String.fromInt result.numGenes) ]
         , Table.td [] [ qualityBadge result.quality ]
         ]
@@ -229,54 +226,15 @@ qualityBadge quality =
             Badge.badgeSecondary [] [ Html.text quality ]
 
 
-onClickPreventDefault : msg -> Html.Attribute msg
-onClickPreventDefault msg =
-    Html.Events.preventDefaultOn "click" (Json.Decode.succeed ( msg, True ))
-
-
-truncateSequence : Int -> String -> String
-truncateSequence maxLen seq =
-    if String.length seq > maxLen then
-        String.left maxLen seq ++ "..."
-
-    else
-        seq
-
-
 viewPagination : Model -> Int -> Html Msg
 viewPagination model totalCount =
     let
         totalPages =
             ceiling (toFloat totalCount / toFloat model.pageSize)
-
-        pages =
-            List.range 1 (min totalPages 10)
     in
-    if totalPages <= 1 then
-        Html.text ""
-
-    else
-        Html.nav [ class "mt-3" ]
-            [ Html.ul [ class "pagination justify-content-center" ]
-                (List.map
-                    (\pg ->
-                        Html.li
-                            [ class
-                                (if pg == model.currentPage then
-                                    "page-item active"
-
-                                 else
-                                    "page-item"
-                                )
-                            ]
-                            [ Html.a
-                                [ class "page-link"
-                                , href "#"
-                                , onClickPreventDefault (GoToPage pg)
-                                ]
-                                [ Html.text (String.fromInt pg) ]
-                            ]
-                    )
-                    pages
-                )
-            ]
+    -- The model/API use 1-indexed pages; the shared control is 0-indexed.
+    Pagination.view
+        { current = model.currentPage - 1
+        , total = totalPages
+        , toMsg = \pg -> GoToPage (pg + 1)
+        }
