@@ -80,72 +80,60 @@ init route _ =
 
         family =
             Dict.get "family" route.query |> Maybe.withDefault ""
+
+        model =
+            { currentPage = pg
+            , pageSize = 20
+            , options = Api.Loading
+            , ampsList = Api.Loading
+            , filterHabitat = habitat
+            , filterMicrobialSource = Nothing
+            , filterQuality = Nothing
+            , filterFamily = family
+            , filterPepLengthMin = ""
+            , filterPepLengthMax = ""
+            , filterMwMin = ""
+            , filterMwMax = ""
+            , filterPiMin = ""
+            , filterPiMax = ""
+            , filterChargeMin = ""
+            , filterChargeMax = ""
+            , showAdvancedFilters = False
+            , visibleColumns = Set.fromList [ "accession", "family", "sequence", "length" ]
+            }
     in
-    ( { currentPage = pg
-      , pageSize = 20
-      , options = Api.Loading
-      , ampsList = Api.Loading
-      , filterHabitat = habitat
-      , filterMicrobialSource = Nothing
-      , filterQuality = Nothing
-      , filterFamily = family
-      , filterPepLengthMin = ""
-      , filterPepLengthMax = ""
-      , filterMwMin = ""
-      , filterMwMax = ""
-      , filterPiMin = ""
-      , filterPiMax = ""
-      , filterChargeMin = ""
-      , filterChargeMax = ""
-      , showAdvancedFilters = False
-      , visibleColumns = Set.fromList [ "accession", "family", "sequence", "length" ]
-      }
+    ( model
     , Effect.batch
         [ Api.AvailableOptions.get { onResponse = GotOptions }
         , Api.AmpList.get
-            { filters = buildFilters pg 20 habitat Nothing Nothing family "" "" "" "" "" "" "" ""
+            { filters = modelToFilters model pg
             , onResponse = GotAmpsList
             }
         ]
     )
 
 
-buildFilters :
-    Int
-    -> Int
-    -> Maybe String
-    -> Maybe String
-    -> Maybe String
-    -> String
-    -> String
-    -> String
-    -> String
-    -> String
-    -> String
-    -> String
-    -> String
-    -> String
-    -> Api.AmpList.Filters
-buildFilters pg pageSize habitat microbialSource quality family plMin plMax mwMin mwMax piMin piMax chargeMin chargeMax =
+modelToFilters : Model -> Int -> Api.AmpList.Filters
+modelToFilters model pg =
     { page = pg
-    , pageSize = pageSize
+    , pageSize = model.pageSize
     , family =
-        if family /= "" then
-            Just family
+        if model.filterFamily /= "" then
+            Just model.filterFamily
 
         else
             Nothing
-    , habitat = habitat
-    , microbialSource = microbialSource
-    , quality = quality
-    , pepLengthMin = String.toInt plMin
-    , pepLengthMax = String.toInt plMax
-    , mwMin = String.toFloat mwMin
-    , mwMax = String.toFloat mwMax
-    , piMin = String.toFloat piMin
-    , piMax = String.toFloat piMax
-    , chargeMin = String.toFloat chargeMin
-    , chargeMax = String.toFloat chargeMax
+    , habitat = model.filterHabitat
+    , microbialSource = model.filterMicrobialSource
+    , quality = model.filterQuality
+    , pepLengthMin = String.toInt model.filterPepLengthMin
+    , pepLengthMax = String.toInt model.filterPepLengthMax
+    , mwMin = String.toFloat model.filterMwMin
+    , mwMax = String.toFloat model.filterMwMax
+    , piMin = String.toFloat model.filterPiMin
+    , piMax = String.toFloat model.filterPiMax
+    , chargeMin = String.toFloat model.filterChargeMin
+    , chargeMax = String.toFloat model.filterChargeMax
     }
 
 
@@ -281,21 +269,7 @@ update msg model =
 fetchAmps : Model -> Int -> Effect Msg
 fetchAmps model pg =
     Api.AmpList.get
-        { filters =
-            buildFilters pg
-                model.pageSize
-                model.filterHabitat
-                model.filterMicrobialSource
-                model.filterQuality
-                model.filterFamily
-                model.filterPepLengthMin
-                model.filterPepLengthMax
-                model.filterMwMin
-                model.filterMwMax
-                model.filterPiMin
-                model.filterPiMax
-                model.filterChargeMin
-                model.filterChargeMax
+        { filters = modelToFilters model pg
         , onResponse = GotAmpsList
         }
 

@@ -20,3 +20,7 @@ release, changes accumulate under **Unreleased**.
 ### Changed
 - README: corrected stale documentation — removed the non-existent `/contact`
   page, documented the `/api` page and the `<copy-button>` web component.
+- Browse Data: replaced the 14-positional-argument `buildFilters` with a
+  `modelToFilters : Model -> Int -> Filters` helper that builds the filter record
+  directly from the model, removing the risk of silently mis-ordering same-typed
+  arguments.
