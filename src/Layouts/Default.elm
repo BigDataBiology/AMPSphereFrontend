@@ -6,7 +6,7 @@ import Bootstrap.Grid as Grid
 import Bootstrap.Navbar as Navbar
 import Effect exposing (Effect)
 import Html exposing (Html)
-import Html.Attributes exposing (class, href)
+import Html.Attributes exposing (alt, class, height, href, src)
 import Html.Events exposing (onSubmit)
 import Layout exposing (Layout)
 import Route exposing (Route)
@@ -110,7 +110,16 @@ viewNavbar shared model toContentMsg =
         |> Navbar.withAnimation
         |> Navbar.dark
         |> Navbar.attrs [ class "navbar-ampsphere" ]
-        |> Navbar.brand [ href "/" ] [ Html.text "AMPSphere" ]
+        |> Navbar.brand [ href "/", class "d-flex align-items-center" ]
+            [ Html.img
+                [ src "/AMPSphere_logo.svg"
+                , alt "AMPSphere"
+                , height 30
+                , class "mr-2"
+                ]
+                []
+            , Html.text "AMPSphere"
+            ]
         |> Navbar.items
             [ Navbar.itemLink [ href "/" ] [ Html.text "Home" ]
             , Navbar.itemLink [ href "/browse-data" ] [ Html.text "Browse Data" ]

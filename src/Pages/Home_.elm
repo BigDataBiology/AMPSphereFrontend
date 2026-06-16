@@ -16,7 +16,7 @@ import Bootstrap.Text
 import Dict
 import Effect exposing (Effect)
 import Html exposing (Html)
-import Html.Attributes exposing (class, href)
+import Html.Attributes exposing (alt, class, height, href, src)
 import Html.Events exposing (onClick, onSubmit, preventDefaultOn)
 import Json.Decode as Decode
 import Http
@@ -148,7 +148,14 @@ view model =
     { title = "Home"
     , body =
         [ Html.div [ class "text-center py-5" ]
-            [ Html.h1 [ class "display-4" ] [ Html.text "AMPSphere" ]
+            [ Html.img
+                [ src "/AMPSphere_logo.svg"
+                , alt "AMPSphere"
+                , height 140
+                , class "mb-4"
+                ]
+                []
+            , Html.h1 [ class "display-4" ] [ Html.text "AMPSphere" ]
             , Html.p [ class "lead text-muted" ]
                 [ Html.text "A comprehensive catalog of antimicrobial peptides from metagenomes and microbial genomes" ]
             ]
