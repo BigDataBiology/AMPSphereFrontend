@@ -14,6 +14,8 @@ release, changes accumulate under **Unreleased**.
   `<a href="#">` and push `#` onto the history stack.
 
 ### Added
+- Favicon (`static/favicon.ico`), referenced via a `<link rel="icon">` in
+  `elm-land.json`.
 - `improvements.md` — a triaged survey of potential improvements.
 - `CHANGELOG.md` and `ARCHITECTURE.md`.
 - Shared modules to remove cross-page duplication: `Util.Format`
