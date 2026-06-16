@@ -492,7 +492,9 @@ viewSelectFilter label options toMsg currentValue =
             [ Select.small
             , Select.onChange toMsg
             ]
-            (Select.item [ value "" ] [ Html.text ("All " ++ label ++ "s") ]
+            (Select.item [ value "" ] [ Html.text (if label == "Quality"
+                                                    then "All Quality Categories"
+                                                    else "All " ++ label ++ "s") ]
                 :: List.map
                     (\( val, lbl ) ->
                         Select.item [ value val, selected (val == currentValue) ] [ Html.text lbl ]
