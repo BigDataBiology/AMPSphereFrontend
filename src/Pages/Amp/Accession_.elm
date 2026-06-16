@@ -210,8 +210,8 @@ viewOverview model =
 
         Api.Success amp ->
             Html.div []
-                [ viewAmpInfo amp
-                , viewSequence amp.sequence
+                [ viewSequence amp.sequence
+                , viewAmpInfo amp
                 , Grid.row []
                     [ Grid.col [ Col.md4 ]
                         [ viewCoprediction model.coprediction

@@ -518,8 +518,8 @@ viewAmpRow amp =
             ]
         , Table.td [ Table.cellAttr (class "text-monospace small") ]
             [ Html.text
-                (if String.length amp.sequence > 30 then
-                    String.left 30 amp.sequence ++ "..."
+                (if String.length amp.sequence > 60 then
+                    String.left 60 amp.sequence ++ "..."
 
                  else
                     amp.sequence
