@@ -116,7 +116,6 @@ viewNavbar shared model toContentMsg =
             , Navbar.itemLink [ href "/browse-data" ] [ Html.text "Browse Data" ]
             , Navbar.itemLink [ href "/downloads" ] [ Html.text "Downloads" ]
             , Navbar.itemLink [ href "/about" ] [ Html.text "About" ]
-            , Navbar.itemLink [ href "/contact" ] [ Html.text "Contact" ]
             ]
         |> Navbar.customItems
             [ Navbar.customItem <|
@@ -141,14 +140,11 @@ viewFooter : Html msg
 viewFooter =
     Html.footer [ class "site-footer" ]
         [ Grid.container []
-            [ Html.p [ class "mb-1" ]
-                [ Html.text "AMPSphere: a comprehensive catalog of antimicrobial peptides" ]
-            , Html.p [ class "mb-0" ]
-                [ Html.a [ href "https://big-data-biology.org" ]
-                    [ Html.text "Big Data Biology Lab" ]
-                , Html.text " | "
+            [ Html.p [ class "mb-0" ]
+                [ Html.text "©2021-2026 AMPSphere authors ("
                 , Html.a [ href "https://doi.org/10.1016/j.cell.2024.05.013" ]
-                    [ Html.text "Cite AMPSphere" ]
+                    [ Html.text "Santos-Júnior, Torres, et al., 2024" ]
+                , Html.text ")"
                 ]
             ]
         ]

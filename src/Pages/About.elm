@@ -92,13 +92,39 @@ view model =
                     ]
                 , aboutCard "Citation"
                     [ Html.p []
-                        [ Html.text "Santos-Junior, C.D., Pan, S., Zhao, XM. "
+                        [ Html.text "Santos-Júnior, C.D., Torres, M.D.T., Duan, Y. "
                         , Html.em [] [ Html.text "et al." ]
                         , Html.text " Discovery of antimicrobial peptides in the global microbiome with machine learning. "
                         , Html.em [] [ Html.text "Cell" ]
-                        , Html.text " (2024). "
+                        , Html.text " 187, 3761–3778 (2024). "
                         , Html.a [ href "https://doi.org/10.1016/j.cell.2024.05.013" ]
                             [ Html.text "https://doi.org/10.1016/j.cell.2024.05.013" ]
+                        ]
+                    ]
+                , aboutCard "Contact"
+                    [ Html.p []
+                        [ Html.text "AMPSphere is developed and maintained by the "
+                        , Html.a [ href "https://big-data-biology.org" ]
+                            [ Html.text "Big Data Biology Lab" ]
+                        , Html.text " at the Centre for Microbiome Research, Queensland University of Technology, in collaboration with the "
+                        , Html.a [ href "https://delafuentelab.seas.upenn.edu/" ]
+                            [ Html.text "de la Fuente Lab" ]
+                        , Html.text " at the University of Pennsylvania."
+                        ]
+                    , Html.p []
+                        [ Html.text "For bug reports and feature requests, please open an issue on our "
+                        , Html.a [ href "https://github.com/BigDataBiology/AMPSphere" ]
+                            [ Html.text "GitHub repository" ]
+                        , Html.text "."
+                        ]
+                    , Html.p [ class "mb-0" ]
+                        [ Html.text "For general inquiries, contact "
+                        , Html.a [ href "mailto:luis@luispedro.org" ]
+                            [ Html.text "luis@luispedro.org" ]
+                        , Html.text " or "
+                        , Html.a [ href "mailto:cfuente@upenn.edu" ]
+                            [ Html.text "cfuente@upenn.edu" ]
+                        , Html.text "."
                         ]
                     ]
                 ]
