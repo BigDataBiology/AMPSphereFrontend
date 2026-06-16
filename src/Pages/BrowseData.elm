@@ -91,35 +91,51 @@ maxExport =
 init : Route () -> () -> ( Model, Effect Msg )
 init route _ =
     let
+        str key =
+            Dict.get key route.query |> Maybe.withDefault ""
+
+        nonEmpty key =
+            Dict.get key route.query
+                |> Maybe.andThen
+                    (\v ->
+                        if v == "" then
+                            Nothing
+
+                        else
+                            Just v
+                    )
+
         pg =
             Dict.get "page" route.query
                 |> Maybe.andThen String.toInt
                 |> Maybe.withDefault 0
 
-        habitat =
-            Dict.get "habitat" route.query
+        microbialSource =
+            nonEmpty "microbial_source"
 
-        family =
-            Dict.get "family" route.query |> Maybe.withDefault ""
+        ranges =
+            [ str "pep_length_min", str "pep_length_max", str "mw_min", str "mw_max", str "pi_min", str "pi_max", str "charge_min", str "charge_max" ]
 
         model =
             { currentPage = pg
             , pageSize = 20
             , options = Api.Loading
             , ampsList = Api.Loading
-            , filterHabitat = habitat
-            , filterMicrobialSource = Nothing
-            , filterQuality = Nothing
-            , filterFamily = family
-            , filterPepLengthMin = ""
-            , filterPepLengthMax = ""
-            , filterMwMin = ""
-            , filterMwMax = ""
-            , filterPiMin = ""
-            , filterPiMax = ""
-            , filterChargeMin = ""
-            , filterChargeMax = ""
-            , showAdvancedFilters = False
+            , filterHabitat = nonEmpty "habitat"
+            , filterMicrobialSource = microbialSource
+            , filterQuality = nonEmpty "quality"
+            , filterFamily = str "family"
+            , filterPepLengthMin = str "pep_length_min"
+            , filterPepLengthMax = str "pep_length_max"
+            , filterMwMin = str "mw_min"
+            , filterMwMax = str "mw_max"
+            , filterPiMin = str "pi_min"
+            , filterPiMax = str "pi_max"
+            , filterChargeMin = str "charge_min"
+            , filterChargeMax = str "charge_max"
+
+            -- Expand the advanced section when a deep link sets any of its filters.
+            , showAdvancedFilters = microbialSource /= Nothing || List.any ((/=) "") ranges
             , visibleColumns = Set.fromList [ "accession", "family", "sequence", "length" ]
             , downloadStatus = DownloadIdle
             }
@@ -266,12 +282,12 @@ update msg model =
 
         ApplyFilters ->
             ( { model | currentPage = 0, ampsList = Api.Loading }
-            , fetchAmps model 0
+            , applyRoute model 0
             )
 
         GoToPage pg ->
             ( { model | currentPage = pg, ampsList = Api.Loading }
-            , fetchAmps model pg
+            , applyRoute model pg
             )
 
         ToggleAdvancedFilters ->
@@ -339,6 +355,48 @@ fetchAmps model pg =
         { filters = modelToFilters model pg
         , onResponse = GotAmpsList
         }
+
+
+{-| Serialize the active filters + page into the URL query (so the view is
+bookmarkable / shareable and back-forward works) and fetch the matching page.
+Empty filters are omitted, and page 0 is left implicit, to keep URLs tidy.
+-}
+applyRoute : Model -> Int -> Effect Msg
+applyRoute model pg =
+    Effect.batch
+        [ Effect.pushRoute
+            { path = Route.Path.BrowseData
+            , query = modelToQuery model pg
+            , hash = Nothing
+            }
+        , fetchAmps model pg
+        ]
+
+
+modelToQuery : Model -> Int -> Dict.Dict String String
+modelToQuery model pg =
+    [ ( "page"
+      , if pg == 0 then
+            ""
+
+        else
+            String.fromInt pg
+      )
+    , ( "habitat", Maybe.withDefault "" model.filterHabitat )
+    , ( "microbial_source", Maybe.withDefault "" model.filterMicrobialSource )
+    , ( "quality", Maybe.withDefault "" model.filterQuality )
+    , ( "family", model.filterFamily )
+    , ( "pep_length_min", model.filterPepLengthMin )
+    , ( "pep_length_max", model.filterPepLengthMax )
+    , ( "mw_min", model.filterMwMin )
+    , ( "mw_max", model.filterMwMax )
+    , ( "pi_min", model.filterPiMin )
+    , ( "pi_max", model.filterPiMax )
+    , ( "charge_min", model.filterChargeMin )
+    , ( "charge_max", model.filterChargeMax )
+    ]
+        |> List.filter (\( _, v ) -> v /= "")
+        |> Dict.fromList
 
 
 subscriptions : Model -> Sub Msg
