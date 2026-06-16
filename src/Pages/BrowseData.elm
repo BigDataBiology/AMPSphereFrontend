@@ -624,7 +624,7 @@ viewPagination model info =
             [ Html.ul [ class "pagination justify-content-center" ]
                 ([ if currentPage > 0 then
                     Html.li [ class "page-item" ]
-                        [ Html.a [ class "page-link", href "#", onClick (GoToPage (currentPage - 1)) ]
+                        [ Html.a [ class "page-link", href "#", onClickPreventDefault (GoToPage (currentPage - 1)) ]
                             [ Html.text "Prev" ]
                         ]
 
@@ -646,7 +646,7 @@ viewPagination model info =
                                 [ Html.a
                                     [ class "page-link"
                                     , href "#"
-                                    , onClick (GoToPage pg)
+                                    , onClickPreventDefault (GoToPage pg)
                                     ]
                                     [ Html.text (String.fromInt (pg + 1)) ]
                                 ]
@@ -654,7 +654,7 @@ viewPagination model info =
                         visiblePages
                     ++ [ if currentPage < totalPages - 1 then
                             Html.li [ class "page-item" ]
-                                [ Html.a [ class "page-link", href "#", onClick (GoToPage (currentPage + 1)) ]
+                                [ Html.a [ class "page-link", href "#", onClickPreventDefault (GoToPage (currentPage + 1)) ]
                                     [ Html.text "Next" ]
                                 ]
 
@@ -670,6 +670,9 @@ viewPagination model info =
 -- HELPERS
 
 
+onClickPreventDefault : msg -> Html.Attribute msg
+onClickPreventDefault msg =
+    Html.Events.preventDefaultOn "click" (Json.Decode.succeed ( msg, True ))
 
 
 formatFloat : Int -> Float -> String
