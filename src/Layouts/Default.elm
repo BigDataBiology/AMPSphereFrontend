@@ -115,6 +115,7 @@ viewNavbar shared model toContentMsg =
             [ Navbar.itemLink [ href "/" ] [ Html.text "Home" ]
             , Navbar.itemLink [ href "/browse-data" ] [ Html.text "Browse Data" ]
             , Navbar.itemLink [ href "/downloads" ] [ Html.text "Downloads" ]
+            , Navbar.itemLink [ href "/api" ] [ Html.text "API" ]
             , Navbar.itemLink [ href "/about" ] [ Html.text "About" ]
             ]
         |> Navbar.customItems
