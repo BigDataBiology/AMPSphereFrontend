@@ -263,7 +263,7 @@ viewOverview model =
         Api.Success fam ->
             Html.div []
                 [ viewFamilyInfo fam
-                , viewConsensusSequence fam.consensusSequence
+                , viewConsensusSequence fam
                 , viewSeqLogo model.alignment
                 , viewDistributionCharts fam.distributions
                 , viewAssociatedAmps model
@@ -299,7 +299,15 @@ viewFamilyInfo fam =
                                 ]
                             , Table.tr []
                                 [ Table.th [ Table.cellAttr (class "w-25") ] [ Html.text "Consensus Sequence Length" ]
-                                , Table.td [] [ Html.text (String.fromInt (String.length fam.consensusSequence) ++ " aa") ]
+                                , Table.td []
+                                    [ Html.text
+                                        (if fam.numAmps <= 7 then
+                                            "Not generated (family has 7 or fewer members)"
+
+                                         else
+                                            String.fromInt (String.length fam.consensusSequence) ++ " aa"
+                                        )
+                                    ]
                                 ]
                             ]
                     }
@@ -307,23 +315,28 @@ viewFamilyInfo fam =
         |> Card.view
 
 
-viewConsensusSequence : String -> Html Msg
-viewConsensusSequence sequence =
+viewConsensusSequence : Family -> Html Msg
+viewConsensusSequence fam =
     Card.config [ Card.attrs [ class "mb-3" ] ]
         |> Card.headerH5 [] [ Html.text "Consensus Sequence" ]
         |> Card.block []
             [ Block.custom <|
-                Html.div []
-                    [ Html.div [ class "sequence-box p-3 bg-light text-monospace" ]
-                        (List.map
-                            (\ch ->
-                                Html.span [ class ("aa aa-" ++ String.fromChar ch) ]
-                                    [ Html.text (String.fromChar ch) ]
+                if fam.numAmps <= 7 then
+                    Alert.simpleInfo []
+                        [ Html.text "No consensus sequence is generated for families with 7 or fewer members." ]
+
+                else
+                    Html.div []
+                        [ Html.div [ class "sequence-box p-3 bg-light text-monospace" ]
+                            (List.map
+                                (\ch ->
+                                    Html.span [ class ("aa aa-" ++ String.fromChar ch) ]
+                                        [ Html.text (String.fromChar ch) ]
+                                )
+                                (String.toList fam.consensusSequence)
                             )
-                            (String.toList sequence)
-                        )
-                    , Components.SequenceLegend.view
-                    ]
+                        , Components.SequenceLegend.view
+                        ]
             ]
         |> Card.view
 
