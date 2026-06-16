@@ -29,27 +29,34 @@ class CopyButton extends HTMLElement {
             this._timer = setTimeout(() => this._render("Copy"), 1500);
         };
 
+        const fail = () => {
+            this._render("Copy failed");
+            clearTimeout(this._timer);
+            this._timer = setTimeout(() => this._render("Copy"), 1500);
+        };
+
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(done, () => this._fallback(text, done));
+            navigator.clipboard.writeText(text).then(done, () => this._fallback(text, done, fail));
         } else {
-            this._fallback(text, done);
+            this._fallback(text, done, fail);
         }
     }
 
-    _fallback(text, done) {
+    _fallback(text, done, fail) {
         const ta = document.createElement("textarea");
         ta.value = text;
         ta.style.position = "fixed";
         ta.style.opacity = "0";
         document.body.appendChild(ta);
         ta.select();
+        let ok = false;
         try {
-            document.execCommand("copy");
-            done();
+            ok = document.execCommand("copy");
         } catch (e) {
-            // ignore
+            ok = false;
         }
         document.body.removeChild(ta);
+        (ok ? done : fail)();
     }
 }
 
