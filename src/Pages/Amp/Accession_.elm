@@ -287,7 +287,10 @@ viewQualityBadges amp =
 viewSequence : String -> Html Msg
 viewSequence sequence =
     Card.config [ Card.attrs [ class "mb-3" ] ]
-        |> Card.headerH5 [] [ Html.text "Peptide Sequence" ]
+        |> Card.headerH5 [ class "d-flex justify-content-between align-items-center" ]
+            [ Html.text "Peptide Sequence"
+            , Html.node "copy-button" [ attribute "data-text" sequence ] []
+            ]
         |> Card.block []
             [ Block.custom <|
                 Html.div []

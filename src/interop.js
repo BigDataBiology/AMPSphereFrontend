@@ -8,4 +8,5 @@ export const onReady = ({ app, env }) => {
     // Import web components
     import('./web-components/plotly-chart.js')
     import('./web-components/helical-wheel.js')
+    import('./web-components/copy-button.js')
 }
