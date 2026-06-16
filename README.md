@@ -66,11 +66,12 @@ src/
     TextSearch.elm              # /text-search — text search results
     Downloads.elm               # /downloads — downloadable files
     About.elm                   # /about
-    Contact.elm                 # /contact
+    Api.elm                     # /api — API usage documentation
     NotFound_.elm               # 404
   web-components/
     plotly-chart.js             # <plotly-chart> custom element wrapping Plotly.js
     helical-wheel.js            # <helical-wheel> custom element (helical wheel diagram)
+    copy-button.js              # <copy-button> copy-to-clipboard custom element
 static/
   styles.css                    # Global stylesheet
 ```
@@ -100,6 +101,10 @@ owns its own DOM, controls, and rendering.
   is centered on that same moment direction, so both annotations track the
   sequence consistently (neither is drawn when the moment is ~zero).
 
+- **`<copy-button data-text="…">`** — a small button that copies `data-text` to
+  the clipboard and briefly shows a confirmation. Self-contained, with a
+  `document.execCommand` fallback for browsers without the async Clipboard API.
+
 ## Pages
 
 | URL | Description |
@@ -112,7 +117,7 @@ owns its own DOM, controls, and rendering.
 | `/text-search` | Text search results |
 | `/downloads` | Downloadable data files |
 | `/about` | About AMPSphere |
-| `/contact` | Contact information |
+| `/api` | API usage documentation |
 
 ## Citation
 
